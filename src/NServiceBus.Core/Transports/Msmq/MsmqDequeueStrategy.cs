@@ -8,7 +8,6 @@ namespace NServiceBus.Transports.Msmq
     using NServiceBus.CircuitBreakers;
     using NServiceBus.Logging;
     using NServiceBus.Support;
-    using NServiceBus.Unicast.Transport;
 
     /// <summary>
     ///     Default implementation of <see cref="IDequeueMessages" /> for MSMQ.
@@ -31,9 +30,8 @@ namespace NServiceBus.Transports.Msmq
         /// </summary>
         public void Init(DequeueSettings settings)
         {
-            maximumConcurrencyLevel = settings.MaximumConcurrencyLevel;
-
-            transactionSettings = settings.TransactionSettings;
+            currentSettings = settings;
+            
             var address = settings.Address;
 
             if (address == null)
@@ -49,7 +47,7 @@ namespace NServiceBus.Transports.Msmq
 
             queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(address), false, true, QueueAccessMode.Receive);
 
-            if (transactionSettings.IsTransactional && !QueueIsTransactional())
+            if (currentSettings.IsTransactional && !QueueIsTransactional())
             {
                 throw new ArgumentException(
                     "Queue must be transactional if you configure your endpoint to be transactional (" + address + ").");
@@ -82,7 +80,7 @@ namespace NServiceBus.Transports.Msmq
         {
             MessageQueue.ClearConnectionCache();
 
-            throttlingSemaphore = new SemaphoreSlim(maximumConcurrencyLevel, maximumConcurrencyLevel);
+            throttlingSemaphore = new SemaphoreSlim(currentSettings.MaximumConcurrencyLevel, currentSettings.MaximumConcurrencyLevel);
 
             queue.PeekCompleted += OnPeekCompleted;
 
@@ -109,7 +107,7 @@ namespace NServiceBus.Transports.Msmq
         {
             Stop();
 
-            maximumConcurrencyLevel = newConcurrencyLevel;
+            currentSettings = new DequeueSettings(currentSettings.Address, newConcurrencyLevel,currentSettings.IsTransactional);
 
             Start();
         }
@@ -126,13 +124,13 @@ namespace NServiceBus.Transports.Msmq
         void DrainStopSemaphore()
         {
             Logger.Debug("Drain stopping 'Throttling Semaphore'.");
-            for (var index = 0; index < maximumConcurrencyLevel; index++)
+            for (var index = 0; index < currentSettings.MaximumConcurrencyLevel; index++)
             {
-                Logger.Debug(string.Format("Claiming Semaphore thread {0}/{1}.", index + 1, maximumConcurrencyLevel));
+                Logger.Debug(string.Format("Claiming Semaphore thread {0}/{1}.", index + 1, currentSettings.MaximumConcurrencyLevel));
                 throttlingSemaphore.Wait();
             }
             Logger.Debug("Releasing all claimed Semaphore threads.");
-            throttlingSemaphore.Release(maximumConcurrencyLevel);
+            throttlingSemaphore.Release(currentSettings.MaximumConcurrencyLevel);
 
             throttlingSemaphore.Dispose();
         }
@@ -209,15 +207,15 @@ namespace NServiceBus.Transports.Msmq
         static ILog Logger = LogManager.GetLogger<MsmqDequeueStrategy>();
         Configure configure;
         CriticalError criticalError;
+
         [SkipWeaving]
         CircuitBreaker circuitBreaker = new CircuitBreaker(100, TimeSpan.FromSeconds(30));
-        int maximumConcurrencyLevel;
         MessageQueue queue;
         ManualResetEvent stopResetEvent = new ManualResetEvent(true);
         SemaphoreSlim throttlingSemaphore;
-        TransactionSettings transactionSettings;
-
+        
         Observable<MessageDequeued> observable = new Observable<MessageDequeued>();
+        DequeueSettings currentSettings;
 
         /// <summary>
         /// b

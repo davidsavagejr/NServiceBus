@@ -171,12 +171,7 @@ namespace NServiceBus.Unicast.Transport
 
         void StartReceiver()
         {
-            var dequeueSettings = new DequeueSettings
-            {
-                TransactionSettings = TransactionSettings,
-                Address = receiveAddress,
-                MaximumConcurrencyLevel = MaximumConcurrencyLevel
-            };
+            var dequeueSettings = new DequeueSettings(receiveAddress, MaximumConcurrencyLevel, TransactionSettings.IsTransactional);
 
             Receiver.Init(dequeueSettings);
             Receiver.Subscribe(this);

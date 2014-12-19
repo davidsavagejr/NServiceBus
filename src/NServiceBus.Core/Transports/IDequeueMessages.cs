@@ -1,8 +1,6 @@
 ﻿namespace NServiceBus.Transports
 {
     using System;
-    using System.Security.Cryptography.X509Certificates;
-    using Unicast.Transport;
 
     /// <summary>
     /// Interface to implement when developing custom dequeuing strategies.
@@ -36,20 +34,34 @@
     /// </summary>
     public class DequeueSettings
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public Address Address { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        public TransactionSettings TransactionSettings { get; set; }
+        /// <param name="address"></param>
+        /// <param name="maximumConcurrencyLevel"></param>
+        /// <param name="isTransactional"></param>
+        public DequeueSettings(Address address, int maximumConcurrencyLevel, bool isTransactional)
+        {
+            Address = address;
+            MaximumConcurrencyLevel = maximumConcurrencyLevel;
+            IsTransactional = isTransactional;
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public int MaximumConcurrencyLevel { get; set; }
+        public Address Address { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int MaximumConcurrencyLevel { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool IsTransactional { get; private set; }
     }
 
     /// <summary>
