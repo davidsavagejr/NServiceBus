@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Transports
 {
     using System;
+    using System.Security.Cryptography.X509Certificates;
     using Unicast.Transport;
 
     /// <summary>
@@ -11,20 +12,44 @@
         /// <summary>
         /// Initializes the <see cref="IDequeueMessages"/>.
         /// </summary>
-        /// <param name="address">The address to listen on.</param>
-        /// <param name="transactionSettings">The <see cref="TransactionSettings"/> to be used by <see cref="IDequeueMessages"/>.</param>
-        void Init(Address address, TransactionSettings transactionSettings);
+        void Init(DequeueSettings settings);
         
         /// <summary>
-        /// Starts the dequeuing of message using the specified <paramref name="maximumConcurrencyLevel"/>.
+        /// Starts the dequeuing of message/>.
         /// </summary>
-        /// <param name="maximumConcurrencyLevel">Indicates the maximum concurrency level this <see cref="IDequeueMessages"/> is able to support.</param>
-        void Start(int maximumConcurrencyLevel);
+        void Start();
         
         /// <summary>
         /// Stops the dequeuing of messages.
         /// </summary>
         void Stop();
+
+        /// <summary>
+        /// Changes the concurrency level of the receiver
+        /// </summary>
+        /// <param name="newConcurrencyLevel">The new concurrency level to use</param>
+        void ChangeConcurrencyLevel(int newConcurrencyLevel);
+    }
+
+    /// <summary>
+    /// TBD
+    /// </summary>
+    public class DequeueSettings
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public Address Address { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public TransactionSettings TransactionSettings { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int MaximumConcurrencyLevel { get; set; }
     }
 
     /// <summary>

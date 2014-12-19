@@ -29,11 +29,12 @@ namespace NServiceBus.Transports.Msmq
         /// <summary>
         ///     Initializes the <see cref="IDequeueMessages" />.
         /// </summary>
-        /// <param name="address">The address to listen on.</param>
-        /// <param name="settings">The <see cref="TransactionSettings" /> to be used by <see cref="IDequeueMessages" />.</param>
-        public void Init(Address address, TransactionSettings settings)
+        public void Init(DequeueSettings settings)
         {
-            transactionSettings = settings;
+            maximumConcurrencyLevel = settings.MaximumConcurrencyLevel;
+
+            transactionSettings = settings.TransactionSettings;
+            var address = settings.Address;
 
             if (address == null)
             {
@@ -75,14 +76,12 @@ namespace NServiceBus.Transports.Msmq
         }
 
         /// <summary>
-        ///     Starts the dequeuing of message using the specified <paramref name="maximumConcurrencyLevel" />.
+        ///     Starts the dequeuing of message using the specified
         /// </summary>
-        /// <param name="maximumConcurrencyLevel">The maximum concurrency level supported.</param>
-        public void Start(int maximumConcurrencyLevel)
+        public void Start()
         {
             MessageQueue.ClearConnectionCache();
 
-            this.maximumConcurrencyLevel = maximumConcurrencyLevel;
             throttlingSemaphore = new SemaphoreSlim(maximumConcurrencyLevel, maximumConcurrencyLevel);
 
             queue.PeekCompleted += OnPeekCompleted;
@@ -100,6 +99,19 @@ namespace NServiceBus.Transports.Msmq
             stopResetEvent.WaitOne();
             DrainStopSemaphore();
             queue.Dispose();
+        }
+
+        /// <summary>
+        /// Changes concurrency level for the dequeue strategy
+        /// </summary>
+        /// <param name="newConcurrencyLevel"></param>
+        public void ChangeConcurrencyLevel(int newConcurrencyLevel)
+        {
+            Stop();
+
+            maximumConcurrencyLevel = newConcurrencyLevel;
+
+            Start();
         }
 
         /// <summary>

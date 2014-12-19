@@ -111,7 +111,7 @@ namespace NServiceBus.Unicast.Transport
             if (isStarted)
             {
                 Receiver.Stop();
-                Receiver.Start(maximumConcurrencyLevel);
+                Receiver.ChangeConcurrencyLevel(maximumConcurrencyLevel);
                 Logger.InfoFormat("Maximum concurrency level for '{0}' changed to {1}.", receiveAddress,
                     maximumConcurrencyLevel);
             }
@@ -171,9 +171,16 @@ namespace NServiceBus.Unicast.Transport
 
         void StartReceiver()
         {
-            Receiver.Init(receiveAddress, TransactionSettings);
+            var dequeueSettings = new DequeueSettings
+            {
+                TransactionSettings = TransactionSettings,
+                Address = receiveAddress,
+                MaximumConcurrencyLevel = MaximumConcurrencyLevel
+            };
+
+            Receiver.Init(dequeueSettings);
             Receiver.Subscribe(this);
-            Receiver.Start(MaximumConcurrencyLevel);
+            Receiver.Start();
         }
 
         /// <summary>

@@ -24,12 +24,12 @@
             TryProcessMessage = tryProcessMessage;
         }
 
-        public void Init(Address address, TransactionSettings transactionSettings)
+        public void Init(DequeueSettings settings)
         {
             throw new NotImplementedException();
         }
 
-        public void Start(int maximumConcurrencyLevel)
+        public void Start()
         {
             IsStarted = true;
         }
@@ -37,6 +37,11 @@
         public void Stop()
         {
            
+        }
+
+        public void ChangeConcurrencyLevel(int newConcurrencyLevel)
+        {
+            throw new NotImplementedException();
         }
 
         Func<TransportMessage, bool> TryProcessMessage;
