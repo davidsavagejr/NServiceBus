@@ -30,27 +30,12 @@ namespace NServiceBus.Transports.Msmq
         /// </summary>
         public void Init(DequeueSettings settings)
         {
-            currentSettings = settings;
-            
-            var address = settings.Address;
-
-            if (address == null)
-            {
-                throw new ArgumentException("Input queue must be specified");
-            }
-
-            if (!address.Machine.Equals(RuntimeEnvironment.MachineName, StringComparison.OrdinalIgnoreCase))
-            {
-                var error = string.Format("Input queue [{0}] must be on the same machine as this process [{1}].", address, RuntimeEnvironment.MachineName);
-                throw new InvalidOperationException(error);
-            }
-
-            queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(address), false, true, QueueAccessMode.Receive);
+           
+            queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(settings.QueueName), false, true, QueueAccessMode.Receive);
 
             if (currentSettings.IsTransactional && !QueueIsTransactional())
             {
-                throw new ArgumentException(
-                    "Queue must be transactional if you configure your endpoint to be transactional (" + address + ").");
+                throw new ArgumentException("Queue must be transactional if you configure your endpoint to be transactional (" + settings.QueueName + ").");
             }
 
             var messageReadPropertyFilter = new MessagePropertyFilter
@@ -107,7 +92,7 @@ namespace NServiceBus.Transports.Msmq
         {
             Stop();
 
-            currentSettings = new DequeueSettings(currentSettings.Address, newConcurrencyLevel,currentSettings.IsTransactional);
+            currentSettings = new DequeueSettings(currentSettings.QueueName, newConcurrencyLevel,currentSettings.IsTransactional);
 
             Start();
         }

@@ -38,20 +38,25 @@
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="address"></param>
+        /// <param name="queue"></param>
         /// <param name="maximumConcurrencyLevel"></param>
         /// <param name="isTransactional"></param>
-        public DequeueSettings(Address address, int maximumConcurrencyLevel, bool isTransactional)
+        public DequeueSettings(string queue, int maximumConcurrencyLevel, bool isTransactional)
         {
-            Address = address;
+            if (string.IsNullOrEmpty(queue))
+            {
+                throw new ArgumentException("Input queue must be specified");
+            }
+
+            QueueName = queue;
             MaximumConcurrencyLevel = maximumConcurrencyLevel;
             IsTransactional = isTransactional;
         }
 
         /// <summary>
-        /// 
+        /// The native queue to consume messages from
         /// </summary>
-        public Address Address { get; private set; }
+        public string QueueName{ get; private set; }
 
         /// <summary>
         /// 
