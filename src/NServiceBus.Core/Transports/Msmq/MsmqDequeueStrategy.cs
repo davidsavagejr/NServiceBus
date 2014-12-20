@@ -25,6 +25,11 @@ namespace NServiceBus.Transports.Msmq
         }
 
         /// <summary>
+        /// Transactionality of the endpoint so that we can check that the queue is created in the correct mode
+        /// </summary>
+        public bool IsTransactional { get; set; }
+
+        /// <summary>
         ///     Initializes the <see cref="IDequeueMessages" />.
         /// </summary>
         public void Init(DequeueSettings settings)
@@ -33,7 +38,7 @@ namespace NServiceBus.Transports.Msmq
 
             queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(settings.QueueName), false, true, QueueAccessMode.Receive);
 
-            if (currentSettings.IsTransactional && !QueueIsTransactional())
+            if (IsTransactional && !QueueIsTransactional())
             {
                 throw new ArgumentException("Queue must be transactional if you configure your endpoint to be transactional (" + settings.QueueName + ").");
             }
@@ -92,7 +97,7 @@ namespace NServiceBus.Transports.Msmq
         {
             Stop();
 
-            currentSettings = new DequeueSettings(currentSettings.QueueName, newConcurrencyLevel,currentSettings.IsTransactional);
+            currentSettings = new DequeueSettings(currentSettings.QueueName, newConcurrencyLevel);
 
             Start();
         }

@@ -107,7 +107,7 @@ namespace NServiceBus.Features
            
              var defaultAddress = context.Settings.LocalAddress();
 
-            var dequeueSettings = new DequeueSettings(defaultAddress.Queue, maximumConcurrencyLevel, transactionSettings.IsTransactional);
+            var dequeueSettings = new DequeueSettings(defaultAddress.Queue, maximumConcurrencyLevel);
 
             context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, dequeueSettings, maximumThroughput, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {

@@ -17,7 +17,7 @@
             fakeReceiver = new FakeReceiver();
 
             TransportReceiver = new MainTransportReceiver(new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, 5, false,false), 
-                new DequeueSettings("FakeQueue",1,true), 0, fakeReceiver, new FakeFailureManager(), new SettingsHolder(), new BusConfiguration().BuildConfiguration(), null);
+                new DequeueSettings("FakeQueue",1), 0, fakeReceiver, new FakeFailureManager(), new SettingsHolder(), new BusConfiguration().BuildConfiguration(), null);
 
         }
 
