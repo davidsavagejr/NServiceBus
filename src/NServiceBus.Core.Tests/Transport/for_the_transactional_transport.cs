@@ -3,6 +3,7 @@
     using System;
     using System.Transactions;
     using Fakes;
+    using NServiceBus.Transports;
     using NUnit.Framework;
     using Settings;
     using Unicast.Transport;
@@ -15,7 +16,8 @@
         {
             fakeReceiver = new FakeReceiver();
 
-            TransportReceiver = new MainTransportReceiver(new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, 5, false,false), 1, 0, fakeReceiver, new FakeFailureManager(), new SettingsHolder(), new BusConfiguration().BuildConfiguration(), null);
+            TransportReceiver = new MainTransportReceiver(new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, 5, false,false), 
+                new DequeueSettings("FakeQueue",1,true), 0, fakeReceiver, new FakeFailureManager(), new SettingsHolder(), new BusConfiguration().BuildConfiguration(), null);
 
         }
 

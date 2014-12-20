@@ -105,13 +105,17 @@ namespace NServiceBus.Features
             context.Container.ConfigureProperty<FirstLevelRetriesBehavior>(b => b.TransactionSettings, transactionSettings)
                 .ConfigureProperty<FirstLevelRetriesBehavior>(p=>p.HostInformation, hostInfo);
            
-            context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, maximumConcurrencyLevel, maximumThroughput, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
+             var defaultAddress = context.Settings.LocalAddress();
+
+            var dequeueSettings = new DequeueSettings(defaultAddress.Queue, maximumConcurrencyLevel, transactionSettings.IsTransactional);
+
+            context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, dequeueSettings, maximumThroughput, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
                 CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()
             }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b => new SatelliteTransportReceiver(b, transactionSettings, maximumConcurrencyLevel, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
+            context.Container.ConfigureComponent(b => new SatelliteTransportReceiver(b, transactionSettings, dequeueSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
                 CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()

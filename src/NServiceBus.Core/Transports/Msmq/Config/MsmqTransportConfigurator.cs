@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Features
 {
+    using System;
     using Config;
     using Logging;
     using NServiceBus.Faults;
@@ -16,7 +17,7 @@
         {
             DependsOn<UnicastBus>();
         }
-            
+
         /// <summary>
         /// Initializes a new instance of <see cref="ConfigureTransport"/>.
         /// </summary>
@@ -28,13 +29,26 @@
             context.Container.ConfigureComponent<CorrelationIdMutatorForBackwardsCompatibilityWithV3>(DependencyLifecycle.InstancePerCall);
             context.Container.ConfigureComponent<MsmqUnitOfWork>(DependencyLifecycle.SingleInstance);
 
+
+            var doNotUseDTCTransactions = context.Settings.Get<bool>("Transactions.SuppressDistributedTransactions");
+
             if (!context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"))
             {
                 var configuredErrorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(context.Settings);
 
                 context.Container.ConfigureComponent<MsmqDequeueStrategy>(DependencyLifecycle.InstancePerCall);
 
-                context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o=>o.ErrorQueue, configuredErrorQueue);
+                if (doNotUseDTCTransactions)
+                {
+                    throw new NotImplementedException();
+                }
+                else
+                {
+                    context.Pipeline.Register<MsmqReceiveWithTransactionScopeBehavior.MsmqReceiveWithTransactionScopeBehaviorRegistration>();
+                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.ErrorQueue, configuredErrorQueue);
+                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.TransactionTimeout, null);
+                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.IsolationLevel, null);
+                }
             }
 
             var cfg = context.Settings.GetConfigSection<MsmqMessageQueueConfig>();
@@ -57,7 +71,7 @@
 
             context.Container.ConfigureComponent<MsmqMessageSender>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(t => t.Settings, settings)
-                .ConfigureProperty(t => t.SuppressDistributedTransactions, context.Settings.Get<bool>("Transactions.SuppressDistributedTransactions"));
+                .ConfigureProperty(t => t.SuppressDistributedTransactions, doNotUseDTCTransactions);
 
             context.Container.ConfigureComponent<MsmqQueueCreator>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(t => t.Settings, settings);

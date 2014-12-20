@@ -15,15 +15,15 @@ namespace NServiceBus.Unicast.Transport
         /// 
         /// </summary>
         /// <param name="transactionSettings"></param>
-        /// <param name="maximumConcurrencyLevel"></param>
+        /// <param name="dequeueSettings"></param>
         /// <param name="maximumThroughput"></param>
         /// <param name="receiver"></param>
         /// <param name="manageMessageFailures"></param>
         /// <param name="settings"></param>
         /// <param name="config"></param>
         /// <param name="pipelineExecutor"></param>
-        public MainTransportReceiver(TransactionSettings transactionSettings, int maximumConcurrencyLevel, int maximumThroughput, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
-            :base(transactionSettings, maximumConcurrencyLevel, receiver, manageMessageFailures, settings, config, pipelineExecutor)
+        public MainTransportReceiver(TransactionSettings transactionSettings, DequeueSettings dequeueSettings, int maximumThroughput, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+            :base(transactionSettings, dequeueSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
         {
             
         }
@@ -53,7 +53,6 @@ namespace NServiceBus.Unicast.Transport
             var context = new IncomingContext(pipelineExecutor.CurrentContext);
             context.Set(firstLevelRetries);
             context.Set(currentReceivePerformanceDiagnostics);
-            context.Set(TransactionSettings);
             context.Set("TransportReceive.Address", receiveAddress);
             context.Set(throughputLimiter);
 

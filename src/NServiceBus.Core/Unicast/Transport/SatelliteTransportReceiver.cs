@@ -12,8 +12,8 @@ namespace NServiceBus.Unicast.Transport
     {
         ISatellite satellite;
 
-        public SatelliteTransportReceiver(IBuilder builder, TransactionSettings transactionSettings, int maximumConcurrencyLevel, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
-            : base(transactionSettings, maximumConcurrencyLevel, receiver, manageMessageFailures, settings, config, pipelineExecutor)
+        public SatelliteTransportReceiver(IBuilder builder, TransactionSettings transactionSettings, DequeueSettings dequeueSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+            : base(transactionSettings, dequeueSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
         {
             var pipelineModifications = settings.Get<PipelineModifications>();
             pipelineModifications.Replacements.Add(new ReplaceBehavior(WellKnownStep.CreateChildContainer, typeof(ExecuteSatelliteHandlerBehavior)));
@@ -30,7 +30,6 @@ namespace NServiceBus.Unicast.Transport
             var context = new IncomingContext(pipelineExecutor.CurrentContext);
             context.Set(firstLevelRetries);
             context.Set(currentReceivePerformanceDiagnostics);
-            context.Set(TransactionSettings);
             context.Set("TransportReceive.Address", receiveAddress);
             context.Set(satellite);
 

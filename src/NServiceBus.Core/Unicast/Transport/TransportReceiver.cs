@@ -17,19 +17,19 @@ namespace NServiceBus.Unicast.Transport
         ///     Creates an instance of <see cref="TransportReceiver" />
         /// </summary>
         /// <param name="transactionSettings">The transaction settings to use for this <see cref="TransportReceiver" />.</param>
-        /// <param name="maximumConcurrencyLevel">The maximum number of messages to process in parallel.</param>
+        /// <param name="dequeueSettings"></param>
         /// <param name="receiver">The <see cref="IDequeueMessages" /> instance to use.</param>
         /// <param name="manageMessageFailures">The <see cref="IManageMessageFailures" /> instance to use.</param>
         /// <param name="settings">The current settings</param>
         /// <param name="config">Configure instance</param>
         /// <param name="pipelineExecutor"></param>
-        protected TransportReceiver(TransactionSettings transactionSettings, int maximumConcurrencyLevel, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+        protected TransportReceiver(TransactionSettings transactionSettings, DequeueSettings dequeueSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
         {
+            this.dequeueSettings = dequeueSettings;
             this.settings = settings;
             this.config = config;
             this.pipelineExecutor = pipelineExecutor;
             TransactionSettings = transactionSettings;
-            MaximumConcurrencyLevel = maximumConcurrencyLevel;
             FailureManager = manageMessageFailures;
             Receiver = receiver;
         }
@@ -171,8 +171,6 @@ namespace NServiceBus.Unicast.Transport
 
         void StartReceiver()
         {
-            var dequeueSettings = new DequeueSettings(receiveAddress.Queue, MaximumConcurrencyLevel, TransactionSettings.IsTransactional);
-
             Receiver.Init(dequeueSettings);
             Receiver.Subscribe(this);
             Receiver.Start();
@@ -213,6 +211,8 @@ namespace NServiceBus.Unicast.Transport
         /// </summary>
         
         protected PipelineExecutor pipelineExecutor;
+
+        readonly DequeueSettings dequeueSettings;
         readonly ReadOnlySettings settings;
 
         /// <summary>

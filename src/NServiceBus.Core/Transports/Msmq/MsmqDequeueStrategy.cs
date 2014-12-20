@@ -7,7 +7,6 @@ namespace NServiceBus.Transports.Msmq
     using Janitor;
     using NServiceBus.CircuitBreakers;
     using NServiceBus.Logging;
-    using NServiceBus.Support;
 
     /// <summary>
     ///     Default implementation of <see cref="IDequeueMessages" /> for MSMQ.
@@ -30,7 +29,8 @@ namespace NServiceBus.Transports.Msmq
         /// </summary>
         public void Init(DequeueSettings settings)
         {
-           
+            currentSettings = settings;
+
             queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(settings.QueueName), false, true, QueueAccessMode.Receive);
 
             if (currentSettings.IsTransactional && !QueueIsTransactional())

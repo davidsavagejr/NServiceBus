@@ -7,7 +7,6 @@ namespace NServiceBus.Transports.Msmq
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Unicast.Transport;
 
     class MsmqReceiveWithTransactionScopeBehavior: IBehavior<IncomingContext>
     {
@@ -30,6 +29,11 @@ namespace NServiceBus.Transports.Msmq
 
         public Address ErrorQueue { get; set; }
 
+        public IsolationLevel IsolationLevel { get; set; }
+
+        public TimeSpan TransactionTimeout { get; set; }
+
+
         public void Invoke(IncomingContext context, Action next)
         {
             var address = context.Get<Address>("TransportReceive.Address");
@@ -38,11 +42,10 @@ namespace NServiceBus.Transports.Msmq
                 MessageReadPropertyFilter = messageReadPropertyFilter
             })
             {
-                var transactionSettings = context.Get<TransactionSettings>();
                 transactionOptions = new TransactionOptions
                 {
-                    IsolationLevel = transactionSettings.IsolationLevel,
-                    Timeout = transactionSettings.TransactionTimeout
+                    IsolationLevel = IsolationLevel,
+                    Timeout = TransactionTimeout
                 };
 
                 using (var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
