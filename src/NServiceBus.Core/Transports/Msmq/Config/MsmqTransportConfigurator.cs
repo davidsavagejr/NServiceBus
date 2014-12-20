@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Features
 {
     using System;
+    using System.Transactions;
     using Config;
     using Logging;
     using NServiceBus.Faults;
@@ -30,8 +31,8 @@
             context.Container.ConfigureComponent<MsmqUnitOfWork>(DependencyLifecycle.SingleInstance);
 
             var endpointIsTransactional = context.Settings.Get<bool>("Transactions.Enabled");
-
             var doNotUseDTCTransactions = context.Settings.Get<bool>("Transactions.SuppressDistributedTransactions");
+
 
             if (!context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"))
             {
@@ -46,10 +47,15 @@
                 }
                 else
                 {
+                    var transactionOptions = new TransactionOptions
+                    {
+                        IsolationLevel = context.Settings.Get<IsolationLevel>("Transactions.IsolationLevel"),
+                        Timeout = context.Settings.Get<TimeSpan>("Transactions.DefaultTimeout")
+                    };
+
                     context.Pipeline.Register<MsmqReceiveWithTransactionScopeBehavior.MsmqReceiveWithTransactionScopeBehaviorRegistration>();
                     context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.ErrorQueue, configuredErrorQueue);
-                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.TransactionTimeout, null);
-                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.IsolationLevel, null);
+                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.TransactionOptions, transactionOptions);
                 }
             }
 

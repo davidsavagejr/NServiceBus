@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Transports
 {
     using System;
-    using System.Messaging;
     using NServiceBus.Pipeline.Contexts;
 
     /// <summary>

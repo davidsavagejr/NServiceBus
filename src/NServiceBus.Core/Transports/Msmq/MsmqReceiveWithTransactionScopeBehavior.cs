@@ -12,27 +12,17 @@ namespace NServiceBus.Transports.Msmq
     {
         public Address ErrorQueue { get; set; }
 
-        public IsolationLevel IsolationLevel { get; set; }
-
-        public TimeSpan TransactionTimeout { get; set; }
-
+        public TransactionOptions TransactionOptions { get; set; }
 
         public void Invoke(IncomingContext context, Action next)
         {
             var queue = context.Get<MessageQueue>();
 
-            //todo: inject this instead
-            transactionOptions = new TransactionOptions
-            {
-                IsolationLevel = IsolationLevel,
-                Timeout = TransactionTimeout
-            };
-
-            using (var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionOptions))
             {
                 Message message;
 
-                if (!TryReceiveMessage(() => queue.Receive(receiveTimeout, MessageQueueTransactionType.Automatic), out message))
+                if (!TryReceiveMessage(() => queue.Receive(TimeSpan.FromSeconds(1), MessageQueueTransactionType.Automatic), out message))
                 {
                     scope.Complete();
                     return;
@@ -111,10 +101,6 @@ namespace NServiceBus.Transports.Msmq
         }
 
         static ILog Logger = LogManager.GetLogger<MsmqReceiveWithTransactionScopeBehavior>();
-
-        TransactionOptions transactionOptions;
-        TimeSpan receiveTimeout = TimeSpan.FromSeconds(1);
-
 
         public class MsmqReceiveWithTransactionScopeBehaviorRegistration : RegisterStep
         {
