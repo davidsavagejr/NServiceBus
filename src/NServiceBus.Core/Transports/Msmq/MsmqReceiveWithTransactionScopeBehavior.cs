@@ -8,25 +8,8 @@ namespace NServiceBus.Transports.Msmq
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class MsmqReceiveWithTransactionScopeBehavior: IBehavior<IncomingContext>
+    class MsmqReceiveWithTransactionScopeBehavior : IBehavior<IncomingContext>
     {
-        static ILog Logger = LogManager.GetLogger<MsmqReceiveWithTransactionScopeBehavior>();
-
-        TransactionOptions transactionOptions;
-        TimeSpan receiveTimeout = TimeSpan.FromSeconds(1);
-
-        static MessagePropertyFilter messageReadPropertyFilter = new MessagePropertyFilter
-        {
-            Body = true,
-            TimeToBeReceived = true,
-            Recoverable = true,
-            Id = true,
-            ResponseQueue = true,
-            CorrelationId = true,
-            Extension = true,
-            AppSpecific = true
-        };
-
         public Address ErrorQueue { get; set; }
 
         public IsolationLevel IsolationLevel { get; set; }
@@ -36,60 +19,57 @@ namespace NServiceBus.Transports.Msmq
 
         public void Invoke(IncomingContext context, Action next)
         {
-            var address = context.Get<Address>("TransportReceive.Address");
-            using (var queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(address), false, true, QueueAccessMode.Receive)
+            var queue = context.Get<MessageQueue>();
+
+            //todo: inject this instead
+            transactionOptions = new TransactionOptions
             {
-                MessageReadPropertyFilter = messageReadPropertyFilter
-            })
+                IsolationLevel = IsolationLevel,
+                Timeout = TransactionTimeout
+            };
+
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
             {
-                transactionOptions = new TransactionOptions
+                Message message;
+
+                if (!TryReceiveMessage(() => queue.Receive(receiveTimeout, MessageQueueTransactionType.Automatic), out message))
                 {
-                    IsolationLevel = IsolationLevel,
-                    Timeout = TransactionTimeout
-                };
+                    scope.Complete();
+                    return;
+                }
 
-                using (var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
+                TransportMessage transportMessage;
+                try
                 {
-                    Message message;
-
-                    if (!TryReceiveMessage(() => queue.Receive(receiveTimeout, MessageQueueTransactionType.Automatic), out message))
+                    transportMessage = NServiceBus.MsmqUtilities.Convert(message);
+                }
+                catch (Exception ex)
+                {
+                    LogCorruptedMessage(message, ex);
+                    using (var errorQueue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(ErrorQueue), false, true, QueueAccessMode.Send))
                     {
-                        scope.Complete();
-                        return;
+                        errorQueue.Send(message, MessageQueueTransactionType.Automatic);
                     }
+                    scope.Complete();
+                    return;
+                }
 
-                    TransportMessage transportMessage;
-                    try
-                    {
-                        transportMessage = NServiceBus.MsmqUtilities.Convert(message);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogCorruptedMessage(message, ex);
-                        using (var errorQueue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(ErrorQueue), false, true, QueueAccessMode.Send))
-                        {
-                            errorQueue.Send(message, MessageQueueTransactionType.Automatic);
-                        }
-                        scope.Complete();
-                        return;
-                    }
+                context.Set(IncomingContext.IncomingPhysicalMessageKey, transportMessage);
 
-                    context.Set(IncomingContext.IncomingPhysicalMessageKey, transportMessage);
+                next();
 
-                    next();
+                bool messageHandledSuccessfully;
+                if (!context.TryGet("TransportReceiver.MessageHandledSuccessfully", out messageHandledSuccessfully))
+                {
+                    messageHandledSuccessfully = true;
+                }
 
-                    bool messageHandledSuccessfully;
-                    if (!context.TryGet("TransportReceiver.MessageHandledSuccessfully", out messageHandledSuccessfully))
-                    {
-                        messageHandledSuccessfully = true;
-                    }
-
-                    if (messageHandledSuccessfully)
-                    {
-                        scope.Complete();
-                    }
+                if (messageHandledSuccessfully)
+                {
+                    scope.Complete();
                 }
             }
+
         }
 
         void LogCorruptedMessage(Message message, Exception ex)
@@ -129,6 +109,12 @@ namespace NServiceBus.Transports.Msmq
 
             return false;
         }
+
+        static ILog Logger = LogManager.GetLogger<MsmqReceiveWithTransactionScopeBehavior>();
+
+        TransactionOptions transactionOptions;
+        TimeSpan receiveTimeout = TimeSpan.FromSeconds(1);
+
 
         public class MsmqReceiveWithTransactionScopeBehaviorRegistration : RegisterStep
         {

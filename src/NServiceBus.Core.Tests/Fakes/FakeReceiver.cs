@@ -50,7 +50,7 @@
         public bool IsStarted { get; set; }
 
         public Address InputAddress { get; set; }
-        public IDisposable Subscribe(IObserver<MessageDequeued> observer)
+        public IDisposable Subscribe(IObserver<MessageAvailable> observer)
         {
             throw new NotImplementedException();
         }

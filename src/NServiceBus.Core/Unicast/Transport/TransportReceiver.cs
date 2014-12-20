@@ -11,7 +11,7 @@ namespace NServiceBus.Unicast.Transport
     /// <summary>
     ///     Default implementation of a NServiceBus transport.
     /// </summary>
-    public abstract class TransportReceiver : IDisposable, IObserver<MessageDequeued>
+    public abstract class TransportReceiver : IDisposable, IObserver<MessageAvailable>
     {
         /// <summary>
         ///     Creates an instance of <see cref="TransportReceiver" />
@@ -67,7 +67,7 @@ namespace NServiceBus.Unicast.Transport
             //Injected at compile time
         }
 
-        void IObserver<MessageDequeued>.OnNext(MessageDequeued value)
+        void IObserver<MessageAvailable>.OnNext(MessageAvailable value)
         {
             try
             {
@@ -85,13 +85,13 @@ namespace NServiceBus.Unicast.Transport
         /// <summary>
         /// 
         /// </summary>
-        protected abstract void InvokePipeline(MessageDequeued value);
+        protected abstract void InvokePipeline(MessageAvailable value);
         
-        void IObserver<MessageDequeued>.OnError(Exception error)
+        void IObserver<MessageAvailable>.OnError(Exception error)
         {
         }
 
-        void IObserver<MessageDequeued>.OnCompleted()
+        void IObserver<MessageAvailable>.OnCompleted()
         {
         }
 

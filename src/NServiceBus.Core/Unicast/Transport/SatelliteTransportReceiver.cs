@@ -25,12 +25,14 @@ namespace NServiceBus.Unicast.Transport
             this.satellite = satellite;
         }
 
-        protected override void InvokePipeline(MessageDequeued value)
+        protected override void InvokePipeline(MessageAvailable value)
         {
             var context = new IncomingContext(pipelineExecutor.CurrentContext);
+
+            value.InitalizeContext(context);
+
             context.Set(firstLevelRetries);
             context.Set(currentReceivePerformanceDiagnostics);
-            context.Set("TransportReceive.Address", receiveAddress);
             context.Set(satellite);
 
             pipelineExecutor.InvokeReceivePhysicalMessagePipeline(context);

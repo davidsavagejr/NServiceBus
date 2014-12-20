@@ -1,11 +1,13 @@
 ﻿namespace NServiceBus.Transports
 {
     using System;
+    using System.Messaging;
+    using NServiceBus.Pipeline.Contexts;
 
     /// <summary>
     /// Interface to implement when developing custom dequeuing strategies.
     /// </summary>
-    public interface IDequeueMessages : IObservable<MessageDequeued>
+    public interface IDequeueMessages : IObservable<MessageAvailable>
     {
         /// <summary>
         /// Initializes the <see cref="IDequeueMessages"/>.
@@ -70,8 +72,26 @@
     /// <summary>
     /// 
     /// </summary>
-    public struct MessageDequeued
+    public class MessageAvailable
     {
-        
+        readonly Action<IncomingContext> contextAction;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="contextAction"></param>
+        public MessageAvailable(Action<IncomingContext> contextAction)
+        {
+            this.contextAction = contextAction;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        public void InitalizeContext(IncomingContext context)
+        {
+            contextAction(context);
+        }
     }
 }

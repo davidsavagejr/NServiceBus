@@ -24,7 +24,7 @@ namespace NServiceBus.Unicast.Tests.Helpers
         }
 
 
-        protected override void InvokePipeline(MessageDequeued value)
+        protected override void InvokePipeline(MessageAvailable value)
         {
             
         }

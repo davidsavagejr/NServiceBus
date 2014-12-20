@@ -143,7 +143,7 @@ namespace NServiceBus.Transports.Msmq
 
                 throttlingSemaphore.Wait();
 
-                observable.OnNext(new MessageDequeued());
+                observable.OnNext(new MessageAvailable(c => c.Set(queue)));
 
                 CallPeekWithExceptionHandling(() => queue.BeginPeek());
             }
@@ -199,7 +199,7 @@ namespace NServiceBus.Transports.Msmq
         ManualResetEvent stopResetEvent = new ManualResetEvent(true);
         SemaphoreSlim throttlingSemaphore;
         
-        Observable<MessageDequeued> observable = new Observable<MessageDequeued>();
+        Observable<MessageAvailable> observable = new Observable<MessageAvailable>();
         int maximumConcurrencyLevel;
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace NServiceBus.Transports.Msmq
         /// </summary>
         /// <param name="observer"></param>
         /// <returns></returns>
-        public IDisposable Subscribe(IObserver<MessageDequeued> observer)
+        public IDisposable Subscribe(IObserver<MessageAvailable> observer)
         {
             return observable.Subscribe(observer);
         }
