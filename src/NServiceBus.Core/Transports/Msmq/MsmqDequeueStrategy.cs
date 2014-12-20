@@ -16,29 +16,24 @@ namespace NServiceBus.Transports.Msmq
         /// <summary>
         ///     Creates an instance of <see cref="MsmqDequeueStrategy" />.
         /// </summary>
-        /// <param name="configure">Configure</param>
         /// <param name="criticalError">CriticalError</param>
-        public MsmqDequeueStrategy(Configure configure, CriticalError criticalError)
+        /// <param name="isTransactional"></param>
+        public MsmqDequeueStrategy(CriticalError criticalError, bool isTransactional)
         {
-            this.configure = configure;
             this.criticalError = criticalError;
+            this.isTransactional = isTransactional;
         }
-
-        /// <summary>
-        /// Transactionality of the endpoint so that we can check that the queue is created in the correct mode
-        /// </summary>
-        public bool IsTransactional { get; set; }
 
         /// <summary>
         ///     Initializes the <see cref="IDequeueMessages" />.
         /// </summary>
         public void Init(DequeueSettings settings)
         {
-            currentSettings = settings;
+            maximumConcurrencyLevel = settings.MaximumConcurrencyLevel;
 
             queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(settings.QueueName), false, true, QueueAccessMode.Receive);
 
-            if (IsTransactional && !QueueIsTransactional())
+            if (isTransactional && !QueueIsTransactional())
             {
                 throw new ArgumentException("Queue must be transactional if you configure your endpoint to be transactional (" + settings.QueueName + ").");
             }
@@ -57,7 +52,7 @@ namespace NServiceBus.Transports.Msmq
 
             queue.MessageReadPropertyFilter = messageReadPropertyFilter;
 
-            if (configure.PurgeOnStartup())
+            if (settings.PurgeOnStartup)
             {
                 queue.Purge();
             }
@@ -70,7 +65,7 @@ namespace NServiceBus.Transports.Msmq
         {
             MessageQueue.ClearConnectionCache();
 
-            throttlingSemaphore = new SemaphoreSlim(currentSettings.MaximumConcurrencyLevel, currentSettings.MaximumConcurrencyLevel);
+            throttlingSemaphore = new SemaphoreSlim(maximumConcurrencyLevel, maximumConcurrencyLevel);
 
             queue.PeekCompleted += OnPeekCompleted;
 
@@ -97,7 +92,7 @@ namespace NServiceBus.Transports.Msmq
         {
             Stop();
 
-            currentSettings = new DequeueSettings(currentSettings.QueueName, newConcurrencyLevel);
+            maximumConcurrencyLevel = newConcurrencyLevel;
 
             Start();
         }
@@ -114,13 +109,13 @@ namespace NServiceBus.Transports.Msmq
         void DrainStopSemaphore()
         {
             Logger.Debug("Drain stopping 'Throttling Semaphore'.");
-            for (var index = 0; index < currentSettings.MaximumConcurrencyLevel; index++)
+            for (var index = 0; index < maximumConcurrencyLevel; index++)
             {
-                Logger.Debug(string.Format("Claiming Semaphore thread {0}/{1}.", index + 1, currentSettings.MaximumConcurrencyLevel));
+                Logger.Debug(string.Format("Claiming Semaphore thread {0}/{1}.", index + 1, maximumConcurrencyLevel));
                 throttlingSemaphore.Wait();
             }
             Logger.Debug("Releasing all claimed Semaphore threads.");
-            throttlingSemaphore.Release(currentSettings.MaximumConcurrencyLevel);
+            throttlingSemaphore.Release(maximumConcurrencyLevel);
 
             throttlingSemaphore.Dispose();
         }
@@ -195,8 +190,8 @@ namespace NServiceBus.Transports.Msmq
         }
 
         static ILog Logger = LogManager.GetLogger<MsmqDequeueStrategy>();
-        Configure configure;
         CriticalError criticalError;
+        readonly bool isTransactional;
 
         [SkipWeaving]
         CircuitBreaker circuitBreaker = new CircuitBreaker(100, TimeSpan.FromSeconds(30));
@@ -205,7 +200,7 @@ namespace NServiceBus.Transports.Msmq
         SemaphoreSlim throttlingSemaphore;
         
         Observable<MessageDequeued> observable = new Observable<MessageDequeued>();
-        DequeueSettings currentSettings;
+        int maximumConcurrencyLevel;
 
         /// <summary>
         /// b

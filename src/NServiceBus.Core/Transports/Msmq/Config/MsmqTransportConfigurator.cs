@@ -29,6 +29,7 @@
             context.Container.ConfigureComponent<CorrelationIdMutatorForBackwardsCompatibilityWithV3>(DependencyLifecycle.InstancePerCall);
             context.Container.ConfigureComponent<MsmqUnitOfWork>(DependencyLifecycle.SingleInstance);
 
+            var endpointIsTransactional = context.Settings.Get<bool>("Transactions.Enabled");
 
             var doNotUseDTCTransactions = context.Settings.Get<bool>("Transactions.SuppressDistributedTransactions");
 
@@ -36,7 +37,8 @@
             {
                 var configuredErrorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(context.Settings);
 
-                context.Container.ConfigureComponent<MsmqDequeueStrategy>(DependencyLifecycle.InstancePerCall);
+                context.Container.ConfigureComponent(b => new MsmqDequeueStrategy(b.Build<CriticalError>(), endpointIsTransactional),
+                    DependencyLifecycle.InstancePerCall);
 
                 if (doNotUseDTCTransactions)
                 {
