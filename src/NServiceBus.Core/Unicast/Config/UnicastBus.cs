@@ -13,7 +13,6 @@ namespace NServiceBus.Features
     using NServiceBus.Unicast;
     using NServiceBus.Unicast.Behaviors;
     using Pipeline;
-    using Pipeline.Contexts;
     using Transports;
     using Unicast.Messages;
     using Unicast.Routing;
@@ -39,14 +38,14 @@ namespace NServiceBus.Features
                 });
             });
         }
-      
+
         protected internal override void Setup(FeatureConfigurationContext context)
         {
             var defaultAddress = context.Settings.LocalAddress();
-            var hostInfo = new HostInformation(context.Settings.Get<Guid>("NServiceBus.HostInformation.HostId"), 
-                context.Settings.Get<string>("NServiceBus.HostInformation.DisplayName"), 
+            var hostInfo = new HostInformation(context.Settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
+                context.Settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
                 context.Settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
-            
+
             context.Container.ConfigureComponent<Unicast.UnicastBus>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(u => u.InputAddress, defaultAddress)
                 .ConfigureProperty(u => u.HostInformation, hostInfo);
@@ -54,8 +53,6 @@ namespace NServiceBus.Features
             ConfigureSubscriptionAuthorization(context);
 
             context.Container.ConfigureComponent<PipelineExecutor>(DependencyLifecycle.SingleInstance);
-            
-            ConfigureBehaviors(context);
 
             var knownMessages = context.Settings.GetAvailableTypes()
                 .Where(context.Settings.Get<Conventions>().IsMessageType)
@@ -70,7 +67,7 @@ namespace NServiceBus.Features
                 return;
             }
 
-            SetTransportThresholds(context, hostInfo);
+            SetTransportThresholds(context);
         }
 
         static Guid GenerateDefaultHostId(out string fullPathToStartingExe)
@@ -82,7 +79,7 @@ namespace NServiceBus.Features
             return gen.HostId;
         }
 
-        void SetTransportThresholds(FeatureConfigurationContext context, HostInformation hostInfo)
+        void SetTransportThresholds(FeatureConfigurationContext context)
         {
             var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
             var maximumThroughput = 0;
@@ -101,11 +98,18 @@ namespace NServiceBus.Features
                 MaxRetries = maximumNumberOfRetries
             };
 
-            context.Container.ConfigureProperty<HandlerTransactionScopeWrapperBehavior>(b => b.TransactionSettings, transactionSettings);
-            context.Container.ConfigureProperty<FirstLevelRetriesBehavior>(b => b.TransactionSettings, transactionSettings)
-                .ConfigureProperty<FirstLevelRetriesBehavior>(p=>p.HostInformation, hostInfo);
-           
-             var defaultAddress = context.Settings.LocalAddress();
+            if (transactionSettings.DoNotWrapHandlersExecutionInATransactionScope)
+            {
+                context.Pipeline.Register<SuppressAmbientTransactionBehavior.Registration>();
+            }
+            else
+            {
+                context.Pipeline.Register<HandlerTransactionScopeWrapperBehavior.Registration>();
+            }
+
+            context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();
+
+            var defaultAddress = context.Settings.LocalAddress();
 
             var dequeueSettings = new DequeueSettings(defaultAddress.Queue,
                 maximumConcurrencyLevel,
@@ -122,18 +126,6 @@ namespace NServiceBus.Features
                 CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()
             }, DependencyLifecycle.InstancePerCall);
-        }
-
-        void ConfigureBehaviors(FeatureConfigurationContext context)
-        {
-            // ReSharper disable HeapView.SlowDelegateCreation
-            var behaviorTypes = context.Settings.GetAvailableTypes().Where(t => (typeof(IBehavior<IncomingContext>).IsAssignableFrom(t) || typeof(IBehavior<OutgoingContext>).IsAssignableFrom(t))
-                                                            && !(t.IsAbstract || t.IsInterface));
-            // ReSharper restore HeapView.SlowDelegateCreation
-            foreach (var behaviorType in behaviorTypes)
-            {
-                context.Container.ConfigureComponent(behaviorType, DependencyLifecycle.InstancePerCall);
-            }
         }
 
         void ConfigureSubscriptionAuthorization(FeatureConfigurationContext context)

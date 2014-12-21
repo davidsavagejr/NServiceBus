@@ -200,6 +200,7 @@
     <Compile Include="Persistence\PersistenceStartup.cs" />
     <Compile Include="Persistence\Storage.cs" />
     <Compile Include="Persistence\StorageType.cs" />
+    <Compile Include="Pipeline\HardcodedPipelineSteps.cs" />
     <Compile Include="Pipeline\PipelineModifications.cs" />
     <Compile Include="Sagas\CorrelationProperty.cs" />
     <Compile Include="Sagas\CustomFinderAdapter.cs" />
@@ -252,6 +253,7 @@
     <Compile Include="Unicast\Transport\Config\TransportExtensions.cs" />
     <Compile Include="Unicast\Transport\Config\UseTransportExtensions_Obsolete.cs" />
     <Compile Include="Unicast\Transport\ExecuteSatelliteHandlerBehavior.cs" />
+    <Compile Include="Unicast\Transport\SuppressAmbientTransactionBehavior.cs" />
     <Compile Include="Unicast\Transport\MainTransportReceiver.cs" />
     <Compile Include="Unicast\Transport\ReceivePerformanceDiagnosticsBehavior.cs" />
     <Compile Include="Unicast\Transport\HandlerTransactionScopeWrapperBehavior.cs" />

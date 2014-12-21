@@ -1,10 +1,8 @@
 ﻿namespace NServiceBus.Features
 {
     using System;
-    using System.Transactions;
     using Config;
     using Logging;
-    using NServiceBus.Faults;
     using Transports;
     using Transports.Msmq;
     using Transports.Msmq.Config;
@@ -36,8 +34,6 @@
 
             if (!context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"))
             {
-                var configuredErrorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(context.Settings);
-
                 context.Container.ConfigureComponent(b => new MsmqDequeueStrategy(b.Build<CriticalError>(), endpointIsTransactional),
                     DependencyLifecycle.InstancePerCall);
 
@@ -47,15 +43,7 @@
                 }
                 else
                 {
-                    var transactionOptions = new TransactionOptions
-                    {
-                        IsolationLevel = context.Settings.Get<IsolationLevel>("Transactions.IsolationLevel"),
-                        Timeout = context.Settings.Get<TimeSpan>("Transactions.DefaultTimeout")
-                    };
-
-                    context.Pipeline.Register<MsmqReceiveWithTransactionScopeBehavior.MsmqReceiveWithTransactionScopeBehaviorRegistration>();
-                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.ErrorQueue, configuredErrorQueue);
-                    context.Container.ConfigureProperty<MsmqReceiveWithTransactionScopeBehavior>(o => o.TransactionOptions, transactionOptions);
+                    context.Pipeline.Register<MsmqReceiveWithTransactionScopeBehavior.Registration>();
                 }
             }
 

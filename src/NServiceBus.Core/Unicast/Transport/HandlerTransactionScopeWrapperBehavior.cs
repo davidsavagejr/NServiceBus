@@ -7,11 +7,22 @@ namespace NServiceBus.Unicast.Transport
 
     class HandlerTransactionScopeWrapperBehavior : IBehavior<IncomingContext>
     {
-        public TransactionSettings TransactionSettings { get; set; }
+        readonly TransactionOptions transactionOptions;
+
+        public HandlerTransactionScopeWrapperBehavior(TransactionOptions transactionOptions)
+        {
+            this.transactionOptions = transactionOptions;
+        }
 
         public void Invoke(IncomingContext context, Action next)
         {
-            using (var tx = GetTransactionScope())
+            if (Transaction.Current != null)
+            {
+                next();
+                return;
+            }
+
+            using (var tx = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
             {
                 next();
 
@@ -19,18 +30,25 @@ namespace NServiceBus.Unicast.Transport
             }
         }
 
-        TransactionScope GetTransactionScope()
+        public class Registration : RegisterStep
         {
-            if (TransactionSettings.DoNotWrapHandlersExecutionInATransactionScope)
+            public Registration()
+                : base("HandlerTransactionScopeWrapperBehavior", typeof(HandlerTransactionScopeWrapperBehavior), "Makes sure that the handlers gets wrapped in a transaction scope")
             {
-                return new TransactionScope(TransactionScopeOption.Suppress);
-            }
+                InsertBefore("FirstLevelRetriesBehavior");
 
-            return new TransactionScope(TransactionScopeOption.Required, new TransactionOptions
-            {
-                IsolationLevel = TransactionSettings.IsolationLevel,
-                Timeout = TransactionSettings.TransactionTimeout
-            });
+                ContainerRegistration((builder, settings) =>
+                {
+                    var transactionOptions = new TransactionOptions
+                    {
+                        IsolationLevel = settings.Get<IsolationLevel>("Transactions.IsolationLevel"),
+                        Timeout = settings.Get<TimeSpan>("Transactions.DefaultTimeout")
+                    };
+
+
+                    return new HandlerTransactionScopeWrapperBehavior(transactionOptions);
+                });
+            }
         }
     }
 }

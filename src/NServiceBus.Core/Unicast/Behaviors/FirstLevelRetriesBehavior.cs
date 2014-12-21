@@ -1,6 +1,7 @@
 namespace NServiceBus.Unicast.Behaviors
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.Serialization;
     using NServiceBus.Faults;
     using NServiceBus.Hosting;
@@ -11,15 +12,11 @@ namespace NServiceBus.Unicast.Behaviors
 
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
-        FirstLevelRetries firstLevelRetries;
-        ILog Logger = LogManager.GetLogger<FirstLevelRetriesBehavior>();
-        public TransactionSettings TransactionSettings { get; set; }
-        public HostInformation HostInformation { get; set; }
-        readonly IManageMessageFailures FailureManager;
-
-        public FirstLevelRetriesBehavior(IManageMessageFailures manageMessageFailures)
+        public FirstLevelRetriesBehavior(IManageMessageFailures manageMessageFailures, bool isTransactional, HostInformation hostInformation)
         {
             FailureManager = manageMessageFailures;
+            this.isTransactional = isTransactional;
+            this.hostInformation = hostInformation;
         }
 
         public void Invoke(IncomingContext context, Action next)
@@ -30,7 +27,7 @@ namespace NServiceBus.Unicast.Behaviors
 
         bool ShouldExitBecauseOfRetries(TransportMessage message)
         {
-            if (TransactionSettings.IsTransactional)
+            if (isTransactional)
             {
                 if (firstLevelRetries.HasMaxRetriesForMessageBeenReached(message))
                 {
@@ -42,8 +39,8 @@ namespace NServiceBus.Unicast.Behaviors
 
         void ProcessMessage(TransportMessage message, Action next)
         {
-            message.Headers[Headers.HostId] = HostInformation.HostId.ToString("N");
-            message.Headers[Headers.HostDisplayName] = HostInformation.DisplayName;
+            message.Headers[Headers.HostId] = hostInformation.HostId.ToString("N");
+            message.Headers[Headers.HostDisplayName] = hostInformation.DisplayName;
 
             if (string.IsNullOrWhiteSpace(message.Id))
             {
@@ -73,5 +70,31 @@ namespace NServiceBus.Unicast.Behaviors
                 FailureManager.SerializationFailedForMessage(message, serializationException);
             }
         }
+
+        readonly IManageMessageFailures FailureManager;
+        readonly bool isTransactional;
+        readonly HostInformation hostInformation;
+        FirstLevelRetries firstLevelRetries;
+        ILog Logger = LogManager.GetLogger<FirstLevelRetriesBehavior>();
+
+        public class Registration : RegisterStep
+        {
+            public Registration()
+                : base("FirstLevelRetriesBehavior", typeof(FirstLevelRetriesBehavior), "Performs first level retries")
+            {
+                InsertBefore("ReceivePerformanceDiagnosticsBehavior");
+
+                ContainerRegistration((builder, settings) =>
+                {
+                    var hostInfo = new HostInformation(settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
+               settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
+               settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
+
+
+                    return new FirstLevelRetriesBehavior(builder.Build<IManageMessageFailures>(), settings.Get<bool>("Transactions.Enabled"), hostInfo);
+                });
+            }
+        }
+
     }
 }

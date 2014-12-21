@@ -2,6 +2,8 @@ namespace NServiceBus.Pipeline
 {
     using System;
     using System.Collections.Generic;
+    using NServiceBus.ObjectBuilder;
+    using NServiceBus.Settings;
 
     /// <summary>
     /// Base class to do an advance registration of a step.
@@ -32,6 +34,29 @@ namespace NServiceBus.Pipeline
             StepId = stepId;
             Description = description;
         }
+
+
+        /// <summary>
+        /// Allows for customization of the container registration for this step
+        /// </summary>
+        /// <param name="customRegistration"></param>
+        protected void ContainerRegistration<T>(Func<IBuilder,ReadOnlySettings,T> customRegistration)
+        {
+            customContainerRegistration = (settings, container) => container.ConfigureComponent(builder => customRegistration(builder,settings), DependencyLifecycle.InstancePerCall);
+        }
+
+        internal void ApplyContainerRegistration(ReadOnlySettings settings, IConfigureComponents container)
+        {
+            if (customContainerRegistration != null)
+            {
+                customContainerRegistration(settings, container);
+                return;
+            }
+
+            container.ConfigureComponent(BehaviorType, DependencyLifecycle.InstancePerCall);
+        }
+
+        Action<ReadOnlySettings,IConfigureComponents> customContainerRegistration;
 
         /// <summary>
         /// Gets the unique identifier for this step.

@@ -1,18 +1,31 @@
 namespace NServiceBus.Pipeline
 {
     using System;
+    using System.Collections.Generic;
+    using NServiceBus.ObjectBuilder;
+    using NServiceBus.Settings;
 
     /// <summary>
     /// Manages the pipeline configuration.
     /// </summary>
     public class PipelineSettings
     {
+     
         /// <summary>
         /// Creates an instance of <see cref="PipelineSettings"/>
         /// </summary>
+        [ObsoleteEx(RemoveInVersion = "6")]
         public PipelineSettings(BusConfiguration config)
         {
-            this.config = config;
+            throw new NotImplementedException();
+        }
+       
+        /// <summary>
+        /// Creates an instance of <see cref="PipelineSettings"/>
+        /// </summary>
+        internal PipelineSettings(PipelineModifications modifications)
+        {
+            this.modifications = modifications;
         }
 
         /// <summary>
@@ -27,7 +40,7 @@ namespace NServiceBus.Pipeline
                 throw new ArgumentNullException("stepId");
             }
 
-            config.Settings.Get<PipelineModifications>().Removals.Add(new RemoveStep(stepId));
+            modifications.Removals.Add(new RemoveStep(stepId));
         }
 
         /// <summary>
@@ -60,7 +73,8 @@ namespace NServiceBus.Pipeline
                 throw new ArgumentNullException("stepId");
             }
 
-            config.Settings.Get<PipelineModifications>().Replacements.Add(new ReplaceBehavior(stepId, newBehavior, description));
+            registeredBehaviors.Add(newBehavior);
+            modifications.Replacements.Add(new ReplaceBehavior(stepId, newBehavior, description));
         }
 
         /// <summary>
@@ -99,7 +113,7 @@ namespace NServiceBus.Pipeline
                 throw new ArgumentNullException("description");
             }
 
-            config.Settings.Get<PipelineModifications>().Additions.Add(RegisterStep.Create(stepId, behavior, description));
+            AddStep(RegisterStep.Create(stepId, behavior, description));
         }
 
 
@@ -126,9 +140,34 @@ namespace NServiceBus.Pipeline
         /// <typeparam name="T">The <see cref="RegisterStep"/> to use to perform the registration.</typeparam>
         public void Register<T>() where T : RegisterStep, new()
         {
-            config.Settings.Get<PipelineModifications>().Additions.Add(new T());
+            AddStep(new T());   
         }
 
-        BusConfiguration config;
+        void AddStep(RegisterStep step)
+        {
+            registeredSteps.Add(step);
+
+            modifications.Additions.Add(step);
+        }
+
+        internal void RegisterBehaviorsInContainer(ReadOnlySettings settings,IConfigureComponents container)
+        {
+            foreach (var registeredBehavior in registeredBehaviors)
+            {
+                container.ConfigureComponent(registeredBehavior, DependencyLifecycle.InstancePerCall);
+            }
+
+            foreach (var step in registeredSteps)
+            {
+                step.ApplyContainerRegistration(settings,container);
+            }
+
+        }
+
+        List<RegisterStep> registeredSteps = new List<RegisterStep>(); 
+        List<Type> registeredBehaviors = new List<Type>(); 
+
+        readonly PipelineModifications modifications;
+     
     }
 }

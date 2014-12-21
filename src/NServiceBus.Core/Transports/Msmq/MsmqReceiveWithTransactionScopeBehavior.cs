@@ -4,21 +4,24 @@ namespace NServiceBus.Transports.Msmq
     using System.Diagnostics;
     using System.Messaging;
     using System.Transactions;
+    using NServiceBus.Faults;
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
     class MsmqReceiveWithTransactionScopeBehavior : IBehavior<IncomingContext>
     {
-        public Address ErrorQueue { get; set; }
-
-        public TransactionOptions TransactionOptions { get; set; }
+        public MsmqReceiveWithTransactionScopeBehavior(TransactionOptions transactionOptions, Address errorQueue)
+        {
+            this.transactionOptions = transactionOptions;
+            this.errorQueue = errorQueue;
+        }
 
         public void Invoke(IncomingContext context, Action next)
         {
             var queue = context.Get<MessageQueue>();
 
-            using (var scope = new TransactionScope(TransactionScopeOption.Required, TransactionOptions))
+            using (var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
             {
                 Message message;
 
@@ -36,9 +39,9 @@ namespace NServiceBus.Transports.Msmq
                 catch (Exception ex)
                 {
                     LogCorruptedMessage(message, ex);
-                    using (var errorQueue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(ErrorQueue), false, true, QueueAccessMode.Send))
+                    using (var nativeErrorQueue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(errorQueue), false, true, QueueAccessMode.Send))
                     {
-                        errorQueue.Send(message, MessageQueueTransactionType.Automatic);
+                        nativeErrorQueue.Send(message, MessageQueueTransactionType.Automatic);
                     }
                     scope.Complete();
                     return;
@@ -64,7 +67,7 @@ namespace NServiceBus.Transports.Msmq
 
         void LogCorruptedMessage(Message message, Exception ex)
         {
-            var error = string.Format("Message '{0}' is corrupt and will be moved to '{1}'", message.Id, ErrorQueue.Queue);
+            var error = string.Format("Message '{0}' is corrupt and will be moved to '{1}'", message.Id, errorQueue.Queue);
             Logger.Error(error, ex);
         }
 
@@ -100,14 +103,30 @@ namespace NServiceBus.Transports.Msmq
             return false;
         }
 
+        readonly TransactionOptions transactionOptions;
+        readonly Address errorQueue;
+
         static ILog Logger = LogManager.GetLogger<MsmqReceiveWithTransactionScopeBehavior>();
 
-        public class MsmqReceiveWithTransactionScopeBehaviorRegistration : RegisterStep
+        public class Registration : RegisterStep
         {
-            public MsmqReceiveWithTransactionScopeBehaviorRegistration()
+            public Registration()
                 : base("ReceiveMessage", typeof(MsmqReceiveWithTransactionScopeBehavior), "Invokes the decryption logic")
             {
                 InsertBefore("HandlerTransactionScopeWrapperBehavior");
+
+                ContainerRegistration((builder, settings) =>
+                {
+                    var transactionOptions = new TransactionOptions
+                   {
+                       IsolationLevel = settings.Get<IsolationLevel>("Transactions.IsolationLevel"),
+                       Timeout = settings.Get<TimeSpan>("Transactions.DefaultTimeout")
+                   };
+
+                    var errorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(settings);
+
+                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions, errorQueue);
+                });
             }
         }
     }
