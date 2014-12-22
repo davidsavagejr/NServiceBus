@@ -263,7 +263,7 @@
     <Compile Include="Utils\ElevateChecker.cs" />
     <Compile Include="IStartableBus.cs" />
     <Compile Include="IWantToRunWhenBusStartsAndStops.cs" />
-    <Compile Include="Licensing\LicenseBehavior.cs" />
+    <Compile Include="Licensing\NotifyOnInvalidLicenseBehavior.cs" />
     <Compile Include="Licensing\LicenseReminder.cs" />
     <Compile Include="Licensing\LicenseLocationConventions.cs" />
     <Compile Include="Licensing\NonLockingFileReader.cs" />

@@ -16,8 +16,18 @@ namespace NServiceBus.Unicast.Transport
             : base(transactionSettings, dequeueSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
         {
             var pipelineModifications = settings.Get<PipelineModifications>();
-            pipelineModifications.Replacements.Add(new ReplaceBehavior(WellKnownStep.CreateChildContainer, typeof(ExecuteSatelliteHandlerBehavior)));
-            base.pipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(), pipelineModifications);
+
+            // we need to clone since multiple satellites will modify the same collections if not
+            var satelliteSpecificPipeline = new PipelineModifications();
+
+            satelliteSpecificPipeline.Additions.AddRange(pipelineModifications.Additions);
+
+            satelliteSpecificPipeline.Removals.AddRange(pipelineModifications.Removals);
+
+            satelliteSpecificPipeline.Replacements.AddRange(pipelineModifications.Replacements);
+
+            satelliteSpecificPipeline.Replacements.Add(new ReplaceBehavior(WellKnownStep.CreateChildContainer, typeof(ExecuteSatelliteHandlerBehavior)));
+            base.pipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(), satelliteSpecificPipeline);
         }
 
         public void SetSatellite(ISatellite satellite)
