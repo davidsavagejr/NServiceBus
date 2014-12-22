@@ -5,7 +5,6 @@
     using System.Transactions;
     using Fakes;
     using Faults;
-    using NServiceBus.Transports;
     using NUnit.Framework;
     using Satellites;
     using Settings;
@@ -31,9 +30,7 @@
             configurationBuilder.EndpointName("xyz");
             configurationBuilder.AssembliesToScan(new Assembly[0]);
 
-            Transport = new MainTransportReceiver(new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, 5, false, false),
-                new DequeueSettings("test",1), 
-                0, FakeReceiver, InMemoryFaultManager, new SettingsHolder(), configurationBuilder.BuildConfiguration(), null);
+            Transport = new MainTransportReceiver(new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, 5, false, false), FakeReceiver, InMemoryFaultManager, new SettingsHolder(), configurationBuilder.BuildConfiguration(), null);
 
             RegisterTypes();
             Builder.Register<IManageMessageFailures>(() => InMemoryFaultManager);

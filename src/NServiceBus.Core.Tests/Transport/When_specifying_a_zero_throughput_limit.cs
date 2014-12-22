@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Core.Tests.Transport
 {
+    using NServiceBus.Transports;
     using NUnit.Framework;
 
     [TestFixture]
@@ -11,7 +12,7 @@
             const int throughputLimit = 0;
 
             TransportReceiver.ChangeMaximumMessageThroughputPerSecond(throughputLimit);
-            TransportReceiver.Start(Address.Parse("myTest"));
+            TransportReceiver.Start(new DequeueSettings("mytest", 1, false));
 
             for (var i = 0; i < 100; i++)
             {

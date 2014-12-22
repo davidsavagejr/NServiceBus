@@ -110,8 +110,7 @@ namespace NServiceBus.Transports.Msmq
 
         public class Registration : RegisterStep
         {
-            public Registration()
-                : base("ReceiveMessage", typeof(MsmqReceiveWithTransactionScopeBehavior), "Invokes the decryption logic")
+            public Registration(): base("ReceiveMessage", typeof(MsmqReceiveWithTransactionScopeBehavior), "Performs a msmq receive using a transaction scope. This will require DTC to be enable on the machine")
             {
                 InsertBefore("HandlerTransactionScopeWrapperBehavior");
 

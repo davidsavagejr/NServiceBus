@@ -6,6 +6,7 @@ namespace NServiceBus.Satellites
     using System.Threading.Tasks;
     using Config;
     using Logging;
+    using NServiceBus.Transports;
     using ObjectBuilder;
     using Unicast.Transport;
 
@@ -43,6 +44,7 @@ namespace NServiceBus.Satellites
                     if (satellite.InputAddress != null)
                     {
                         satelliteContext.Transport = builder.Build<SatelliteTransportReceiver>();
+                        Console.Out.WriteLine("Hashcode: " + satelliteContext.Transport.GetHashCode());
                         satelliteContext.Transport.SetSatellite(satellite);
                         
                         var advancedSatellite = satellite as IAdvancedSatellite;
@@ -94,7 +96,10 @@ namespace NServiceBus.Satellites
             {
                 if (context.Transport != null)
                 {
-                    context.Transport.Start(context.Instance.InputAddress);
+                    //todo: read settings from config
+                    var dequeueSettings = new DequeueSettings(context.Instance.InputAddress.Queue,1,false);
+
+                    context.Transport.Start(dequeueSettings);
                 }
                 else
                 {

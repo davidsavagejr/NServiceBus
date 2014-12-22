@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Core.Tests.Transport
 {
     using System.Threading;
+    using NServiceBus.Transports;
     using NUnit.Framework;
 
     [TestFixture,Explicit("Timing sensitive")]
@@ -12,7 +13,7 @@
         public void Should_limit_the_throughput_to_the_set_limit()
         {
             TransportReceiver.ChangeMaximumMessageThroughputPerSecond(ThroughputLimit);
-            TransportReceiver.Start(Address.Parse("mytest"));
+            TransportReceiver.Start(new DequeueSettings("mytest",1,false));
 
             ThreadPool.QueueUserWorkItem(Receive10);
 

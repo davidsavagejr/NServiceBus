@@ -665,7 +665,9 @@ namespace NServiceBus.Unicast
 
                 if (!DoNotStartTransport)
                 {
-                   Transport.Start(InputAddress);
+                    var dequeueSettings = new DequeueSettings(InputAddress.Queue, MaximumConcurrencyLevel, PurgeOnStartup);
+
+                    Transport.Start(dequeueSettings);
                 }
 
                 started = true;
@@ -890,6 +892,16 @@ namespace NServiceBus.Unicast
                 return Builder.Build<TransportDefinition>();
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public  int MaximumConcurrencyLevel { get; set; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool PurgeOnStartup { get; set; }
 
         static void ProcessStartupItems<T>(IEnumerable<T> items, Action<T> iteration, Action<Exception> inCaseOfFault, EventWaitHandle eventToSet)
         {

@@ -15,15 +15,13 @@ namespace NServiceBus.Unicast.Transport
         /// 
         /// </summary>
         /// <param name="transactionSettings"></param>
-        /// <param name="dequeueSettings"></param>
-        /// <param name="maximumThroughput"></param>
         /// <param name="receiver"></param>
         /// <param name="manageMessageFailures"></param>
         /// <param name="settings"></param>
         /// <param name="config"></param>
         /// <param name="pipelineExecutor"></param>
-        public MainTransportReceiver(TransactionSettings transactionSettings, DequeueSettings dequeueSettings, int maximumThroughput, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
-            :base(transactionSettings, dequeueSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
+        public MainTransportReceiver(TransactionSettings transactionSettings,IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+            :base(transactionSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
         {
             
         }
@@ -64,8 +62,8 @@ namespace NServiceBus.Unicast.Transport
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="address"></param>
-        public override void Start(Address address)
+        /// <param name="dequeueSettings"></param>
+        public override void Start(DequeueSettings dequeueSettings)
         {
             throughputLimiter = new ThroughputLimiter();
 
@@ -77,7 +75,7 @@ namespace NServiceBus.Unicast.Transport
                     MaximumMessageThroughputPerSecond);
             }
 
-            base.Start(address);
+            base.Start(dequeueSettings);
         }
 
         /// <summary>

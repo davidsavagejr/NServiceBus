@@ -12,8 +12,8 @@ namespace NServiceBus.Unicast.Transport
     {
         ISatellite satellite;
 
-        public SatelliteTransportReceiver(IBuilder builder, TransactionSettings transactionSettings, DequeueSettings dequeueSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
-            : base(transactionSettings, dequeueSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
+        public SatelliteTransportReceiver(IBuilder builder, TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+            : base(transactionSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
         {
             var pipelineModifications = settings.Get<PipelineModifications>();
 

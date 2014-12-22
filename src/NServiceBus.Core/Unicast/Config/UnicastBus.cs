@@ -46,9 +46,25 @@ namespace NServiceBus.Features
                 context.Settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
                 context.Settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
 
+
+            var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
+            //var maximumThroughput = 0;
+            var maximumNumberOfRetries = 5;
+            var maximumConcurrencyLevel = 1;
+
+            if (transportConfig != null)
+            {
+                maximumNumberOfRetries = transportConfig.MaxRetries;
+                //maximumThroughput = transportConfig.MaximumMessageThroughputPerSecond;
+                maximumConcurrencyLevel = transportConfig.MaximumConcurrencyLevel;
+            }
+
+
             context.Container.ConfigureComponent<Unicast.UnicastBus>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(u => u.InputAddress, defaultAddress)
-                .ConfigureProperty(u => u.HostInformation, hostInfo);
+                .ConfigureProperty(u => u.HostInformation, hostInfo)
+                .ConfigureProperty(u => u.MaximumConcurrencyLevel, maximumConcurrencyLevel)
+                .ConfigureProperty(u => u.PurgeOnStartup, context.Settings.GetOrDefault<bool>("Transport.PurgeOnStartup"));
 
             ConfigureSubscriptionAuthorization(context);
 
@@ -67,32 +83,6 @@ namespace NServiceBus.Features
                 return;
             }
 
-            SetTransportThresholds(context);
-        }
-
-        static Guid GenerateDefaultHostId(out string fullPathToStartingExe)
-        {
-            var gen = new DefaultHostIdGenerator(Environment.CommandLine, RuntimeEnvironment.MachineName);
-
-            fullPathToStartingExe = gen.FullPathToStartingExe;
-
-            return gen.HostId;
-        }
-
-        void SetTransportThresholds(FeatureConfigurationContext context)
-        {
-            var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
-            var maximumThroughput = 0;
-            var maximumNumberOfRetries = 5;
-            var maximumConcurrencyLevel = 1;
-
-            if (transportConfig != null)
-            {
-                maximumNumberOfRetries = transportConfig.MaxRetries;
-                maximumThroughput = transportConfig.MaximumMessageThroughputPerSecond;
-                maximumConcurrencyLevel = transportConfig.MaximumConcurrencyLevel;
-            }
-
             var transactionSettings = new TransactionSettings(context.Settings)
             {
                 MaxRetries = maximumNumberOfRetries
@@ -109,24 +99,29 @@ namespace NServiceBus.Features
 
             context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();
 
-            var defaultAddress = context.Settings.LocalAddress();
-
-            var dequeueSettings = new DequeueSettings(defaultAddress.Queue,
-                maximumConcurrencyLevel,
-                context.Settings.GetOrDefault<bool>("Transport.PurgeOnStartup"));
-
-            context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, dequeueSettings, maximumThroughput, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
+            context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
                 CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()
             }, DependencyLifecycle.InstancePerCall);
 
-            context.Container.ConfigureComponent(b => new SatelliteTransportReceiver(b, transactionSettings, dequeueSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
+            context.Container.ConfigureComponent(b => new SatelliteTransportReceiver(b, transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
                 CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()
             }, DependencyLifecycle.InstancePerCall);
         }
+
+        static Guid GenerateDefaultHostId(out string fullPathToStartingExe)
+        {
+            var gen = new DefaultHostIdGenerator(Environment.CommandLine, RuntimeEnvironment.MachineName);
+
+            fullPathToStartingExe = gen.FullPathToStartingExe;
+
+            return gen.HostId;
+        }
+
+
 
         void ConfigureSubscriptionAuthorization(FeatureConfigurationContext context)
         {

@@ -9,12 +9,12 @@ namespace NServiceBus.Unicast.Tests.Helpers
 
     public class FakeTransport : TransportReceiver
     {
-        public FakeTransport(TransactionSettings transactionSettings, DequeueSettings dequeueSettings, int maximumThroughput, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config) :
-            base(transactionSettings, dequeueSettings, receiver, manageMessageFailures, settings, config, null)
+        public FakeTransport(TransactionSettings transactionSettings,IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config) :
+            base(transactionSettings, receiver, manageMessageFailures, settings, config, null)
         {
         }
 
-        public override void Start(Address localAddress)
+        public override void Start(DequeueSettings dequeueSettings)
         {
         }
 

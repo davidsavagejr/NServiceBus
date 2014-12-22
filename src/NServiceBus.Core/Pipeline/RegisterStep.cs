@@ -2,12 +2,14 @@ namespace NServiceBus.Pipeline
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
 
     /// <summary>
     /// Base class to do an advance registration of a step.
     /// </summary>
+    [DebuggerDisplay("{StepId}({BehaviorType.FullName}) - {Description}")]
     public abstract class RegisterStep
     {
         /// <summary>

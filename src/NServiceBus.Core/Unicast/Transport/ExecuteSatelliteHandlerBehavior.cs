@@ -9,7 +9,9 @@ namespace NServiceBus.Unicast.Transport
     {
         public void Invoke(IncomingContext context, Action next)
         {
-            context.Set("TransportReceiver.MessageHandledSuccessfully", context.Get<ISatellite>().Handle(context.PhysicalMessage));
+            var satellite = context.Get<ISatellite>();
+
+            context.Set("TransportReceiver.MessageHandledSuccessfully", satellite.Handle(context.PhysicalMessage));
         }
 
         public class ExecuteSatelliteHandlerBehaviorRegistration : RegisterStep

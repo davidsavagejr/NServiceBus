@@ -17,15 +17,13 @@ namespace NServiceBus.Unicast.Transport
         ///     Creates an instance of <see cref="TransportReceiver" />
         /// </summary>
         /// <param name="transactionSettings">The transaction settings to use for this <see cref="TransportReceiver" />.</param>
-        /// <param name="dequeueSettings"></param>
         /// <param name="receiver">The <see cref="IDequeueMessages" /> instance to use.</param>
         /// <param name="manageMessageFailures">The <see cref="IManageMessageFailures" /> instance to use.</param>
         /// <param name="settings">The current settings</param>
         /// <param name="config">Configure instance</param>
         /// <param name="pipelineExecutor"></param>
-        protected TransportReceiver(TransactionSettings transactionSettings, DequeueSettings dequeueSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+        protected TransportReceiver(TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
         {
-            this.dequeueSettings = dequeueSettings;
             this.settings = settings;
             this.config = config;
             this.pipelineExecutor = pipelineExecutor;
@@ -121,12 +119,15 @@ namespace NServiceBus.Unicast.Transport
         /// <summary>
         ///     Starts the transport listening for messages on the given local address.
         /// </summary>
-        public virtual void Start(Address address)
+        public virtual void Start(DequeueSettings dequeueSettings)
         {
             if (isStarted)
             {
                 throw new InvalidOperationException("The transport is already started");
             }
+
+            var address = Address.Parse(dequeueSettings.QueueName);
+
 
             receiveAddress = address;
 
@@ -148,6 +149,8 @@ namespace NServiceBus.Unicast.Transport
             firstLevelRetries = new FirstLevelRetries(TransactionSettings.MaxRetries, FailureManager, CriticalError, Notifications);
 
             InitializePerformanceCounters();
+
+            Receiver.Init(dequeueSettings);
 
             StartReceiver();
 
@@ -171,7 +174,6 @@ namespace NServiceBus.Unicast.Transport
 
         void StartReceiver()
         {
-            Receiver.Init(dequeueSettings);
             Receiver.Subscribe(this);
             Receiver.Start();
         }
@@ -212,7 +214,6 @@ namespace NServiceBus.Unicast.Transport
         
         protected PipelineExecutor pipelineExecutor;
 
-        readonly DequeueSettings dequeueSettings;
         readonly ReadOnlySettings settings;
 
         /// <summary>
