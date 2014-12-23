@@ -3,7 +3,6 @@ namespace NServiceBus.Unicast.Transport
     using System;
     using NServiceBus.Faults;
     using NServiceBus.Logging;
-    using NServiceBus.Pipeline;
     using NServiceBus.Settings;
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport.Monitoring;
@@ -21,12 +20,10 @@ namespace NServiceBus.Unicast.Transport
         /// <param name="manageMessageFailures">The <see cref="IManageMessageFailures" /> instance to use.</param>
         /// <param name="settings">The current settings</param>
         /// <param name="config">Configure instance</param>
-        /// <param name="pipelineExecutor"></param>
-        protected TransportReceiver(TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
+        protected TransportReceiver(TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config)
         {
             this.settings = settings;
             this.config = config;
-            this.pipelineExecutor = pipelineExecutor;
             TransactionSettings = transactionSettings;
             FailureManager = manageMessageFailures;
             Receiver = receiver;
@@ -207,12 +204,7 @@ namespace NServiceBus.Unicast.Transport
         protected static ILog Logger = LogManager.GetLogger<TransportReceiver>();
 
         readonly Configure config;
-        /// <summary>
-        /// 
-        /// 
-        /// </summary>
         
-        protected PipelineExecutor pipelineExecutor;
 
         readonly ReadOnlySettings settings;
 

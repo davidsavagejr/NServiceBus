@@ -10,7 +10,7 @@ namespace NServiceBus.Unicast.Tests.Helpers
     public class FakeTransport : TransportReceiver
     {
         public FakeTransport(TransactionSettings transactionSettings,IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config) :
-            base(transactionSettings, receiver, manageMessageFailures, settings, config, null)
+            base(transactionSettings, receiver, manageMessageFailures, settings, config)
         {
         }
 

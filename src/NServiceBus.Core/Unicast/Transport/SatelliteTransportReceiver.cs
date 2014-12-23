@@ -12,23 +12,25 @@ namespace NServiceBus.Unicast.Transport
     {
         ISatellite satellite;
 
-        public SatelliteTransportReceiver(IBuilder builder, TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
-            : base(transactionSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
+        public SatelliteTransportReceiver(IBuilder builder, TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config)
+            : base(transactionSettings, receiver, manageMessageFailures, settings, config)
         {
             var pipelineModifications = settings.Get<PipelineModifications>();
 
-            // we need to clone since multiple satellites will modify the same collections if not
             var satelliteSpecificPipeline = new PipelineModifications();
 
-            satelliteSpecificPipeline.Additions.AddRange(pipelineModifications.Additions);
 
-            satelliteSpecificPipeline.Removals.AddRange(pipelineModifications.Removals);
+            var childContainerIndex = pipelineModifications.Additions.FindIndex(s => s.StepId == WellKnownStep.CreateChildContainer);
 
-            satelliteSpecificPipeline.Replacements.AddRange(pipelineModifications.Replacements);
 
-            satelliteSpecificPipeline.Replacements.Add(new ReplaceBehavior(WellKnownStep.CreateChildContainer, typeof(ExecuteSatelliteHandlerBehavior)));
-            base.pipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(), satelliteSpecificPipeline);
+            satelliteSpecificPipeline.Additions.AddRange(pipelineModifications.Additions.GetRange(0, childContainerIndex));
+            satelliteSpecificPipeline.Additions.Add(RegisterStep.Create("ExecuteSatelliteHandler", typeof(ExecuteSatelliteHandlerBehavior), "Executes the specific satellite handler"));
+
+            pipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(), satelliteSpecificPipeline);
+
         }
+
+        PipelineExecutor pipelineExecutor;
 
         public void SetSatellite(ISatellite satellite)
         {

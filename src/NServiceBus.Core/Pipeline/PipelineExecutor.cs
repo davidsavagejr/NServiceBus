@@ -41,7 +41,7 @@
         /// <summary>
         ///     The list of incoming steps registered.
         /// </summary>
-        public IList<RegisterStep> Incoming { get; private set; }
+        public IList<RegisterStep> Incoming{ get; private set; }
 
         /// <summary>
         ///     The list of outgoing steps registered.

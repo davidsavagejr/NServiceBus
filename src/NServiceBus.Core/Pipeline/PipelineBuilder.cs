@@ -12,6 +12,7 @@
             RegisterAdditionalBehaviors(modifications.Additions);
 
             var model = coordinator.BuildRuntimeModel();
+
             Incoming = new List<RegisterStep>();
             Outgoing = new List<RegisterStep>();
             var behaviorType = typeof(IBehavior<>);

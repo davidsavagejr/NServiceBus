@@ -10,8 +10,6 @@
 
     class ExecuteLogicalMessagesBehavior : IBehavior<IncomingContext>
     {
-        public PipelineExecutor PipelineExecutor { get; set; }
-
         public void Invoke(IncomingContext context, Action next)
         {
             var logicalMessages = context.LogicalMessages;

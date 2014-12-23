@@ -21,9 +21,9 @@ namespace NServiceBus.Unicast.Transport
         /// <param name="config"></param>
         /// <param name="pipelineExecutor"></param>
         public MainTransportReceiver(TransactionSettings transactionSettings,IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, PipelineExecutor pipelineExecutor)
-            :base(transactionSettings, receiver, manageMessageFailures, settings, config, pipelineExecutor)
+            :base(transactionSettings, receiver, manageMessageFailures, settings, config)
         {
-            
+            this.pipelineExecutor = pipelineExecutor;
         }
 
         /// <summary>
@@ -117,5 +117,6 @@ namespace NServiceBus.Unicast.Transport
         object changeMaximumMessageThroughputPerSecondLock = new object();
 
         ThroughputLimiter throughputLimiter;
+        readonly PipelineExecutor pipelineExecutor;
     }
 }
