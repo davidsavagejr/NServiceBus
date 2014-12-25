@@ -6,6 +6,7 @@ namespace NServiceBus.Satellites
     using System.Threading.Tasks;
     using Config;
     using Logging;
+    using NServiceBus.Pipeline;
     using NServiceBus.Transports;
     using ObjectBuilder;
     using Unicast.Transport;
@@ -44,16 +45,31 @@ namespace NServiceBus.Satellites
                     if (satellite.InputAddress != null)
                     {
                         satelliteContext.Transport = builder.Build<SatelliteTransportReceiver>();
-                        Console.Out.WriteLine("Hashcode: " + satelliteContext.Transport.GetHashCode());
-                        satelliteContext.Transport.SetSatellite(satellite);
-                        
+
                         var advancedSatellite = satellite as IAdvancedSatellite;
+                        
                         if (advancedSatellite != null)
                         {
                             var receiverCustomization = advancedSatellite.GetReceiverCustomization();
 
                             receiverCustomization(satelliteContext.Transport);
                         }
+
+                        var pipelineModifications = new PipelineModifications();
+
+                        var transportBehaviorDefinition = builder.Build<TransportReceiveBehaviorDefinition>();
+                        var pipelineSettings = new PipelineSettings(pipelineModifications);
+
+
+                        pipelineSettings.Register(transportBehaviorDefinition.Registration);
+                        
+                        //todo: add FLR after refactoring it to be multi pipeline safe
+                        pipelineSettings.Register<ExecuteSatelliteHandlerBehavior.Registration>();
+                        
+
+                        satelliteContext.PipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(),pipelineModifications);
+
+                        satelliteContext.Transport.SetContext(satelliteContext);
                     }
 
                     StartSatellite(satelliteContext);

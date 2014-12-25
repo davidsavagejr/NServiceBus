@@ -1,4 +1,4 @@
-namespace NServiceBus.Unicast.Transport
+namespace NServiceBus
 {
     using System;
     using NServiceBus.Pipeline;
@@ -14,12 +14,12 @@ namespace NServiceBus.Unicast.Transport
             context.Set("TransportReceiver.MessageHandledSuccessfully", satellite.Handle(context.PhysicalMessage));
         }
 
-        public class ExecuteSatelliteHandlerBehaviorRegistration : RegisterStep
+        public class Registration : RegisterStep
         {
-            public ExecuteSatelliteHandlerBehaviorRegistration()
+            public Registration()
                 : base("SatelliteHandlerExecutor", typeof(ExecuteSatelliteHandlerBehavior), "Invokes the decryption logic")
             {
-                InsertBefore("HandlerTransactionScopeWrapperBehavior");
+                InsertAfter("ReceiveMessage");
             }
         }
     }

@@ -3,6 +3,8 @@
     using System;
     using Config;
     using Logging;
+    using NServiceBus.Pipeline;
+    using NServiceBus.Settings;
     using Transports;
     using Transports.Msmq;
     using Transports.Msmq.Config;
@@ -15,6 +17,25 @@
         internal MsmqTransportConfigurator()
         {
             DependsOn<UnicastBus>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="settings"></param>
+        /// <returns></returns>
+        protected override RegisterStep GetReceiveBehaviorRegistration(ReadOnlySettings settings)
+        {
+            var doNotUseDTCTransactions = settings.Get<bool>("Transactions.SuppressDistributedTransactions");
+
+            if (doNotUseDTCTransactions)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                return new  MsmqReceiveWithTransactionScopeBehavior.Registration();
+            }
         }
 
         /// <summary>
@@ -36,15 +57,6 @@
             {
                 context.Container.ConfigureComponent(b => new MsmqDequeueStrategy(b.Build<CriticalError>(), endpointIsTransactional),
                     DependencyLifecycle.InstancePerCall);
-
-                if (doNotUseDTCTransactions)
-                {
-                    throw new NotImplementedException();
-                }
-                else
-                {
-                    context.Pipeline.Register<MsmqReceiveWithTransactionScopeBehavior.Registration>();
-                }
             }
 
             var cfg = context.Settings.GetConfigSection<MsmqMessageQueueConfig>();

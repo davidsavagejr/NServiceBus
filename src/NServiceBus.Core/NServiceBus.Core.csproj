@@ -252,7 +252,7 @@
     <Compile Include="Unicast\Transport\Config\TransportConfiguration.cs" />
     <Compile Include="Unicast\Transport\Config\TransportExtensions.cs" />
     <Compile Include="Unicast\Transport\Config\UseTransportExtensions_Obsolete.cs" />
-    <Compile Include="Unicast\Transport\ExecuteSatelliteHandlerBehavior.cs" />
+    <Compile Include="Satellites\ExecuteSatelliteHandlerBehavior.cs" />
     <Compile Include="Unicast\Transport\SuppressAmbientTransactionBehavior.cs" />
     <Compile Include="Unicast\Transport\MainTransportReceiver.cs" />
     <Compile Include="Unicast\Transport\ReceivePerformanceDiagnosticsBehavior.cs" />

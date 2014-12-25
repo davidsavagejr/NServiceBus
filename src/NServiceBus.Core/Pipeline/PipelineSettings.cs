@@ -143,6 +143,15 @@ namespace NServiceBus.Pipeline
             AddStep(new T());   
         }
 
+
+        /// <summary>
+        /// Register a new step into the pipeline.
+        /// </summary>
+        /// <param name="registration">The step registration</param>
+        public void Register(RegisterStep registration)
+        {
+            AddStep(registration);
+        }
         void AddStep(RegisterStep step)
         {
             registeredSteps.Add(step);
@@ -168,6 +177,6 @@ namespace NServiceBus.Pipeline
         List<Type> registeredBehaviors = new List<Type>(); 
 
         readonly PipelineModifications modifications;
-     
+
     }
 }

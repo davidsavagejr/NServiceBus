@@ -1,8 +1,8 @@
 namespace NServiceBus.Config
 {
-    using NServiceBus.Unicast.Transport;
     using Satellites;
 
+    //todo: make this a feature
     class SatelliteConfigurer : INeedInitialization
     {
         public void Customize(BusConfiguration configuration)

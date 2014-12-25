@@ -2,6 +2,7 @@ namespace NServiceBus.Transports
 {
     using System;
     using Features;
+    using NServiceBus.Pipeline;
     using NServiceBus.Settings;
     using Unicast.Transport;
 
@@ -16,7 +17,7 @@ namespace NServiceBus.Transports
         protected ConfigureTransport()
         {
             Defaults(s => s.SetDefault<TransportConnectionString>(TransportConnectionString.Default));
-            
+
             Defaults(s => s.SetDefault("NServiceBus.LocalAddress", GetDefaultEndpointAddress(s)));
 
             Defaults(s =>
@@ -44,8 +45,19 @@ namespace NServiceBus.Transports
 
             context.Container.RegisterSingleton(selectedTransportDefinition);
 
+            var receiveBehaviorRegistration = GetReceiveBehaviorRegistration(context.Settings);
+
+            context.Pipeline.Register(receiveBehaviorRegistration);
+            context.Container.RegisterSingleton(new TransportReceiveBehaviorDefinition(receiveBehaviorRegistration));
+
             Configure(context, connectionString);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        protected abstract RegisterStep GetReceiveBehaviorRegistration(ReadOnlySettings settings);
 
         /// <summary>
         ///  Allows the transport to control the local address of the endpoint if needed
@@ -106,6 +118,23 @@ Here is an example of what is required:
   <connectionStrings>
     <add name=""NServiceBus/Transport"" connectionString=""{2}"" />
   </connectionStrings>";
+
+    }
+
+    class TransportReceiveBehaviorDefinition
+    {
+        readonly RegisterStep registration;
+
+        public TransportReceiveBehaviorDefinition(RegisterStep registration)
+        {
+            this.registration = registration;
+        }
+
+        public RegisterStep Registration
+        {
+            get { return registration; }
+        }
+
 
     }
 }
