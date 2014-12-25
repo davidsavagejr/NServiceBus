@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using NServiceBus.Hosting;
     using Pipeline;
     using Pipeline.Contexts;
     using Transports;
@@ -9,6 +10,8 @@
 
     class AuditBehavior : IBehavior<IncomingContext>
     {
+        public HostInformation HostInformation { get; set; }
+
         public IAuditMessages MessageAuditer { get; set; }
 
         public Address AuditQueue { get; set; }
@@ -27,6 +30,9 @@
             //set audit related headers
             context.PhysicalMessage.Headers[Headers.ProcessingStarted] = DateTimeExtensions.ToWireFormattedString(context.Get<DateTime>("IncomingMessage.ProcessingStarted"));
             context.PhysicalMessage.Headers[Headers.ProcessingEnded] = DateTimeExtensions.ToWireFormattedString(context.Get<DateTime>("IncomingMessage.ProcessingEnded"));
+
+            context.PhysicalMessage.Headers[Headers.HostId] = HostInformation.HostId.ToString("N");
+            context.PhysicalMessage.Headers[Headers.HostDisplayName] = HostInformation.DisplayName;
 
             MessageAuditer.Audit(sendOptions, context.PhysicalMessage);
         }

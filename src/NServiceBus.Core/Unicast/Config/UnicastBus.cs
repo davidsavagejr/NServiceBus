@@ -41,11 +41,15 @@ namespace NServiceBus.Features
 
         protected internal override void Setup(FeatureConfigurationContext context)
         {
-            var defaultAddress = context.Settings.LocalAddress();
             var hostInfo = new HostInformation(context.Settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
                 context.Settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
                 context.Settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
 
+            context.Container.RegisterSingleton(hostInfo);
+            
+            var defaultAddress = context.Settings.LocalAddress();
+
+            
 
             var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
             //var maximumThroughput = 0;

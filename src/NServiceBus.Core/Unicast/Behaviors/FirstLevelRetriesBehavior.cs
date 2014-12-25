@@ -1,10 +1,8 @@
 namespace NServiceBus.Unicast.Behaviors
 {
     using System;
-    using System.Collections.Generic;
     using System.Runtime.Serialization;
     using NServiceBus.Faults;
-    using NServiceBus.Hosting;
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
@@ -12,11 +10,10 @@ namespace NServiceBus.Unicast.Behaviors
 
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
-        public FirstLevelRetriesBehavior(IManageMessageFailures manageMessageFailures, bool isTransactional, HostInformation hostInformation)
+        public FirstLevelRetriesBehavior(IManageMessageFailures manageMessageFailures, bool isTransactional)
         {
             FailureManager = manageMessageFailures;
             this.isTransactional = isTransactional;
-            this.hostInformation = hostInformation;
         }
 
         public void Invoke(IncomingContext context, Action next)
@@ -39,9 +36,6 @@ namespace NServiceBus.Unicast.Behaviors
 
         void ProcessMessage(TransportMessage message, Action next)
         {
-            message.Headers[Headers.HostId] = hostInformation.HostId.ToString("N");
-            message.Headers[Headers.HostDisplayName] = hostInformation.DisplayName;
-
             if (string.IsNullOrWhiteSpace(message.Id))
             {
                 Logger.Error("Message without message id detected");
@@ -73,7 +67,6 @@ namespace NServiceBus.Unicast.Behaviors
 
         readonly IManageMessageFailures FailureManager;
         readonly bool isTransactional;
-        readonly HostInformation hostInformation;
         FirstLevelRetries firstLevelRetries;
         ILog Logger = LogManager.GetLogger<FirstLevelRetriesBehavior>();
 
@@ -84,15 +77,7 @@ namespace NServiceBus.Unicast.Behaviors
             {
                 InsertBefore("ReceivePerformanceDiagnosticsBehavior");
 
-                ContainerRegistration((builder, settings) =>
-                {
-                    var hostInfo = new HostInformation(settings.Get<Guid>("NServiceBus.HostInformation.HostId"),
-               settings.Get<string>("NServiceBus.HostInformation.DisplayName"),
-               settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
-
-
-                    return new FirstLevelRetriesBehavior(builder.Build<IManageMessageFailures>(), settings.Get<bool>("Transactions.Enabled"), hostInfo);
-                });
+                ContainerRegistration((builder, settings) => new FirstLevelRetriesBehavior(builder.Build<IManageMessageFailures>(), settings.Get<bool>("Transactions.Enabled")));
             }
         }
 

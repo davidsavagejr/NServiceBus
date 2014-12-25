@@ -1,6 +1,7 @@
 namespace NServiceBus.Faults.Forwarder
 {
     using System;
+    using NServiceBus.Hosting;
     using NServiceBus.Logging;
     using NServiceBus.SecondLevelRetries;
     using NServiceBus.SecondLevelRetries.Helpers;
@@ -25,6 +26,12 @@ namespace NServiceBus.Faults.Forwarder
         ///     Endpoint to which message failures are forwarded
         /// </summary>
         public Address ErrorQueue { get; set; }
+
+
+        /// <summary>
+        /// Currenthost information
+        /// </summary>
+        public HostInformation HostInformation { get; set; }
 
         /// <summary>
         ///     The address of the Second Level Retries input queue when SLR is enabled
@@ -51,7 +58,7 @@ namespace NServiceBus.Faults.Forwarder
         void HandleSerializationFailedForMessage(TransportMessage message, Exception e)
         {
             message.SetExceptionHeaders(e, localAddress ?? config.LocalAddress);
-            sender.Send(message, new SendOptions(ErrorQueue));
+            SendToErrorQueue(message, e);
         }
 
         void HandleProcessingAlwaysFailsForMessage(TransportMessage message, Exception e, int numberOfRetries)
@@ -60,8 +67,7 @@ namespace NServiceBus.Faults.Forwarder
 
             if (MessageWasSentFromSLR(message))
             {
-                sender.Send(message, new SendOptions(ErrorQueue));
-                busNotifications.Errors.InvokeMessageHasBeenSentToErrorQueue(message, e);
+                SendToErrorQueue(message, e);
                 return;
             }
 
@@ -72,9 +78,9 @@ namespace NServiceBus.Faults.Forwarder
             //HACK: We need this hack here till we refactor the SLR to be a first class concept in the TransportReceiver
             if (RetriesErrorQueue == null)
             {
-                sender.Send(message, new SendOptions(ErrorQueue));
                 Logger.ErrorFormat("{0} will be moved to the configured error queue.", flrPart);
-                busNotifications.Errors.InvokeMessageHasBeenSentToErrorQueue(message, e);
+
+                SendToErrorQueue(message, e);
                 return;
             }
 
@@ -82,6 +88,10 @@ namespace NServiceBus.Faults.Forwarder
 
             if (defer < TimeSpan.Zero)
             {
+                Logger.ErrorFormat(
+                    "SLR has failed to resolve the issue with message {0} and will be forwarded to the error queue at {1}",
+                    message.Id, ErrorQueue);
+                
                 SendToErrorQueue(message, e);
                 return;
             }
@@ -95,11 +105,13 @@ namespace NServiceBus.Faults.Forwarder
 
         void SendToErrorQueue(TransportMessage message, Exception exception)
         {
-            Logger.ErrorFormat(
-                "SLR has failed to resolve the issue with message {0} and will be forwarded to the error queue at {1}",
-                message.Id, ErrorQueue);
-
+           
             message.Headers.Remove(Headers.Retries);
+
+
+            message.Headers[Headers.HostId] = HostInformation.HostId.ToString("N");
+            message.Headers[Headers.HostDisplayName] = HostInformation.DisplayName;
+
 
             sender.Send(message, new SendOptions(ErrorQueue));
             busNotifications.Errors.InvokeMessageHasBeenSentToErrorQueue(message, exception);
