@@ -11,7 +11,6 @@ namespace NServiceBus.Features
     using NServiceBus.Hosting;
     using NServiceBus.Support;
     using NServiceBus.Unicast;
-    using NServiceBus.Unicast.Behaviors;
     using Pipeline;
     using Transports;
     using Unicast.Messages;
@@ -101,8 +100,14 @@ namespace NServiceBus.Features
                 context.Pipeline.Register<HandlerTransactionScopeWrapperBehavior.Registration>();
             }
 
-            context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();
 
+            context.Pipeline.Register<EnforceMessageIdBehavior.Registration>();   
+  
+            if (transactionSettings.IsTransactional)
+            {
+                context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();     
+            }
+           
             context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
                 CriticalError = b.Build<CriticalError>(),

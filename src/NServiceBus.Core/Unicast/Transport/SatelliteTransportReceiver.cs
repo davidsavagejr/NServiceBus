@@ -30,7 +30,6 @@ namespace NServiceBus.Unicast.Transport
 
             value.InitalizeContext(context);
 
-            context.Set(firstLevelRetries);
             context.Set(currentReceivePerformanceDiagnostics);
             context.Set(satelliteContext.Instance);
 

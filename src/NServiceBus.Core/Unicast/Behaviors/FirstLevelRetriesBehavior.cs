@@ -1,7 +1,6 @@
-namespace NServiceBus.Unicast.Behaviors
+namespace NServiceBus
 {
     using System;
-    using System.Runtime.Serialization;
     using NServiceBus.Faults;
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
@@ -10,43 +9,18 @@ namespace NServiceBus.Unicast.Behaviors
 
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
-        public FirstLevelRetriesBehavior(IManageMessageFailures manageMessageFailures, bool isTransactional)
+        public FirstLevelRetriesBehavior(IManageMessageFailures manageMessageFailures)
         {
             FailureManager = manageMessageFailures;
-            this.isTransactional = isTransactional;
         }
 
         public void Invoke(IncomingContext context, Action next)
         {
             firstLevelRetries = context.Get<FirstLevelRetries>();
-            ProcessMessage(context.PhysicalMessage, next);
-        }
 
-        bool ShouldExitBecauseOfRetries(TransportMessage message)
-        {
-            if (isTransactional)
-            {
-                if (firstLevelRetries.HasMaxRetriesForMessageBeenReached(message))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+            var message = context.PhysicalMessage;
 
-        void ProcessMessage(TransportMessage message, Action next)
-        {
-            if (string.IsNullOrWhiteSpace(message.Id))
-            {
-                Logger.Error("Message without message id detected");
-
-                FailureManager.SerializationFailedForMessage(message,
-                    new SerializationException("Message without message id received."));
-
-                return;
-            }
-
-            if (ShouldExitBecauseOfRetries(message))
+            if (firstLevelRetries.HasMaxRetriesForMessageBeenReached(message))
             {
                 return;
             }
@@ -65,8 +39,8 @@ namespace NServiceBus.Unicast.Behaviors
             }
         }
 
+
         readonly IManageMessageFailures FailureManager;
-        readonly bool isTransactional;
         FirstLevelRetries firstLevelRetries;
         ILog Logger = LogManager.GetLogger<FirstLevelRetriesBehavior>();
 
@@ -75,9 +49,8 @@ namespace NServiceBus.Unicast.Behaviors
             public Registration()
                 : base("FirstLevelRetriesBehavior", typeof(FirstLevelRetriesBehavior), "Performs first level retries")
             {
+                InsertAfter("ReceiveBehavior");
                 InsertBefore("ReceivePerformanceDiagnosticsBehavior");
-
-                ContainerRegistration((builder, settings) => new FirstLevelRetriesBehavior(builder.Build<IManageMessageFailures>(), settings.Get<bool>("Transactions.Enabled")));
             }
         }
 

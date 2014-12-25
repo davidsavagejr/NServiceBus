@@ -236,6 +236,7 @@
     <Compile Include="Timeout\ConfigurationBuilderExtensions.cs" />
     <Compile Include="Transports\ConfigurePurging_Obsolete.cs" />
     <Compile Include="Transports\Msmq\MsmqReceiveWithTransactionScopeBehavior.cs" />
+    <Compile Include="Unicast\Behaviors\EnforceMessageIdBehavior.cs" />
     <Compile Include="Unicast\Behaviors\ForwardReceivedMessages.cs" />
     <Compile Include="Unicast\Behaviors\FirstLevelRetriesBehavior.cs" />
     <Compile Include="Unicast\BusAsyncResultEventArgs.cs" />
