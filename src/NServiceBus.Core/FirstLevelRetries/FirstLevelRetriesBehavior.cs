@@ -29,10 +29,12 @@ namespace NServiceBus
             catch (Exception ex)
             {
                 var messageId = context.PhysicalMessage.Id;
+                var numberOfRetries = storage.GetRetriesForMessage(messageId);
 
-                if (storage.GetRetriesForMessage(messageId) >= maxRetries)
+                if (numberOfRetries >= maxRetries)
                 {
                     storage.ClearFailuresForMessage(messageId);
+                    context.PhysicalMessage.Headers[Headers.FLRetries] = numberOfRetries.ToString();
                     throw;
                 }
 

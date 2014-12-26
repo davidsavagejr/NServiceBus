@@ -41,12 +41,17 @@
             var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(null),0);
             var context = new IncomingContext(null);
 
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage("someid", new Dictionary<string, string>()));
+            var message = new TransportMessage("someid", new Dictionary<string, string>());
+
+            context.Set(IncomingContext.IncomingPhysicalMessageKey, message);
 
             Assert.Throws<Exception>(() => behavior.Invoke(context, () =>
             {
                 throw new Exception("test");
             }));
+
+            //should set the retries header to capture how many flr attempts where made
+            Assert.AreEqual("0", message.Headers[Headers.FLRetries]);
         }
 
         [Test]
