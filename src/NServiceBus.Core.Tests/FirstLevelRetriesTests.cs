@@ -12,7 +12,7 @@
         [Test]
         public void ShouldNotPerformFLROnMessagesThatCantBeDeserialized()
         {
-            var behavior = new FirstLevelRetriesBehavior(null);
+            var behavior = new FirstLevelRetriesBehavior(null,0);
             
            Assert.Throws<MessageDeserializationException>(()=> behavior.Invoke(null, () => {
                     throw new MessageDeserializationException("test");
@@ -22,7 +22,7 @@
         [Test]
         public void ShouldPerformFLRIfThereAreRetriesLeftToDo()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(1,null,null));
+            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(null),1);
             var context = new IncomingContext(null);
 
             context.Set(IncomingContext.IncomingPhysicalMessageKey,new TransportMessage("someid",new Dictionary<string, string>()));
@@ -38,7 +38,7 @@
         [Test]
         public void ShouldBubbleTheExceptionUpIfThereAreNoMoreRetriesLeft()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(0, null, null));
+            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(null),0);
             var context = new IncomingContext(null);
 
             context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage("someid", new Dictionary<string, string>()));
@@ -47,6 +47,32 @@
             {
                 throw new Exception("test");
             }));
+        }
+
+        [Test]
+        public void ShouldClearStorageAfterGivingUp()
+        {
+            var storage = new FlrStatusStorage(null);
+            var behavior = new FirstLevelRetriesBehavior(storage,1);
+
+            storage.IncrementFailuresForMessage("someid",new Exception(""));
+          
+            Assert.Throws<Exception>(() => behavior.Invoke(CreateContext("someid"), () =>
+            {
+                throw new Exception("test");
+            }));
+
+
+            Assert.AreEqual(0, storage.GetRetriesForMessage("someid"));
+        }
+
+        IncomingContext CreateContext(string messageId)
+        {
+            var context = new IncomingContext(null);
+
+            context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage(messageId, new Dictionary<string, string>()));
+
+            return context;
         }
     }
 }

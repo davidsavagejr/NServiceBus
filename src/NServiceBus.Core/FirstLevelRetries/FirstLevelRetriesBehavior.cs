@@ -8,10 +8,12 @@ namespace NServiceBus
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
         readonly FlrStatusStorage storage;
+        readonly int maxRetries;
 
-        public FirstLevelRetriesBehavior(FlrStatusStorage storage)
+        public FirstLevelRetriesBehavior(FlrStatusStorage storage, int maxRetries)
         {
             this.storage = storage;
+            this.maxRetries = maxRetries;
         }
 
         public void Invoke(IncomingContext context, Action next)
@@ -26,11 +28,11 @@ namespace NServiceBus
             }
             catch (Exception)
             {
-                var message = context.PhysicalMessage;
+                var messageId = context.PhysicalMessage.Id;
 
-                if (storage.HasMaxRetriesForMessageBeenReached(message.Id))
+                if (storage.GetRetriesForMessage(messageId) >= maxRetries)
                 {
-                    //todo: clear
+                    storage.ClearFailuresForMessage(messageId);
                     throw;
                 }
 

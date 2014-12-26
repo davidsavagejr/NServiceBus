@@ -7,43 +7,24 @@
     {
         ConcurrentDictionary<string, Tuple<int, Exception>> failuresPerMessage = new ConcurrentDictionary<string, Tuple<int, Exception>>();
         CriticalError criticalError;
-        readonly BusNotifications notifications;
-        int maxRetries;
-
-        public FlrStatusStorage(int maxRetries, CriticalError criticalError, BusNotifications busNotifications)
+       
+        public FlrStatusStorage(CriticalError criticalError)
         {
-            this.maxRetries = maxRetries;
             this.criticalError = criticalError;
-            notifications = busNotifications;
         }
 
-        public bool HasMaxRetriesForMessageBeenReached(string messageId)
-        {
-            Tuple<int, Exception> e;
-
-            var numberOfRetries = 0;
-
-            if (failuresPerMessage.TryGetValue(messageId, out e))
-            {
-                numberOfRetries = e.Item1;
-            }
-
-            return numberOfRetries <= maxRetries;
-        }
-
-        public void ClearFailuresForMessage(TransportMessage message)
-        {
-            var messageId = message.Id;
+        public void ClearFailuresForMessage(string messageId)
+        {;
             Tuple<int, Exception> e;
             failuresPerMessage.TryRemove(messageId, out e);
         }
 
-        public void IncrementFailuresForMessage(TransportMessage message, Exception e)
+        public void IncrementFailuresForMessage(string messageId, Exception e)
         {
-            var item = failuresPerMessage.AddOrUpdate(message.Id, new Tuple<int, Exception>(1, e),
+            failuresPerMessage.AddOrUpdate(messageId, new Tuple<int, Exception>(1, e),
                 (s, i) => new Tuple<int, Exception>(i.Item1 + 1, e));
 
-            notifications.Errors.InvokeMessageHasFailedAFirstLevelRetryAttempt(item.Item1, message, e);
+            //notifications.Errors.InvokeMessageHasFailedAFirstLevelRetryAttempt(item.Item1, message, e);
         }
 
         void TryInvokeFaultManager(TransportMessage message, Exception exception, int numberOfAttempts)
@@ -60,6 +41,17 @@
 
                 throw;
             }
+        }
+
+        public int GetRetriesForMessage(string messageId)
+        {
+            Tuple<int, Exception> e;
+
+            if (!failuresPerMessage.TryGetValue(messageId, out e))
+            {
+                return 0;
+            }
+            return e.Item1;
         }
     }
 }

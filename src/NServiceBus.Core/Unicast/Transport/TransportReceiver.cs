@@ -143,7 +143,7 @@ namespace NServiceBus.Unicast.Transport
 
             FailureManager.Init(returnAddressForFailures);
 
-            flrStatusStorage = new FlrStatusStorage(TransactionSettings.MaxRetries, CriticalError, Notifications);
+            flrStatusStorage = new FlrStatusStorage(CriticalError);
 
             InitializePerformanceCounters();
 
