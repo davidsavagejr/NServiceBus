@@ -28,8 +28,9 @@ namespace NServiceBus
             {
                 var message = context.PhysicalMessage;
 
-                if (storage.HasMaxRetriesForMessageBeenReached(message))
+                if (storage.HasMaxRetriesForMessageBeenReached(message.Id))
                 {
+                    //todo: clear
                     throw;
                 }
 

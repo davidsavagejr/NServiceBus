@@ -22,7 +22,7 @@
         [Test]
         public void ShouldPerformFLRIfThereAreRetriesLeftToDo()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(1,null,null,null));
+            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(1,null,null));
             var context = new IncomingContext(null);
 
             context.Set(IncomingContext.IncomingPhysicalMessageKey,new TransportMessage("someid",new Dictionary<string, string>()));
@@ -33,6 +33,20 @@
             });
 
             Assert.False(context.MessageHandledSuccessfully());
+        }
+
+        [Test]
+        public void ShouldBubbleTheExceptionUpIfThereAreNoMoreRetriesLeft()
+        {
+            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(0, null, null));
+            var context = new IncomingContext(null);
+
+            context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage("someid", new Dictionary<string, string>()));
+
+            Assert.Throws<Exception>(() => behavior.Invoke(context, () =>
+            {
+                throw new Exception("test");
+            }));
         }
     }
 }

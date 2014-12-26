@@ -2,43 +2,33 @@
 {
     using System;
     using System.Collections.Concurrent;
-    using Faults;
 
     class FlrStatusStorage
     {
         ConcurrentDictionary<string, Tuple<int, Exception>> failuresPerMessage = new ConcurrentDictionary<string, Tuple<int, Exception>>();
-        IManageMessageFailures failureManager;
         CriticalError criticalError;
         readonly BusNotifications notifications;
         int maxRetries;
 
-        public FlrStatusStorage(int maxRetries, IManageMessageFailures failureManager, CriticalError criticalError, BusNotifications busNotifications)
+        public FlrStatusStorage(int maxRetries, CriticalError criticalError, BusNotifications busNotifications)
         {
             this.maxRetries = maxRetries;
-            this.failureManager = failureManager;
             this.criticalError = criticalError;
             notifications = busNotifications;
         }
 
-        public bool HasMaxRetriesForMessageBeenReached(TransportMessage message)
+        public bool HasMaxRetriesForMessageBeenReached(string messageId)
         {
-            var messageId = message.Id;
             Tuple<int, Exception> e;
+
+            var numberOfRetries = 0;
 
             if (failuresPerMessage.TryGetValue(messageId, out e))
             {
-                if (e.Item1 < maxRetries)
-                {
-                    return false;
-                }
-
-                TryInvokeFaultManager(message, e.Item2, e.Item1);
-                ClearFailuresForMessage(message);
-
-                return true;
+                numberOfRetries = e.Item1;
             }
 
-            return false;
+            return numberOfRetries <= maxRetries;
         }
 
         public void ClearFailuresForMessage(TransportMessage message)
@@ -63,7 +53,6 @@
                 message.RevertToOriginalBodyIfNeeded();
                 var numberOfRetries = numberOfAttempts - 1;
                 message.Headers[Headers.FLRetries] = numberOfRetries.ToString();
-                failureManager.ProcessingAlwaysFailsForMessage(message, exception);
             }
             catch (Exception ex)
             {
