@@ -128,6 +128,7 @@
     <Compile Include="Features\DisplayDiagnosticsForFeatures.cs" />
     <Compile Include="Features\ExposeSettings.cs" />
     <Compile Include="Features\PrerequisiteStatus.cs" />
+    <Compile Include="Transports\IncomingContextExtensions.cs" />
     <Compile Include="Gateway\IDeduplicateMessages.cs" />
     <Compile Include="Hosting\HostInfoConfigurationExtensions.cs" />
     <Compile Include="Hosting\HostInfoSettings.cs" />
@@ -215,6 +216,7 @@
     <Compile Include="Pipeline\PipelineNotifications.cs" />
     <Compile Include="Pipeline\StepStarted.cs" />
     <Compile Include="Pipeline\StepEnded.cs" />
+    <Compile Include="Satellites\InvokeFaultManagerBehavior.cs" />
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />
     <Compile Include="Scheduling\Scheduler.cs" />
     <Compile Include="Scheduling\TaskDefinition.cs" />
@@ -238,7 +240,7 @@
     <Compile Include="Transports\Msmq\MsmqReceiveWithTransactionScopeBehavior.cs" />
     <Compile Include="Unicast\Behaviors\EnforceMessageIdBehavior.cs" />
     <Compile Include="Unicast\Behaviors\ForwardReceivedMessages.cs" />
-    <Compile Include="Unicast\Behaviors\FirstLevelRetriesBehavior.cs" />
+    <Compile Include="FirstLevelRetries\FirstLevelRetriesBehavior.cs" />
     <Compile Include="Unicast\BusAsyncResultEventArgs.cs" />
     <Compile Include="Unicast\Config\LoadMessageHandlersExtentions_Obsolete.cs" />
     <Compile Include="Unicast\Config\RegisterHandlersInOrder.cs" />
@@ -593,7 +595,7 @@
     <Compile Include="Unicast\Transport\ControlMessage.cs" />
     <Compile Include="Unicast\Transport\FailedMessageProcessingEventArgs.cs" />
     <Compile Include="Unicast\Transport\Config\UseTransportExtensions.cs" />
-    <Compile Include="Unicast\Transport\FirstLevelRetries.cs" />
+    <Compile Include="Unicast\Transport\FlrStatusStorage.cs" />
     <Compile Include="Unicast\Transport\Monitoring\ReceivePerformanceDiagnostics.cs" />
     <Compile Include="Unicast\Transport\ThroughputLimiter.cs" />
     <Compile Include="Unicast\Transport\TransportReceiver.cs" />

@@ -4,7 +4,7 @@
     using System.Collections.Concurrent;
     using Faults;
 
-    class FirstLevelRetries
+    class FlrStatusStorage
     {
         ConcurrentDictionary<string, Tuple<int, Exception>> failuresPerMessage = new ConcurrentDictionary<string, Tuple<int, Exception>>();
         IManageMessageFailures failureManager;
@@ -12,7 +12,7 @@
         readonly BusNotifications notifications;
         int maxRetries;
 
-        public FirstLevelRetries(int maxRetries, IManageMessageFailures failureManager, CriticalError criticalError, BusNotifications busNotifications)
+        public FlrStatusStorage(int maxRetries, IManageMessageFailures failureManager, CriticalError criticalError, BusNotifications busNotifications)
         {
             this.maxRetries = maxRetries;
             this.failureManager = failureManager;

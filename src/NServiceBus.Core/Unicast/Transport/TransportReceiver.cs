@@ -143,7 +143,7 @@ namespace NServiceBus.Unicast.Transport
 
             FailureManager.Init(returnAddressForFailures);
 
-            firstLevelRetries = new FirstLevelRetries(TransactionSettings.MaxRetries, FailureManager, CriticalError, Notifications);
+            flrStatusStorage = new FlrStatusStorage(TransactionSettings.MaxRetries, FailureManager, CriticalError, Notifications);
 
             InitializePerformanceCounters();
 
@@ -215,7 +215,7 @@ namespace NServiceBus.Unicast.Transport
         /// <summary>
         /// 
         /// </summary>
-        internal FirstLevelRetries firstLevelRetries;
+        internal FlrStatusStorage flrStatusStorage;
 
         /// <summary>
         /// </summary>

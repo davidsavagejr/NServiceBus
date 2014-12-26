@@ -51,13 +51,7 @@ namespace NServiceBus.Transports.Msmq
 
                 next();
 
-                bool messageHandledSuccessfully;
-                if (!context.TryGet("TransportReceiver.MessageHandledSuccessfully", out messageHandledSuccessfully))
-                {
-                    messageHandledSuccessfully = true;
-                }
-
-                if (messageHandledSuccessfully)
+                if (context.MessageHandledSuccessfully())
                 {
                     scope.Complete();
                 }

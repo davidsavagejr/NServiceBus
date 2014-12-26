@@ -101,6 +101,7 @@ namespace NServiceBus.Features
             }
 
 
+            context.Pipeline.Register<InvokeFaultManagerBehavior.Registration>();
             context.Pipeline.Register<EnforceMessageIdBehavior.Registration>();   
   
             if (transactionSettings.IsTransactional)
