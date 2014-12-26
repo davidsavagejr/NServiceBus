@@ -26,7 +26,7 @@ namespace NServiceBus
             {
                 throw; // no retries for poison messages
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 var messageId = context.PhysicalMessage.Id;
 
@@ -36,7 +36,7 @@ namespace NServiceBus
                     throw;
                 }
 
-                //tell the transport to roll the message back to the queue again
+                storage.IncrementFailuresForMessage(messageId, ex);
                 context.AbortReceiveOperation();
             }
 

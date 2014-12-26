@@ -65,6 +65,20 @@
 
             Assert.AreEqual(0, storage.GetRetriesForMessage("someid"));
         }
+        [Test]
+        public void ShouldRememberRetryCountBetweenRetries()
+        {
+            var storage = new FlrStatusStorage(null);
+            var behavior = new FirstLevelRetriesBehavior(storage, 1);
+
+            behavior.Invoke(CreateContext("someid"), () =>
+            {
+                throw new Exception("test");
+            });
+
+
+            Assert.AreEqual(1, storage.GetRetriesForMessage("someid"));
+        }
 
         IncomingContext CreateContext(string messageId)
         {
