@@ -5,14 +5,7 @@
 
     class FlrStatusStorage
     {
-        ConcurrentDictionary<string, Tuple<int, Exception>> failuresPerMessage = new ConcurrentDictionary<string, Tuple<int, Exception>>();
-        CriticalError criticalError;
        
-        public FlrStatusStorage(CriticalError criticalError)
-        {
-            this.criticalError = criticalError;
-        }
-
         public void ClearFailuresForMessage(string messageId)
         {;
             Tuple<int, Exception> e;
@@ -27,21 +20,21 @@
             //notifications.Errors.InvokeMessageHasFailedAFirstLevelRetryAttempt(item.Item1, message, e);
         }
 
-        void TryInvokeFaultManager(TransportMessage message, Exception exception, int numberOfAttempts)
-        {
-            try
-            {
-                message.RevertToOriginalBodyIfNeeded();
-                var numberOfRetries = numberOfAttempts - 1;
-                message.Headers[Headers.FLRetries] = numberOfRetries.ToString();
-            }
-            catch (Exception ex)
-            {
-                criticalError.Raise(String.Format("Fault manager failed to process the failed message with id {0}", message.Id), ex);
+        //void TryInvokeFaultManager(TransportMessage message, Exception exception, int numberOfAttempts)
+        //{
+        //    try
+        //    {
+        //        message.RevertToOriginalBodyIfNeeded();
+        //        var numberOfRetries = numberOfAttempts - 1;
+        //        message.Headers[Headers.FLRetries] = numberOfRetries.ToString();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        //criticalError.Raise(String.Format("Fault manager failed to process the failed message with id {0}", message.Id), ex);
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
 
         public int GetRetriesForMessage(string messageId)
         {
@@ -53,5 +46,8 @@
             }
             return e.Item1;
         }
+
+        ConcurrentDictionary<string, Tuple<int, Exception>> failuresPerMessage = new ConcurrentDictionary<string, Tuple<int, Exception>>();
+       
     }
 }

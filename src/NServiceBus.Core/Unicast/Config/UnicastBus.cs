@@ -111,13 +111,11 @@ namespace NServiceBus.Features
            
             context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
-                CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()
             }, DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent(b => new SatelliteTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>())
             {
-                CriticalError = b.Build<CriticalError>(),
                 Notifications = b.Build<BusNotifications>()
             }, DependencyLifecycle.InstancePerCall);
         }

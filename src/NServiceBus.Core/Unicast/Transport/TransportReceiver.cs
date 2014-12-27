@@ -51,8 +51,6 @@ namespace NServiceBus.Unicast.Transport
         /// </summary>
         public TransactionSettings TransactionSettings { get; private set; }
 
-        internal CriticalError CriticalError { get; set; }
-
         /// <summary>
         ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
@@ -143,8 +141,6 @@ namespace NServiceBus.Unicast.Transport
 
             FailureManager.Init(returnAddressForFailures);
 
-            flrStatusStorage = new FlrStatusStorage(CriticalError);
-
             InitializePerformanceCounters();
 
             Receiver.Init(dequeueSettings);
@@ -212,11 +208,6 @@ namespace NServiceBus.Unicast.Transport
         /// </summary>
         internal ReceivePerformanceDiagnostics currentReceivePerformanceDiagnostics;
         
-        /// <summary>
-        /// 
-        /// </summary>
-        internal FlrStatusStorage flrStatusStorage;
-
         /// <summary>
         /// </summary>
         protected bool isStarted;

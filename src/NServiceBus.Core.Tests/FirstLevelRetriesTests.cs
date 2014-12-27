@@ -22,7 +22,7 @@
         [Test]
         public void ShouldPerformFLRIfThereAreRetriesLeftToDo()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(null),1);
+            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(),1);
             var context = new IncomingContext(null);
 
             context.Set(IncomingContext.IncomingPhysicalMessageKey,new TransportMessage("someid",new Dictionary<string, string>()));
@@ -38,7 +38,7 @@
         [Test]
         public void ShouldBubbleTheExceptionUpIfThereAreNoMoreRetriesLeft()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(null),0);
+            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(),0);
             var context = new IncomingContext(null);
 
             var message = new TransportMessage("someid", new Dictionary<string, string>());
@@ -57,7 +57,7 @@
         [Test]
         public void ShouldClearStorageAfterGivingUp()
         {
-            var storage = new FlrStatusStorage(null);
+            var storage = new FlrStatusStorage();
             var behavior = new FirstLevelRetriesBehavior(storage,1);
 
             storage.IncrementFailuresForMessage("someid",new Exception(""));
@@ -73,7 +73,7 @@
         [Test]
         public void ShouldRememberRetryCountBetweenRetries()
         {
-            var storage = new FlrStatusStorage(null);
+            var storage = new FlrStatusStorage();
             var behavior = new FirstLevelRetriesBehavior(storage, 1);
 
             behavior.Invoke(CreateContext("someid"), () =>

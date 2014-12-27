@@ -52,7 +52,6 @@ namespace NServiceBus.Unicast.Transport
 
             value.InitalizeContext(context);
 
-            context.Set(flrStatusStorage);
             context.Set(currentReceivePerformanceDiagnostics);
             context.Set(throughputLimiter);
 
