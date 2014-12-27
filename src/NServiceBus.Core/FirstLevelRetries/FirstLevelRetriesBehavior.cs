@@ -9,11 +9,13 @@ namespace NServiceBus
     {
         readonly FlrStatusStorage storage;
         readonly int maxRetries;
+        readonly BusNotifications notifications;
 
-        public FirstLevelRetriesBehavior(FlrStatusStorage storage, int maxRetries)
+        public FirstLevelRetriesBehavior(FlrStatusStorage storage, int maxRetries, BusNotifications notifications)
         {
             this.storage = storage;
             this.maxRetries = maxRetries;
+            this.notifications = notifications;
         }
 
         public void Invoke(IncomingContext context, Action next)
@@ -39,6 +41,10 @@ namespace NServiceBus
                 }
 
                 storage.IncrementFailuresForMessage(messageId, ex);
+
+                //question: should we invoke this the first time around? feels like the naming is off?
+                notifications.Errors.InvokeMessageHasFailedAFirstLevelRetryAttempt(numberOfRetries,context.PhysicalMessage,ex);
+
                 context.AbortReceiveOperation();
             }
 

@@ -7,26 +7,21 @@
     {
        
         public void ClearFailuresForMessage(string messageId)
-        {;
-            Tuple<int, Exception> e;
+        {
+            int e;
             failuresPerMessage.TryRemove(messageId, out e);
         }
 
         public void IncrementFailuresForMessage(string messageId, Exception e)
         {
-            failuresPerMessage.AddOrUpdate(messageId, new Tuple<int, Exception>(1, e),
-                (s, i) => new Tuple<int, Exception>(i.Item1 + 1, e));
-
-            //notifications.Errors.InvokeMessageHasFailedAFirstLevelRetryAttempt(item.Item1, message, e);
+            failuresPerMessage.AddOrUpdate(messageId,1,
+                (s, i) => i + 1);
         }
 
         //void TryInvokeFaultManager(TransportMessage message, Exception exception, int numberOfAttempts)
         //{
         //    try
         //    {
-        //        message.RevertToOriginalBodyIfNeeded();
-        //        var numberOfRetries = numberOfAttempts - 1;
-        //        message.Headers[Headers.FLRetries] = numberOfRetries.ToString();
         //    }
         //    catch (Exception ex)
         //    {
@@ -38,16 +33,16 @@
 
         public int GetRetriesForMessage(string messageId)
         {
-            Tuple<int, Exception> e;
+            int e;
 
             if (!failuresPerMessage.TryGetValue(messageId, out e))
             {
                 return 0;
             }
-            return e.Item1;
+            return e;
         }
 
-        ConcurrentDictionary<string, Tuple<int, Exception>> failuresPerMessage = new ConcurrentDictionary<string, Tuple<int, Exception>>();
+        ConcurrentDictionary<string, int> failuresPerMessage = new ConcurrentDictionary<string, int>();
        
     }
 }
