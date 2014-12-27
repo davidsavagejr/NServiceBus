@@ -36,7 +36,7 @@ namespace NServiceBus.Unicast.Transport
                 : base("HandlerTransactionScopeWrapperBehavior", typeof(HandlerTransactionScopeWrapperBehavior), "Makes sure that the handlers gets wrapped in a transaction scope")
             {
                 InsertAfter("ReceiveMessage");
-                InsertBefore("FirstLevelRetriesBehavior");
+                InsertBefore("FirstLevelRetries");
 
                 ContainerRegistration((builder, settings) =>
                 {

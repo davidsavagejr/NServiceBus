@@ -19,10 +19,10 @@ namespace NServiceBus
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("EnforceMessageIdBehavior", typeof(EnforceMessageIdBehavior), "Makes sure that the message pulled from the transport contains a message id")
+                : base("EnforceMessageId", typeof(EnforceMessageIdBehavior), "Makes sure that the message pulled from the transport contains a message id")
             {
-                InsertAfter("ReceiveBehavior");
-                InsertBefore("FirstLevelRetriesBehavior");
+                InsertAfter("ReceiveMessage");
+                InsertBefore("FirstLevelRetries");
             }
         }
     }

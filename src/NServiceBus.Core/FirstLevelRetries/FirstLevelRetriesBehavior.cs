@@ -1,6 +1,7 @@
 namespace NServiceBus
 {
     using System;
+    using NServiceBus.Config;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast.Transport;
@@ -53,10 +54,18 @@ namespace NServiceBus
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("FirstLevelRetriesBehavior", typeof(FirstLevelRetriesBehavior), "Performs first level retries")
+                : base("FirstLevelRetries", typeof(FirstLevelRetriesBehavior), "Performs first level retries")
             {
-                InsertAfter("ReceiveBehavior");
+                InsertAfter("ReceiveMessage");
                 InsertBefore("ReceivePerformanceDiagnosticsBehavior");
+
+                ContainerRegistration((builder, settings) =>
+                {
+                    var transportConfig = settings.GetConfigSection<TransportConfig>();
+                    var maxRetries = transportConfig != null ? transportConfig.MaxRetries : 5;
+           
+                    return new FirstLevelRetriesBehavior(builder.Build<FlrStatusStorage>(), maxRetries, builder.Build<BusNotifications>());
+                });
             }
         }
 

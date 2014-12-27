@@ -50,7 +50,7 @@ namespace NServiceBus
             {
                 InsertAfter("ReceiveMessage");
 
-                InsertBefore("FirstLevelRetries");
+                InsertBeforeIfExists("FirstLevelRetries");
             }
         }
     }

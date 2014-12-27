@@ -10,7 +10,7 @@
 
     public class When_doing_flr_with_dtc_on : NServiceBusAcceptanceTest
     {
-        public static Func<int> X = () => 5;
+        public const int maxretries = 5;
             
         [Test]
         public void Should_do_X_retries_by_default_with_dtc_on()
@@ -18,9 +18,9 @@
             Scenario.Define(() => new Context { Id = Guid.NewGuid() })
                     .WithEndpoint<RetryEndpoint>(b => b.Given((bus, context) => bus.SendLocal(new MessageToBeRetried{ Id = context.Id })))
                     .AllowExceptions()
-                    .Done(c => c.HandedOverToSlr || c.NumberOfTimesInvoked > X())
+                    .Done(c => c.HandedOverToSlr || c.NumberOfTimesInvoked > maxretries)
                     .Repeat(r => r.For<AllDtcTransports>())
-                    .Should(c => Assert.AreEqual(X(), c.NumberOfTimesInvoked, string.Format("The FLR should by default retry {0} times", X())))
+                    .Should(c => Assert.AreEqual(maxretries, c.NumberOfTimesInvoked, string.Format("The FLR should by default retry {0} times", maxretries)))
                     .Run();
 
         }
@@ -43,7 +43,7 @@
             {
                 EndpointSetup<DefaultServer>(
                     b => b.RegisterComponents(r => r.ConfigureComponent<CustomFaultManager>(DependencyLifecycle.SingleInstance)))
-                    .WithConfig<TransportConfig>(c => c.MaximumConcurrencyLevel = 1);
+                    .WithConfig<TransportConfig>(c => c.MaxRetries = maxretries);
             }
 
             class CustomFaultManager : IManageMessageFailures

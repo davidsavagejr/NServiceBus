@@ -50,7 +50,7 @@
             behavior = new OutboxDeduplicationBehavior
             {
                 OutboxStorage = fakeOutbox,
-                TransactionSettings = new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, 5, false,false)
+                TransactionSettings = new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, false,false)
             };
         }
 

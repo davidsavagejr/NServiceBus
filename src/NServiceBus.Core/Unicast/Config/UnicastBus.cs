@@ -51,14 +51,10 @@ namespace NServiceBus.Features
             
 
             var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
-            //var maximumThroughput = 0;
-            var maximumNumberOfRetries = 5;
             var maximumConcurrencyLevel = 1;
 
             if (transportConfig != null)
             {
-                maximumNumberOfRetries = transportConfig.MaxRetries;
-                //maximumThroughput = transportConfig.MaximumMessageThroughputPerSecond;
                 maximumConcurrencyLevel = transportConfig.MaximumConcurrencyLevel;
             }
 
@@ -86,10 +82,7 @@ namespace NServiceBus.Features
                 return;
             }
 
-            var transactionSettings = new TransactionSettings(context.Settings)
-            {
-                MaxRetries = maximumNumberOfRetries
-            };
+            var transactionSettings = new TransactionSettings(context.Settings);
 
             if (transactionSettings.DoNotWrapHandlersExecutionInATransactionScope)
             {
@@ -99,15 +92,18 @@ namespace NServiceBus.Features
             {
                 context.Pipeline.Register<HandlerTransactionScopeWrapperBehavior.Registration>();
             }
-
+           
+            
+            if (transactionSettings.IsTransactional)
+            {
+                context.Container.ConfigureComponent<FlrStatusStorage>(DependencyLifecycle.SingleInstance);
+                context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();
+            }
+           
 
             context.Pipeline.Register<InvokeFaultManagerBehavior.Registration>();
             context.Pipeline.Register<EnforceMessageIdBehavior.Registration>();   
   
-            if (transactionSettings.IsTransactional)
-            {
-                context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();     
-            }
            
             context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
             {
