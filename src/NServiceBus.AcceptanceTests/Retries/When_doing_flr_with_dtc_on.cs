@@ -18,9 +18,10 @@
             Scenario.Define(() => new Context { Id = Guid.NewGuid() })
                     .WithEndpoint<RetryEndpoint>(b => b.Given((bus, context) => bus.SendLocal(new MessageToBeRetried{ Id = context.Id })))
                     .AllowExceptions()
-                    .Done(c => c.HandedOverToSlr || c.NumberOfTimesInvoked > maxretries)
+                    .Done(c => c.GaveUpOnRetries || c.NumberOfTimesInvoked > maxretries)
                     .Repeat(r => r.For<AllDtcTransports>())
-                    .Should(c => Assert.AreEqual(maxretries, c.NumberOfTimesInvoked, string.Format("The FLR should by default retry {0} times", maxretries)))
+                    //we add 1 since first call + X retries totals to X+1
+                    .Should(c => Assert.AreEqual(maxretries+1, c.NumberOfTimesInvoked, string.Format("The FLR should by default retry {0} times", maxretries)))
                     .Run();
 
         }
@@ -32,9 +33,7 @@
 
             public int NumberOfTimesInvoked { get; set; }
 
-            public bool HandedOverToSlr { get; set; }
-
-            public bool SecondMessageReceived { get; set; }
+            public bool GaveUpOnRetries { get; set; }
         }
 
         public class RetryEndpoint : EndpointConfigurationBuilder
@@ -57,7 +56,7 @@
 
                 public void ProcessingAlwaysFailsForMessage(TransportMessage message, Exception e)
                 {
-                    Context.HandedOverToSlr = true;
+                    Context.GaveUpOnRetries = true;
                 }
 
                 public void Init(Address address)
@@ -74,12 +73,6 @@
                 {
                     if (message.Id != Context.Id) return; // messages from previous test runs must be ignored
 
-                    if (message.SecondMessage)
-                    {
-                        Context.SecondMessageReceived = true;
-                        return;
-                    }
-
                     Context.NumberOfTimesInvoked++;
 
                     throw new Exception("Simulated exception");
@@ -91,8 +84,6 @@
         public class MessageToBeRetried : IMessage
         {
             public Guid Id { get; set; }
-
-            public bool SecondMessage { get; set; }
         }
     }
 

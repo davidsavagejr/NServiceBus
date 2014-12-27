@@ -50,6 +50,8 @@ namespace NServiceBus
             {
                 InsertAfter("ReceiveMessage");
 
+                InsertBeforeIfExists("HandlerTransactionScopeWrapper");
+
                 InsertBeforeIfExists("FirstLevelRetries");
             }
         }

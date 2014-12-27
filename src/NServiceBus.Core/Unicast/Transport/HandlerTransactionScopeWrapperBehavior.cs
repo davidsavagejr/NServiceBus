@@ -33,7 +33,7 @@ namespace NServiceBus.Unicast.Transport
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("HandlerTransactionScopeWrapperBehavior", typeof(HandlerTransactionScopeWrapperBehavior), "Makes sure that the handlers gets wrapped in a transaction scope")
+                : base("HandlerTransactionScopeWrapper", typeof(HandlerTransactionScopeWrapperBehavior), "Makes sure that the handlers gets wrapped in a transaction scope")
             {
                 InsertAfter("ReceiveMessage");
                 InsertBefore("FirstLevelRetries");
