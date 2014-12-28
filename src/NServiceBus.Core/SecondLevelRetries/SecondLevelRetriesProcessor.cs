@@ -19,7 +19,7 @@ namespace NServiceBus.SecondLevelRetries
         public SecondLevelRetriesConfiguration SecondLevelRetriesConfiguration { get; set; }
         public ISendMessages MessageSender { get; set; }
         public IDeferMessages MessageDeferrer { get; set; }
-        public FaultManager FaultManager { get; set; }
+        public ForwardingFaultManager FaultManager { get; set; }
         public Address InputAddress { get; set; }
         public bool Disabled { get; set; }
 
@@ -53,13 +53,13 @@ namespace NServiceBus.SecondLevelRetries
 
         void SendToErrorQueue(TransportMessage message)
         {
-            logger.ErrorFormat(
-                "SLR has failed to resolve the issue with message {0} and will be forwarded to the error queue at {1}",
-                message.Id, FaultManager.ErrorQueue);
+            //logger.ErrorFormat(
+            //    "SLR has failed to resolve the issue with message {0} and will be forwarded to the error queue at {1}",
+            //    message.Id, FaultManager.ErrorQueue);
 
-            message.Headers.Remove(Headers.Retries);
+            //message.Headers.Remove(Headers.Retries);
 
-            MessageSender.Send(message, new SendOptions(FaultManager.ErrorQueue));
+            //MessageSender.Send(message, new SendOptions(FaultManager.ErrorQueue));
         }
 
         void Defer(TimeSpan defer, TransportMessage message)

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using Faults.Forwarder;
     using NServiceBus.Faults;
     using SecondLevelRetries;
     using SecondLevelRetries.Helpers;
@@ -32,13 +31,12 @@
             RETRIES_QUEUE = new Address("retries", "localhost");
             ORIGINAL_QUEUE = new Address("org", "hostname");
             CLIENT_QUEUE = Address.Parse("clientQ@myMachine");
-            var busNotifications = new BusNotifications();
             satellite = new SecondLevelRetriesProcessor
             {
-                FaultManager = new FaultManager(null, null, busNotifications)
-                {
-                    ErrorQueue = ERROR_QUEUE
-                },
+                //FaultManager = new FaultManager(null, null, busNotifications)
+                //{
+                //    ErrorQueue = ERROR_QUEUE
+                //},
                 MessageSender = messageSender,
                 MessageDeferrer = deferrer,
                 InputAddress = RETRIES_QUEUE,

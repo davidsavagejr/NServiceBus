@@ -3,6 +3,8 @@ namespace NServiceBus.Features
     using NServiceBus.Faults;
     using NServiceBus.Faults.Forwarder;
     using NServiceBus.Faults.Forwarder.Config;
+    using NServiceBus.Hosting;
+    using NServiceBus.Transports;
 
     class ForwarderFaultManager : Feature
     {
@@ -22,8 +24,11 @@ namespace NServiceBus.Features
 
             var errorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(context.Settings);
 
-            context.Container.ConfigureComponent<FaultManager>(DependencyLifecycle.InstancePerCall)
-                    .ConfigureProperty(fm => fm.ErrorQueue, errorQueue);
+            context.Container.ConfigureComponent(b => new ForwardingFaultManager(b.Build<ISendMessages>(),
+                errorQueue.ToString(),
+                b.Build<HostInformation>(),
+                b.Build<BusNotifications>()), DependencyLifecycle.InstancePerCall);
+
             context.Container.ConfigureComponent<FaultsQueueCreator>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(p => p.Enabled, true)
                 .ConfigureProperty(t => t.ErrorQueue, errorQueue);

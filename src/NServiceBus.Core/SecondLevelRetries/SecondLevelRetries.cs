@@ -2,7 +2,6 @@ namespace NServiceBus.Features
 {
     using System;
     using Config;
-    using Faults.Forwarder;
     using NServiceBus.SecondLevelRetries;
 
     /// <summary>
@@ -25,15 +24,6 @@ namespace NServiceBus.Features
         /// </summary>
         protected internal override void Setup(FeatureConfigurationContext context)
         {
-            var processorAddress = context.Settings.LocalAddress().SubScope("Retries");
-            var useRemoteRetryProcessor = context.Settings.HasSetting("SecondLevelRetries.AddressOfRetryProcessor");
-
-            if (useRemoteRetryProcessor)
-            {
-                processorAddress = context.Settings.Get<Address>("SecondLevelRetries.AddressOfRetryProcessor");
-            }
-
-            var container = context.Container;
             var retryPolicy = context.Settings.GetOrDefault<Func<TransportMessage, TimeSpan>>("SecondLevelRetries.RetryPolicy");
 
             var secondLevelRetriesConfiguration = new SecondLevelRetriesConfiguration();
@@ -42,12 +32,6 @@ namespace NServiceBus.Features
                 secondLevelRetriesConfiguration.RetryPolicy = retryPolicy;
             }
 
-            container.ConfigureProperty<FaultManager>(fm => fm.RetriesErrorQueue, processorAddress)
-                .ConfigureProperty<FaultManager>(fm => fm.SecondLevelRetriesConfiguration, secondLevelRetriesConfiguration);
-
-            container.ConfigureProperty<SecondLevelRetriesProcessor>(p => p.InputAddress, processorAddress)
-                .ConfigureProperty<SecondLevelRetriesProcessor>(p => p.SecondLevelRetriesConfiguration, secondLevelRetriesConfiguration)
-                .ConfigureProperty<SecondLevelRetriesProcessor>(p => p.Disabled, useRemoteRetryProcessor);
 
             var retriesConfig = context.Settings.GetConfigSection<SecondLevelRetriesConfig>();
             if (retriesConfig == null)
