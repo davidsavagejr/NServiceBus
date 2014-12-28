@@ -20,6 +20,7 @@ namespace NServiceBus
                 : base("SatelliteHandlerExecutor", typeof(ExecuteSatelliteHandlerBehavior), "Invokes the decryption logic")
             {
                 InsertAfter("ReceiveMessage");
+                InsertBeforeIfExists("FirstLevelRetries");
             }
         }
     }

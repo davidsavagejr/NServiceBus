@@ -8,6 +8,7 @@ namespace NServiceBus.Features
     using Config;
     using Faults;
     using Logging;
+    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Hosting;
     using NServiceBus.Support;
     using NServiceBus.Unicast;

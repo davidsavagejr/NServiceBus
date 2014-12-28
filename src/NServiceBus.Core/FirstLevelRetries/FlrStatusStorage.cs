@@ -1,11 +1,10 @@
-﻿namespace NServiceBus.Unicast.Transport
+﻿namespace NServiceBus.FirstLevelRetries
 {
     using System;
     using System.Collections.Concurrent;
 
     class FlrStatusStorage
     {
-       
         public void ClearFailuresForMessage(string messageId)
         {
             int e;
@@ -30,6 +29,5 @@
         }
 
         ConcurrentDictionary<string, int> failuresPerMessage = new ConcurrentDictionary<string, int>();
-       
     }
 }

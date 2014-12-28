@@ -120,7 +120,7 @@ namespace NServiceBus.Unicast.Transport
             {
                 throw new InvalidOperationException("The transport is already started");
             }
-
+            this.dequeueSettings = dequeueSettings;
             var address = Address.Parse(dequeueSettings.QueueName);
 
 
@@ -215,5 +215,10 @@ namespace NServiceBus.Unicast.Transport
         /// <summary>
         /// </summary>
         protected Address receiveAddress;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected DequeueSettings dequeueSettings;
     }
 }

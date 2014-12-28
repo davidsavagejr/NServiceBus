@@ -2,8 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
+    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Unicast.Transport;
+    using NServiceBus.Transports;
     using NUnit.Framework;
 
     [TestFixture]
@@ -24,13 +25,11 @@
         public void ShouldPerformFLRIfThereAreRetriesLeftToDo()
         {
             var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(), 1, new BusNotifications());
-            var context = new IncomingContext(null);
-
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage("someid", new Dictionary<string, string>()));
+            var context = CreateContext("someid");
 
             behavior.Invoke(context, () =>
             {
-                throw new Exception("test");
+                throw new Exception("test"); 
             });
 
             Assert.False(context.MessageHandledSuccessfully());
@@ -40,11 +39,7 @@
         public void ShouldBubbleTheExceptionUpIfThereAreNoMoreRetriesLeft()
         {
             var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(), 0, new BusNotifications());
-            var context = new IncomingContext(null);
-
-            var message = new TransportMessage("someid", new Dictionary<string, string>());
-
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, message);
+            var context = CreateContext("someid");
 
             Assert.Throws<Exception>(() => behavior.Invoke(context, () =>
             {
@@ -52,7 +47,7 @@
             }));
 
             //should set the retries header to capture how many flr attempts where made
-            Assert.AreEqual("0", message.Headers[Headers.FLRetries]);
+            Assert.AreEqual("0", context.PhysicalMessage.Headers[Headers.FLRetries]);
         }
 
         [Test]
@@ -61,7 +56,7 @@
             var storage = new FlrStatusStorage();
             var behavior = new FirstLevelRetriesBehavior(storage, 1, new BusNotifications());
 
-            storage.IncrementFailuresForMessage("someid", new Exception(""));
+            storage.IncrementFailuresForMessage("main/someid", new Exception(""));
 
             Assert.Throws<Exception>(() => behavior.Invoke(CreateContext("someid"), () =>
             {
@@ -69,7 +64,7 @@
             }));
 
 
-            Assert.AreEqual(0, storage.GetRetriesForMessage("someid"));
+            Assert.AreEqual(0, storage.GetRetriesForMessage("main/someid"));
         }
         [Test]
         public void ShouldRememberRetryCountBetweenRetries()
@@ -83,8 +78,30 @@
             });
 
 
-            Assert.AreEqual(1, storage.GetRetriesForMessage("someid"));
+            Assert.AreEqual(1, storage.GetRetriesForMessage("main/someid"));
         }
+
+        [Test]
+        public void ShouldHandleMessageWithTheSameIdFailingInDifferentQueues()
+        {
+            var storage = new FlrStatusStorage();
+            var behavior = new FirstLevelRetriesBehavior(storage, 1, new BusNotifications());
+
+            behavior.Invoke(CreateContext("someid","main"), () =>
+            {
+                throw new Exception("test");
+            });
+
+            behavior.Invoke(CreateContext("someid", "main.satellite"), () =>
+            {
+                throw new Exception("test");
+            });
+
+
+            Assert.AreEqual(1, storage.GetRetriesForMessage("main.satellite/someid"));
+            Assert.AreEqual(1, storage.GetRetriesForMessage("main/someid"));
+        }
+
 
         [Test]
         public void ShouldRaiseBusNotificationsForFLR()
@@ -112,10 +129,11 @@
 
             Assert.True(notificationFired);
         }
-        IncomingContext CreateContext(string messageId)
+        IncomingContext CreateContext(string messageId,string queueName="main")
         {
             var context = new IncomingContext(null);
 
+            context.Set(new DequeueSettings(queueName,1));
             context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage(messageId, new Dictionary<string, string>()));
 
             return context;

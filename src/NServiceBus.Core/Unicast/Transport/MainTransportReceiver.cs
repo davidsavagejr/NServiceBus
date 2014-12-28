@@ -50,8 +50,9 @@ namespace NServiceBus.Unicast.Transport
         {
             var context = new IncomingContext(pipelineExecutor.CurrentContext);
 
-            value.InitalizeContext(context);
+            value.InitializeContext(context);
 
+            context.Set(dequeueSettings);
             context.Set(currentReceivePerformanceDiagnostics);
             context.Set(throughputLimiter);
 

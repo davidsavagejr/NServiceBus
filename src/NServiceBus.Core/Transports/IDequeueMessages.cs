@@ -88,7 +88,7 @@
         /// 
         /// </summary>
         /// <param name="context"></param>
-        public void InitalizeContext(IncomingContext context)
+        public void InitializeContext(IncomingContext context)
         {
             contextAction(context);
         }

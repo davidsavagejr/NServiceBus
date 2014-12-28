@@ -62,8 +62,8 @@ namespace NServiceBus.Satellites
 
 
                         pipelineSettings.Register(transportBehaviorDefinition.Registration);
-                        
-                        //todo: add FLR after refactoring it to be multi pipeline safe
+
+                        pipelineSettings.Register<FirstLevelRetriesBehavior.Registration>();
                         pipelineSettings.Register<ExecuteSatelliteHandlerBehavior.Registration>();
                         
 

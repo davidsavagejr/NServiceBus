@@ -2,9 +2,10 @@ namespace NServiceBus
 {
     using System;
     using NServiceBus.Config;
+    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Unicast.Transport;
+    using NServiceBus.Transports;
 
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
@@ -31,7 +32,8 @@ namespace NServiceBus
             }
             catch (Exception ex)
             {
-                var messageId = context.PhysicalMessage.Id;
+                var messageId = context.Get<DequeueSettings>().QueueName + "/" + context.PhysicalMessage.Id;
+
                 var numberOfRetries = storage.GetRetriesForMessage(messageId);
 
                 if (numberOfRetries >= maxRetries)
@@ -57,7 +59,7 @@ namespace NServiceBus
                 : base("FirstLevelRetries", typeof(FirstLevelRetriesBehavior), "Performs first level retries")
             {
                 InsertAfter("ReceiveMessage");
-                InsertBefore("ReceivePerformanceDiagnosticsBehavior");
+                InsertBeforeIfExists("ReceivePerformanceDiagnosticsBehavior");
 
                 ContainerRegistration((builder, settings) =>
                 {
