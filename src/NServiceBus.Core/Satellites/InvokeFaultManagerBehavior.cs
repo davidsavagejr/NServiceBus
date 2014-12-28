@@ -8,9 +8,10 @@ namespace NServiceBus
 
     class InvokeFaultManagerBehavior : IBehavior<IncomingContext>
     {
-        public InvokeFaultManagerBehavior(IManageMessageFailures failureManager)
+        public InvokeFaultManagerBehavior(IManageMessageFailures failureManager,CriticalError criticalError)
         {
             this.failureManager = failureManager;
+            this.criticalError = criticalError;
         }
 
         public void Invoke(IncomingContext context, Action next)
@@ -25,22 +26,33 @@ namespace NServiceBus
             {
                 Logger.Error("Failed to deserialize message with ID: " + message.Id, serializationException);
 
-                message.RevertToOriginalBodyIfNeeded();
-
-                failureManager.SerializationFailedForMessage(message, serializationException);
+                InvokeFaultManager(f => f.SerializationFailedForMessage(message, serializationException),message);
             }
 
             catch (Exception exception)
             {
                 Logger.Error("Failed to process message with ID: " + message.Id, exception);
 
-                message.RevertToOriginalBodyIfNeeded();
+                InvokeFaultManager(f => f.ProcessingAlwaysFailsForMessage(message, exception),message);
+            }
+        }
 
-                failureManager.ProcessingAlwaysFailsForMessage(message, exception);
+        void InvokeFaultManager(Action<IManageMessageFailures> faultAction,TransportMessage message)
+        {
+            try
+            {
+                message.RevertToOriginalBodyIfNeeded();
+                faultAction(failureManager);
+            }
+            catch (Exception ex)
+            {
+                criticalError.Raise(string.Format("Fault manager failed to process the failed message with id {0}", message.Id), ex);        
+                throw;
             }
         }
 
         readonly IManageMessageFailures failureManager;
+        readonly CriticalError criticalError;
         ILog Logger = LogManager.GetLogger<InvokeFaultManagerBehavior>();
 
         public class Registration : RegisterStep
