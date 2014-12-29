@@ -135,6 +135,7 @@
     <Compile Include="Pipeline\PipelineFactory.cs" />
     <Compile Include="Pipeline\Pipeline.cs" />
     <Compile Include="Pipeline\SatellitePipelineFactory.cs" />
+    <Compile Include="Pipeline\StepRegistrationSequence.cs" />
     <Compile Include="Pipeline\SynchronousExecutor.cs" />
     <Compile Include="Pipeline\PipelineCollection.cs" />
     <Compile Include="SecondLevelRetries\FirstLevelRetriesBehavior.cs" />
