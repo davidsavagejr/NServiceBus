@@ -23,10 +23,7 @@
                 executor,
                 builder.Build<IManageMessageFailures>(),
                 settings,
-                builder.Build<Configure>())
-            {
-                Notifications = builder.Build<BusNotifications>()
-            };
+                builder.Build<Configure>());
             yield return pipeline;
         }
     }

@@ -42,10 +42,7 @@
                         builder.Build<IManageMessageFailures>(),
                         settings,
                         builder.Build<Configure>(),
-                        satellite)
-                    {
-                        Notifications = builder.Build<BusNotifications>()
-                    };
+                        satellite);
 
                     var advancedSatellite = satellite as IAdvancedSatellite;
 

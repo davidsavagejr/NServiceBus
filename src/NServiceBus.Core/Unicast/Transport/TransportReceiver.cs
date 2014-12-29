@@ -32,8 +32,6 @@ namespace NServiceBus.Unicast.Transport
             Receiver = receiver;
         }
 
-        internal BusNotifications Notifications { get; set; }
-
         /// <summary>
         ///     The receiver responsible for notifying the transport when new messages are available
         /// </summary>
