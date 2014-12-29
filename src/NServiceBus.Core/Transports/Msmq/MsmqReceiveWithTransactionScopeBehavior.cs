@@ -107,6 +107,7 @@ namespace NServiceBus.Transports.Msmq
         {
             public Registration(): base("ReceiveMessage", typeof(MsmqReceiveWithTransactionScopeBehavior), "Performs a msmq receive using a transaction scope. This will require DTC to be enable on the machine")
             {
+                InsertBeforeIfExists(WellKnownStep.ExecuteLogicalMessages);
                 ContainerRegistration((builder, settings) =>
                 {
                     var transactionOptions = new TransactionOptions

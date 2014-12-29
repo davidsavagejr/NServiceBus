@@ -11,7 +11,7 @@
         /// <summary>
         /// Specifies the maximum concurrency level this <see cref="TransportReceiver"/> is able to support.
         /// </summary>
-        [ConfigurationProperty("MaximumConcurrencyLevel", IsRequired = false, DefaultValue = 1)]
+        [ConfigurationProperty("MaximumConcurrencyLevel", IsRequired = false, DefaultValue = 0)]
         public int MaximumConcurrencyLevel
         {
             get

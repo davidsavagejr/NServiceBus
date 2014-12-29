@@ -48,17 +48,18 @@ namespace NServiceBus.Features
                 context.Settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
 
             context.Container.RegisterSingleton(hostInfo);
-            
-            //var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
-            //var maximumConcurrencyLevel = 1;
 
-            //if (transportConfig != null)
-            //{
-            //    maximumConcurrencyLevel = transportConfig.MaximumConcurrencyLevel;
-            //}
+           
 
             var concurrencyConfig = context.Settings.Get<IConcurrencyConfig>();
             var throttlingConfig = context.Settings.Get<IThrottlingConfig>();
+
+            var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
+
+            if (transportConfig != null && transportConfig.MaximumConcurrencyLevel != 0)
+            {
+                concurrencyConfig = new SharedConcurrencyConfig(transportConfig.MaximumConcurrencyLevel);
+            }
 
             var executor = throttlingConfig.WrapExecutor(concurrencyConfig.BuildExecutor());
 

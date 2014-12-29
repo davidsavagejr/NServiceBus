@@ -5,12 +5,72 @@ namespace NServiceBus.Pipeline
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
 
+
+    /// <summary>
+    /// </summary>
+    public class HardcodedStepRegistration
+    {
+        string previousStep;
+        readonly Action<RegisterStep> addStep;
+
+        internal HardcodedStepRegistration(Action<RegisterStep> addStep, string previousStep)
+        {
+            this.addStep = addStep;
+            this.previousStep = previousStep;
+        }
+
+        /// <summary>
+        /// Register a new step into the pipeline.
+        /// </summary>
+        /// <param name="stepId">The identifier of the new step to add.</param>
+        /// <param name="behavior">The <see cref="IBehavior{TContext}"/> to execute.</param>
+        /// <param name="description">The description of the behavior.</param>
+        public HardcodedStepRegistration Register(string stepId, Type behavior, string description)
+        {
+            BehaviorTypeChecker.ThrowIfInvalid(behavior, "behavior");
+
+            if (string.IsNullOrEmpty(stepId))
+            {
+                throw new ArgumentNullException("stepId");
+            }
+
+            if (string.IsNullOrEmpty(description))
+            {
+                throw new ArgumentNullException("description");
+            }
+
+            var step = RegisterStep.Create(stepId, behavior, description);
+            step.InsertAfter(previousStep);
+            addStep(step);
+            previousStep = stepId;
+            return this;
+        }
+
+
+        /// <summary>
+        /// <see cref="Register(string,System.Type,string)"/>
+        /// </summary>
+        /// <param name="wellKnownStep">The identifier of the step to add.</param>
+        /// <param name="behavior">The <see cref="IBehavior{TContext}"/> to execute.</param>
+        /// <param name="description">The description of the behavior.</param>
+        public HardcodedStepRegistration Register(WellKnownStep wellKnownStep, Type behavior, string description)
+        {
+            if (wellKnownStep == null)
+            {
+                throw new ArgumentNullException("wellKnownStep");
+            }
+
+            Register((string)wellKnownStep, behavior, description);
+            return this;
+        }
+    }
+
     /// <summary>
     /// Manages the pipeline configuration.
     /// </summary>
     public class PipelineSettings
     {
-     
+
         /// <summary>
         /// Creates an instance of <see cref="PipelineSettings"/>
         /// </summary>
@@ -19,7 +79,7 @@ namespace NServiceBus.Pipeline
         {
             throw new NotImplementedException();
         }
-       
+
         /// <summary>
         /// Creates an instance of <see cref="PipelineSettings"/>
         /// </summary>
@@ -92,14 +152,14 @@ namespace NServiceBus.Pipeline
 
             Replace((string)wellKnownStep, newBehavior, description);
         }
-        
+
         /// <summary>
         /// Register a new step into the pipeline.
         /// </summary>
         /// <param name="stepId">The identifier of the new step to add.</param>
         /// <param name="behavior">The <see cref="IBehavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
-        public void Register(string stepId, Type behavior, string description)
+        public HardcodedStepRegistration Register(string stepId, Type behavior, string description)
         {
             BehaviorTypeChecker.ThrowIfInvalid(behavior, "behavior");
 
@@ -114,6 +174,7 @@ namespace NServiceBus.Pipeline
             }
 
             AddStep(RegisterStep.Create(stepId, behavior, description));
+            return new HardcodedStepRegistration(AddStep, stepId);
         }
 
 
@@ -123,14 +184,14 @@ namespace NServiceBus.Pipeline
         /// <param name="wellKnownStep">The identifier of the step to add.</param>
         /// <param name="behavior">The <see cref="IBehavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
-        public void Register(WellKnownStep wellKnownStep, Type behavior, string description)
+        public HardcodedStepRegistration Register(WellKnownStep wellKnownStep, Type behavior, string description)
         {
             if (wellKnownStep == null)
             {
                 throw new ArgumentNullException("wellKnownStep");
             }
 
-            Register((string)wellKnownStep, behavior, description);
+            return Register((string)wellKnownStep, behavior, description);
         }
 
 
@@ -140,7 +201,7 @@ namespace NServiceBus.Pipeline
         /// <typeparam name="T">The <see cref="RegisterStep"/> to use to perform the registration.</typeparam>
         public void Register<T>() where T : RegisterStep, new()
         {
-            AddStep(new T());   
+            AddStep(new T());
         }
 
 
@@ -159,7 +220,7 @@ namespace NServiceBus.Pipeline
             modifications.Additions.Add(step);
         }
 
-        internal void RegisterBehaviorsInContainer(ReadOnlySettings settings,IConfigureComponents container)
+        internal void RegisterBehaviorsInContainer(ReadOnlySettings settings, IConfigureComponents container)
         {
             foreach (var registeredBehavior in registeredBehaviors)
             {
@@ -168,13 +229,13 @@ namespace NServiceBus.Pipeline
 
             foreach (var step in registeredSteps)
             {
-                step.ApplyContainerRegistration(settings,container);
+                step.ApplyContainerRegistration(settings, container);
             }
 
         }
 
-        List<RegisterStep> registeredSteps = new List<RegisterStep>(); 
-        List<Type> registeredBehaviors = new List<Type>(); 
+        List<RegisterStep> registeredSteps = new List<RegisterStep>();
+        List<Type> registeredBehaviors = new List<Type>();
 
         readonly PipelineModifications modifications;
 
