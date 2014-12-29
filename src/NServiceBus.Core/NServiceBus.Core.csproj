@@ -128,6 +128,7 @@
     <Compile Include="Features\DisplayDiagnosticsForFeatures.cs" />
     <Compile Include="Features\ExposeSettings.cs" />
     <Compile Include="Features\PrerequisiteStatus.cs" />
+    <Compile Include="FirstLevelRetries\FirstLevelRetries.cs" />
     <Compile Include="Pipeline\PerCallBehavior.cs" />
     <Compile Include="Pipeline\IBehaviorInstance.cs" />
     <Compile Include="Pipeline\IExecutor.cs" />

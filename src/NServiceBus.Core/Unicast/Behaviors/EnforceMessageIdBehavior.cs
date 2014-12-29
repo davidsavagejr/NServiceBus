@@ -22,7 +22,7 @@ namespace NServiceBus
                 : base("EnforceMessageId", typeof(EnforceMessageIdBehavior), "Makes sure that the message pulled from the transport contains a message id")
             {
                 InsertAfter("ReceiveMessage");
-                InsertBefore("FirstLevelRetries");
+                InsertBeforeIfExists("FirstLevelRetries");
             }
         }
     }

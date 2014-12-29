@@ -7,7 +7,6 @@ namespace NServiceBus.Features
     using AutomaticSubscriptions;
     using Config;
     using Logging;
-    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Hosting;
     using NServiceBus.Settings.Concurrency;
     using NServiceBus.Settings.Throttling;
@@ -109,14 +108,6 @@ namespace NServiceBus.Features
                 context.Pipeline.Register<HandlerTransactionScopeWrapperBehavior.Registration>();
             }
            
-            
-            if (transactionSettings.IsTransactional)
-            {
-                context.Container.ConfigureComponent<FlrStatusStorage>(DependencyLifecycle.SingleInstance);
-                context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();
-            }
-           
-
             context.Pipeline.Register<InvokeFaultManagerBehavior.Registration>();
             context.Pipeline.Register<EnforceMessageIdBehavior.Registration>();   
         }

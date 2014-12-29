@@ -28,7 +28,7 @@ namespace NServiceBus.Unicast.Transport
             public Registration()
                 : base("HandlerTransactionScopeWrapperBehavior", typeof(SuppressAmbientTransactionBehavior), "Make sure that any ambient transaction scope is supressed")
             {
-                InsertBefore("FirstLevelRetriesBehavior");
+                InsertBeforeIfExists("FirstLevelRetriesBehavior");
             }
         }
     }
