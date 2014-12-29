@@ -19,15 +19,14 @@ namespace NServiceBus.Unicast.Transport
     /// </summary>
     public class TransportReceiver : IDisposable, IObserver<MessageAvailable>
     {
-        internal TransportReceiver(string id, TransactionSettings transactionSettings, IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config)
+        internal TransportReceiver(string id,IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config)
         {
             this.id = id;
             this.pipelineExecutor = pipelineExecutor;
             this.executor = executor;
             this.settings = settings;
             this.config = config;
-            dequeueSettings = new DequeueSettings(queue, purgeOnStartup: purgeOnStartup);
-            TransactionSettings = transactionSettings;
+            dequeueSettings = new DequeueSettings(queue, purgeOnStartup);
             FailureManager = manageMessageFailures;
             Receiver = receiver;
         }
@@ -42,12 +41,7 @@ namespace NServiceBus.Unicast.Transport
         /// </summary>
         public IManageMessageFailures FailureManager { get; set; }
 
-       
-        /// <summary>
-        ///     The <see cref="TransactionSettings" /> being used.
-        /// </summary>
-        public TransactionSettings TransactionSettings { get; private set; }
-
+      
         /// <summary>
         /// Gets the ID of this pipeline
         /// </summary>

@@ -9,7 +9,6 @@
     using NServiceBus.Settings;
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport;
-    using TransactionSettings = NServiceBus.Unicast.Transport.TransactionSettings;
 
     class SatellitePipelineFactory : PipelineFactory
     {
@@ -26,14 +25,12 @@
                 Logger.DebugFormat("Creating {1}/{2} {0} satellite", satellite.GetType().AssemblyQualifiedName,
                     index + 1, satellitesList.Count);
 
-                var transactionSettings = new TransactionSettings(settings);
                 if (satellite.InputAddress != null)
                 {
                     var pipelineExecutor = BuildPipelineExecutor(builder);
 
                     var pipeline = new SatelliteTransportReceiver(
                         satellite.GetType().AssemblyQualifiedName,
-                        transactionSettings,
                         builder.Build<IDequeueMessages>(),
                         satellite.InputAddress.Queue,
                         false,

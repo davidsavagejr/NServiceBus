@@ -12,7 +12,7 @@ namespace NServiceBus.Unicast.Transport
         ISatellite satellite;
 
 
-        public SatelliteTransportReceiver(string id, TransactionSettings transactionSettings, IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, ISatellite satellite) : base(id, transactionSettings, receiver, queue, purgeOnStartup, pipelineExecutor, executor, manageMessageFailures, settings, config)
+        public SatelliteTransportReceiver(string id, IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, ISatellite satellite) : base(id, receiver, queue, purgeOnStartup, pipelineExecutor, executor, manageMessageFailures, settings, config)
         {
             this.satellite = satellite;
         }
