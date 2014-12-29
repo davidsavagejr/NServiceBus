@@ -100,7 +100,8 @@ namespace NServiceBus.Pipeline
         /// <param name="stepId">The identifier of the new step to add.</param>
         /// <param name="behavior">The <see cref="IBehavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
-        public StepRegistrationSequence Register(string stepId, Type behavior, string description)
+        /// <param name="isStatic">Is this behavior pipeline-static</param>
+        public StepRegistrationSequence Register(string stepId, Type behavior, string description, bool isStatic = false)
         {
             BehaviorTypeChecker.ThrowIfInvalid(behavior, "behavior");
 
@@ -114,25 +115,26 @@ namespace NServiceBus.Pipeline
                 throw new ArgumentNullException("description");
             }
 
-            AddStep(RegisterStep.Create(stepId, behavior, description));
+            AddStep(RegisterStep.Create(stepId, behavior, description, isStatic));
             return new StepRegistrationSequence(AddStep, stepId);
         }
 
 
         /// <summary>
-        /// <see cref="Register(string,System.Type,string)"/>
+        /// <see cref="Register(string,System.Type,string, bool)"/>
         /// </summary>
         /// <param name="wellKnownStep">The identifier of the step to add.</param>
         /// <param name="behavior">The <see cref="IBehavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
-        public StepRegistrationSequence Register(WellKnownStep wellKnownStep, Type behavior, string description)
+        /// <param name="isStatic">Is this behavior pipeline-static</param>
+        public StepRegistrationSequence Register(WellKnownStep wellKnownStep, Type behavior, string description, bool isStatic = false)
         {
             if (wellKnownStep == null)
             {
                 throw new ArgumentNullException("wellKnownStep");
             }
 
-            return Register((string)wellKnownStep, behavior, description);
+            return Register((string)wellKnownStep, behavior, description, isStatic);
         }
 
 

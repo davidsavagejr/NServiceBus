@@ -15,7 +15,7 @@ namespace NServiceBus.Pipeline
 
         public void Register(WellKnownStep wellKnownStep, Type behavior, string description)
         {
-            additions.Add(RegisterStep.Create(wellKnownStep, behavior, description));
+            additions.Add(RegisterStep.Create(wellKnownStep, behavior, description, false));
         }
 
         public void Register(RegisterStep rego)

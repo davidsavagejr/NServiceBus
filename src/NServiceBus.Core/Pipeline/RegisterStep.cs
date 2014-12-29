@@ -18,7 +18,8 @@ namespace NServiceBus.Pipeline
         /// <param name="stepId">The unique identifier for this steps.</param>
         /// <param name="behavior">The type of <see cref="IBehavior{TContext}"/> to register.</param>
         /// <param name="description">A brief description of what this step does.</param>
-        protected RegisterStep(string stepId, Type behavior, string description)
+        /// <param name="isStatic">If a behavior is pipeline-static (shared between executions)</param>
+        protected RegisterStep(string stepId, Type behavior, string description, bool isStatic = false)
         {
             BehaviorTypeChecker.ThrowIfInvalid(behavior, "behavior");
 
@@ -35,6 +36,7 @@ namespace NServiceBus.Pipeline
             BehaviorType = behavior;
             StepId = stepId;
             Description = description;
+            IsStatic = isStatic;
         }
 
 
@@ -64,6 +66,11 @@ namespace NServiceBus.Pipeline
         /// Gets the unique identifier for this step.
         /// </summary>
         public string StepId { get; private set; }
+
+        /// <summary>
+        /// Gets if the behavior is pipeline-static (shared between all executions of the pipeline)
+        /// </summary>
+        public bool IsStatic { get; private set; }
         
         /// <summary>
         /// Gets the description for this registration.
@@ -206,19 +213,28 @@ namespace NServiceBus.Pipeline
             Afters.Add(new Dependency(id, true));
         }
 
-        internal static RegisterStep Create(WellKnownStep wellKnownStep, Type behavior, string description)
+        internal IBehaviorInstance<TContext> CreateBehavior<TContext>(IBuilder defaultBuilder) where TContext : BehaviorContext
         {
-            return new DefaultRegisterStep(behavior, wellKnownStep, description);
+            if (IsStatic)
+            {
+                return new StaticBehavior<TContext>(BehaviorType,defaultBuilder);
+            }
+            return new PerCallBehavior<TContext>(BehaviorType);
         }
-        internal static RegisterStep Create(string pipelineStep, Type behavior, string description)
+
+        internal static RegisterStep Create(WellKnownStep wellKnownStep, Type behavior, string description, bool isStatic)
         {
-            return new DefaultRegisterStep(behavior, pipelineStep, description);
+            return new DefaultRegisterStep(behavior, wellKnownStep, description, isStatic);
+        }
+        internal static RegisterStep Create(string pipelineStep, Type behavior, string description, bool isStatic)
+        {
+            return new DefaultRegisterStep(behavior, pipelineStep, description, isStatic);
         }
         
         class DefaultRegisterStep : RegisterStep
         {
-            public DefaultRegisterStep(Type behavior, string stepId, string description)
-                : base(stepId, behavior, description)
+            public DefaultRegisterStep(Type behavior, string stepId, string description, bool isStatic)
+                : base(stepId, behavior, description, isStatic)
             {
             }
         }

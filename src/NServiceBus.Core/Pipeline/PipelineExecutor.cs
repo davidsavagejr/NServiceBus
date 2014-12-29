@@ -34,8 +34,8 @@
             Incoming = pipelineBuilder.Incoming.AsReadOnly();
             Outgoing = pipelineBuilder.Outgoing.AsReadOnly();
 
-            incomingBehaviors = Incoming.Select(r => r.BehaviorType);
-            outgoingBehaviors = Outgoing.Select(r => r.BehaviorType);
+            incomingBehaviors = Incoming.Select(r => r.CreateBehavior<IncomingContext>(builder)).ToArray();
+            outgoingBehaviors = Outgoing.Select(r => r.CreateBehavior<OutgoingContext>(builder)).ToArray();
         }
 
         /// <summary>
@@ -83,7 +83,7 @@
         /// <typeparam name="TContext">The context to use.</typeparam>
         /// <param name="behaviors">The behaviors to execute in the specified order.</param>
         /// <param name="context">The context instance.</param>
-        public void InvokePipeline<TContext>(IEnumerable<Type> behaviors, TContext context) where TContext : BehaviorContext
+        public void InvokePipeline<TContext>(IEnumerable<IBehaviorInstance<TContext>> behaviors, TContext context) where TContext : BehaviorContext
         {
             var pipeline = new BehaviorChain<TContext>(behaviors, context, this, busNotifications);
 
@@ -123,8 +123,8 @@
         }
 
         BehaviorContextStacker contextStacker = new BehaviorContextStacker();
-        IEnumerable<Type> incomingBehaviors;
-        IEnumerable<Type> outgoingBehaviors;
+        IEnumerable<IBehaviorInstance<IncomingContext>> incomingBehaviors;
+        IEnumerable<IBehaviorInstance<OutgoingContext>> outgoingBehaviors;
         IBuilder rootBuilder;
         readonly BusNotifications busNotifications;
     }

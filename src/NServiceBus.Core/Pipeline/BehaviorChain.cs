@@ -8,14 +8,14 @@
 
     class BehaviorChain<T> where T : BehaviorContext
     {
-        public BehaviorChain(IEnumerable<Type> behaviorList, T context, PipelineExecutor pipelineExecutor, BusNotifications notifications)
+        public BehaviorChain(IEnumerable<IBehaviorInstance<T>> behaviorList, T context, PipelineExecutor pipelineExecutor, BusNotifications notifications)
         {
             context.SetChain(this);
             this.context = context;
             this.notifications = notifications;
-            foreach (var behaviorType in behaviorList)
+            foreach (var behaviorInstance in behaviorList)
             {
-                itemDescriptors.Enqueue(behaviorType);
+                itemDescriptors.Enqueue(behaviorInstance);
             }
 
             lookupSteps = pipelineExecutor.Incoming.Concat(pipelineExecutor.Outgoing).ToDictionary(rs => rs.BehaviorType);
@@ -62,12 +62,12 @@
 
         public void TakeSnapshot()
         {
-            snapshots.Push(new Queue<Type>(itemDescriptors));
+            snapshots.Push(new Queue<IBehaviorInstance<T>>(itemDescriptors));
         }
 
         public void DeleteSnapshot()
         {
-            itemDescriptors = new Queue<Type>(snapshots.Pop());
+            itemDescriptors = new Queue<IBehaviorInstance<T>>(snapshots.Pop());
         }
 
         void InvokeNext(T context)
@@ -77,14 +77,14 @@
                 return;
             }
 
-            var behaviorType = itemDescriptors.Dequeue();
+            var behavior = itemDescriptors.Dequeue();
             var stepEnded = new Observable<StepEnded>();
 
             try
             {
-                steps.OnNext(new StepStarted(lookupSteps[behaviorType].StepId, behaviorType, stepEnded));
+                steps.OnNext(new StepStarted(lookupSteps[behavior.Type].StepId, behavior.Type, stepEnded));
 
-                var instance = (IBehavior<T>) context.Builder.Build(behaviorType);
+                var instance = behavior.GetInstance(context.Builder);
 
                 var duration = Stopwatch.StartNew();
 
@@ -110,9 +110,9 @@
 
         readonly BusNotifications notifications;
         T context;
-        Queue<Type> itemDescriptors = new Queue<Type>();
+        Queue<IBehaviorInstance<T>> itemDescriptors = new Queue<IBehaviorInstance<T>>();
         Dictionary<Type, RegisterStep> lookupSteps;
-        Stack<Queue<Type>> snapshots = new Stack<Queue<Type>>();
+        Stack<Queue<IBehaviorInstance<T>>> snapshots = new Stack<Queue<IBehaviorInstance<T>>>();
         Observable<StepStarted> steps;
     }
 }
