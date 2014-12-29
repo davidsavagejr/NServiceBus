@@ -45,7 +45,7 @@
         /// <summary>
         /// The max throughput for the transport. This allows the user to throttle their endpoint if needed
         /// </summary>
-        [ConfigurationProperty("MaximumMessageThroughputPerSecond", IsRequired = false, DefaultValue = 0)]
+        [ConfigurationProperty("MaximumMessageThroughputPerSecond", IsRequired = false, DefaultValue = -1)]
         public int MaximumMessageThroughputPerSecond
         {
             get

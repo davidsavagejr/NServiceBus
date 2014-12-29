@@ -56,9 +56,20 @@ namespace NServiceBus.Features
 
             var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
 
-            if (transportConfig != null && transportConfig.MaximumConcurrencyLevel != 0)
+            if (transportConfig != null)
             {
-                concurrencyConfig = new SharedConcurrencyConfig(transportConfig.MaximumConcurrencyLevel);
+                if (transportConfig.MaximumConcurrencyLevel != 0)
+                {
+                    concurrencyConfig = new SharedConcurrencyConfig(transportConfig.MaximumConcurrencyLevel);
+                }
+                if (transportConfig.MaximumMessageThroughputPerSecond == 0)
+                {
+                    throttlingConfig = new NoLimitThrottlingConfig();
+                }
+                else if (transportConfig.MaximumMessageThroughputPerSecond != -1)
+                {
+                    throttlingConfig = new SharedLimitThrottlingConfig(transportConfig.MaximumConcurrencyLevel);
+                }
             }
 
             var executor = throttlingConfig.WrapExecutor(concurrencyConfig.BuildExecutor());
