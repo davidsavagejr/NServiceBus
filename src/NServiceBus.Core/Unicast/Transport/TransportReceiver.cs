@@ -42,11 +42,7 @@ namespace NServiceBus.Unicast.Transport
         /// </summary>
         public IManageMessageFailures FailureManager { get; set; }
 
-        /// <summary>
-        ///     Gets the maximum concurrency level this <see cref="TransportReceiver" /> is able to support.
-        /// </summary>
-        public virtual int MaximumConcurrencyLevel { get; private set; }
-
+       
         /// <summary>
         ///     The <see cref="TransactionSettings" /> being used.
         /// </summary>
