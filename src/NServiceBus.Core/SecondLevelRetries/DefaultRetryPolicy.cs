@@ -1,41 +1,48 @@
 namespace NServiceBus.SecondLevelRetries
 {
     using System;
-    using NServiceBus.SecondLevelRetries.Helpers;
 
-    class SecondLevelRetriesConfiguration
+    class DefaultRetryPolicy:RetryPolicy
     {
-        public SecondLevelRetriesConfiguration()
+        readonly int maxRetries;
+        readonly TimeSpan timeIncrease;
+
+        public DefaultRetryPolicy(int maxRetries,TimeSpan timeIncrease)
         {
-            TimeIncrease = DefaultTimeIncrease;
-            NumberOfRetries = DefaultNumberOfRetries;
-            RetryPolicy = DefaultRetryPolicy;
+            this.maxRetries = maxRetries;
+            this.timeIncrease = timeIncrease;
         }
 
-        public Func<TransportMessage, TimeSpan> RetryPolicy { get; set; }
-        public int NumberOfRetries { get; set; }
-        public TimeSpan TimeIncrease { get; set; }
-
-        TimeSpan DefaultRetryPolicy(TransportMessage message)
+        public override bool TryGetDelay(TransportMessage message, Exception ex, int currentRetry, out TimeSpan delay)
         {
-            if (HasReachedMaxTime(message))
+            delay = TimeSpan.MinValue;
+
+            if (currentRetry > maxRetries)
             {
-                return TimeSpan.MinValue;
+                return false;
             }
 
-            var numberOfRetries = TransportMessageHeaderHelper.GetNumberOfRetries(message);
+            if (HasReachedMaxTime(message))
+            {
+                return false;
+            }
 
-            var timeToIncreaseInTicks = TimeIncrease.Ticks*(numberOfRetries + 1);
-            var timeIncrease = TimeSpan.FromTicks(timeToIncreaseInTicks);
+            delay = TimeSpan.FromTicks(timeIncrease.Ticks * currentRetry);
 
-            return numberOfRetries >= NumberOfRetries ? TimeSpan.MinValue : timeIncrease;
+            return true;
         }
 
         static bool HasReachedMaxTime(TransportMessage message)
         {
-            var timestampHeader = TransportMessageHeaderHelper.GetHeader(message, SecondLevelRetriesHeaders.RetriesTimestamp);
+            string timestampHeader;
 
-            if (String.IsNullOrEmpty(timestampHeader))
+            if (!message.Headers.TryGetValue(SecondLevelRetriesBehavior.RetriesTimestamp, out timestampHeader))
+            {
+                return false;
+            }
+
+            
+            if (string.IsNullOrEmpty(timestampHeader))
             {
                 return false;
             }
@@ -60,6 +67,7 @@ namespace NServiceBus.SecondLevelRetries
             return false;
         }
 
+        
         public static int DefaultNumberOfRetries = 3;
         public static TimeSpan DefaultTimeIncrease = TimeSpan.FromSeconds(10);
     }

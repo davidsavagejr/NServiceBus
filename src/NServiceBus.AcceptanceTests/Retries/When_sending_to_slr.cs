@@ -7,7 +7,6 @@
     using AcceptanceTesting;
     using MessageMutator;
     using NServiceBus.Config;
-    using NServiceBus.Unicast;
     using NUnit.Framework;
     using Unicast.Messages;
 
@@ -28,20 +27,7 @@
 
         }
         
-        [Test]
-        public void Should_raise_FinishedMessageProcessing_event()
-        {
-            var context = new Context();
-
-            Scenario.Define(context)
-                    .WithEndpoint<RetryEndpoint>(b => b.Given(bus => bus.SendLocal(new MessageToBeRetried())))
-                    .Done(c => c.FinishedMessageProcessingCalledAfterFaultManagerInvoked)
-                    .Run();
-
-            Assert.IsTrue(context.FinishedMessageProcessingCalledAfterFaultManagerInvoked);
-
-        }
-
+      
         [Test]
         public void Should_preserve_the_original_body_for_serialization_exceptions()
         {
@@ -84,33 +70,7 @@
                     });
             }
 
-            class FinishedProcessingListener : IWantToRunWhenBusStartsAndStops
-            {
-                //readonly Context context;
-
-                public FinishedProcessingListener(UnicastBus bus, Context context)
-                {
-                    //this.context = context;
-                    //bus.Transport.FinishedMessageProcessing += Transport_FinishedMessageProcessing;
-                }
-
-                //void Transport_FinishedMessageProcessing(object sender, FinishedMessageProcessingEventArgs e)
-                //{
-                //    if (context.FaultManagerInvoked)
-                //    {
-                //        context.FinishedMessageProcessingCalledAfterFaultManagerInvoked = true;
-                //    }
-                //}
-
-                public void Start()
-                {
-                }
-
-                public void Stop()
-                {
-                }
-            }
-
+   
             class BodyMutator : IMutateTransportMessages, INeedInitialization
             {
                 public Context Context { get; set; }

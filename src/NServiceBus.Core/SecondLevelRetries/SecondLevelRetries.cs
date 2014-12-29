@@ -3,6 +3,8 @@ namespace NServiceBus.Features
     using System;
     using Config;
     using NServiceBus.SecondLevelRetries;
+    using NServiceBus.Settings;
+    using NServiceBus.Transports;
 
     /// <summary>
     /// Used to configure Second Level Retries.
@@ -12,7 +14,6 @@ namespace NServiceBus.Features
         internal SecondLevelRetries()
         {
             EnableByDefault();
-            DependsOn<ForwarderFaultManager>();
 
             Prerequisite(context => !context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"), "Send only endpoints can't use SLR since it requires receive capabilities");
 
@@ -24,27 +25,10 @@ namespace NServiceBus.Features
         /// </summary>
         protected internal override void Setup(FeatureConfigurationContext context)
         {
-            var retryPolicy = context.Settings.GetOrDefault<Func<TransportMessage, TimeSpan>>("SecondLevelRetries.RetryPolicy");
+            var  retryPolicy = GetRetryPolicy(context.Settings);
 
-            var secondLevelRetriesConfiguration = new SecondLevelRetriesConfiguration();
-            if (retryPolicy != null)
-            {
-                secondLevelRetriesConfiguration.RetryPolicy = retryPolicy;
-            }
-
-
-            var retriesConfig = context.Settings.GetConfigSection<SecondLevelRetriesConfig>();
-            if (retriesConfig == null)
-            {
-                return;
-            }
-
-            secondLevelRetriesConfiguration.NumberOfRetries = retriesConfig.NumberOfRetries;
-
-            if (retriesConfig.TimeIncrease != TimeSpan.MinValue)
-            {
-                secondLevelRetriesConfiguration.TimeIncrease = retriesConfig.TimeIncrease;
-            }
+            context.Pipeline.Register<SecondLevelRetriesBehavior.Registration, SecondLevelRetriesBehavior>(
+                builder => new SecondLevelRetriesBehavior(builder.Build<IDeferMessages>(), retryPolicy));
         }
 
         bool IsEnabledInConfig(FeatureConfigurationContext context)
@@ -58,6 +42,24 @@ namespace NServiceBus.Features
                 return false;
 
             return retriesConfig.Enabled;
+        }
+
+        RetryPolicy GetRetryPolicy(ReadOnlySettings settings)
+        {
+            var customRetryPolicy = settings.GetOrDefault<Func<TransportMessage, TimeSpan>>("SecondLevelRetries.RetryPolicy");
+
+            if (customRetryPolicy != null)
+            {
+                return new CustomRetryPolicy(customRetryPolicy);
+            }
+
+            var retriesConfig = settings.GetConfigSection<SecondLevelRetriesConfig>();
+            if (retriesConfig != null)
+            {
+                return new DefaultRetryPolicy(retriesConfig.NumberOfRetries, retriesConfig.TimeIncrease);
+            }
+
+            return new DefaultRetryPolicy(DefaultRetryPolicy.DefaultNumberOfRetries,DefaultRetryPolicy.DefaultTimeIncrease);
         }
     }
 }

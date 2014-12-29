@@ -44,7 +44,7 @@ namespace NServiceBus.Pipeline
         /// Allows for customization of the container registration for this step
         /// </summary>
         /// <param name="customRegistration"></param>
-        protected void ContainerRegistration<T>(Func<IBuilder,ReadOnlySettings,T> customRegistration)
+        public void ContainerRegistration<T>(Func<IBuilder,ReadOnlySettings,T> customRegistration)
         {
             customContainerRegistration = (settings, container) => container.ConfigureComponent(builder => customRegistration(builder,settings), DependencyLifecycle.InstancePerCall);
         }

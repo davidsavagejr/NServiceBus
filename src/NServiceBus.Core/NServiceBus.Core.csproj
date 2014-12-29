@@ -141,7 +141,6 @@
     <Compile Include="Pipeline\StepRegistrationSequence.cs" />
     <Compile Include="Pipeline\SynchronousExecutor.cs" />
     <Compile Include="Pipeline\PipelineCollection.cs" />
-    <Compile Include="SecondLevelRetries\FirstLevelRetriesBehavior.cs" />
     <Compile Include="Settings\Concurrency\ConcurrencySettings.cs" />
     <Compile Include="Settings\Concurrency\ConcurrencySettingsExtensions.cs" />
     <Compile Include="Settings\Concurrency\IConcurrencyConfig.cs" />
@@ -155,6 +154,9 @@
     <Compile Include="Settings\Throttling\ThrottlingSettingsExtensions.cs" />
     <Compile Include="Settings\Throttling\IThrottlingConfig.cs" />
     <Compile Include="Settings\Concurrency\SharedConcurrencyConfig.cs" />
+    <Compile Include="SecondLevelRetries\CustomRetryPolicy.cs" />
+    <Compile Include="SecondLevelRetries\RetryPolicy.cs" />
+    <Compile Include="SecondLevelRetries\SecondLevelRetriesBehavior.cs" />
     <Compile Include="Transports\IncomingContextExtensions.cs" />
     <Compile Include="Gateway\IDeduplicateMessages.cs" />
     <Compile Include="Hosting\HostInfoConfigurationExtensions.cs" />
@@ -247,8 +249,7 @@
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />
     <Compile Include="Scheduling\Scheduler.cs" />
     <Compile Include="Scheduling\TaskDefinition.cs" />
-    <Compile Include="SecondLevelRetries\Helpers\TransportMessageHelpers_Obsolete.cs" />
-    <Compile Include="SecondLevelRetries\SecondLevelRetriesConfiguration.cs" />
+    <Compile Include="SecondLevelRetries\DefaultRetryPolicy.cs" />
     <Compile Include="Serialization\CustomSerialization.cs" />
     <Compile Include="Serialization\CustomSerializer.cs" />
     <Compile Include="Serialization\SerializationConfigExtensions.cs" />
@@ -519,9 +520,6 @@
     <Compile Include="Logging\ILog.cs" />
     <Compile Include="Logging\ILoggerFactory.cs" />
     <Compile Include="Logging\LogManager.cs" />
-    <Compile Include="SecondLevelRetries\TransportMessageHelpers.cs" />
-    <Compile Include="SecondLevelRetries\SecondLevelRetriesProcessor.cs" />
-    <Compile Include="SecondLevelRetries\Helpers\SecondLevelRetriesHeaders.cs" />
     <Compile Include="MessageConventions_Obsolete.cs" />
     <Compile Include="MessageInterfaces\IMessageMapper.cs" />
     <Compile Include="MessageInterfaces\MessageMapper\Reflection\MessageMapper.cs" />

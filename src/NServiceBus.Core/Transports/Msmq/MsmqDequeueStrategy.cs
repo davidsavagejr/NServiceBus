@@ -29,6 +29,8 @@ namespace NServiceBus.Transports.Msmq
         /// </summary>
         public void Init(DequeueSettings settings)
         {
+            publicReceiveAddress = Address.Parse(settings.QueueName);
+
             queue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(settings.QueueName), false, true, QueueAccessMode.Receive);
 
             if (isTransactional && !QueueIsTransactional())
@@ -109,6 +111,7 @@ namespace NServiceBus.Transports.Msmq
 
                 observable.OnNext(new MessageAvailable(c =>
                 {
+					c.SetPublicReceiveAddress(publicReceiveAddress.ToString());
                     c.Set(queue);
                     c.Set("MsmqDequeueStrategy.PeekResetEvent",peekResetEvent);
                 }));
@@ -167,6 +170,8 @@ namespace NServiceBus.Transports.Msmq
         MessageQueue queue;
         ManualResetEvent stopResetEvent = new ManualResetEvent(true);
         AutoResetEvent peekResetEvent = new AutoResetEvent(false);
+
+        Address publicReceiveAddress;
         
         Observable<MessageAvailable> observable = new Observable<MessageAvailable>();
 

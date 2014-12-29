@@ -147,6 +147,21 @@ namespace NServiceBus.Pipeline
             AddStep(new T());
         }
 
+        /// <summary>
+        /// Register a new step into the pipeline.
+        /// </summary>
+        /// <typeparam name="T">The <see cref="RegisterStep"/> to use to perform the registration.</typeparam>
+        /// <typeparam name="TBehavior"></typeparam>
+        /// <param name="customInitializer">A function the returns a new instance of the behavior</param>
+        public void Register<T,TBehavior>(Func<IBuilder, TBehavior> customInitializer) where T : RegisterStep, new()
+        {
+            var registration = new T();
+
+            registration.ContainerRegistration((b, s) => customInitializer(b));
+
+            AddStep(registration);
+        }
+
 
         /// <summary>
         /// Register a new step into the pipeline.
@@ -182,5 +197,6 @@ namespace NServiceBus.Pipeline
 
         readonly PipelineModifications modifications;
 
+  
     }
 }
