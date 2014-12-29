@@ -3,38 +3,36 @@ namespace NServiceBus.Unicast.Transport
     using NServiceBus.Faults;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Satellites.Config;
+    using NServiceBus.Satellites;
     using NServiceBus.Settings;
     using NServiceBus.Transports;
 
     class SatelliteTransportReceiver : TransportReceiver
     {
-        SatelliteContext satelliteContext;
+        ISatellite satellite;
 
-        public SatelliteTransportReceiver(TransactionSettings transactionSettings, IDequeueMessages receiver, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config)
-            : base(transactionSettings, receiver, manageMessageFailures, settings, config)
+
+        public SatelliteTransportReceiver(string id, TransactionSettings transactionSettings, IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, ISatellite satellite) : base(id, transactionSettings, receiver, queue, purgeOnStartup, pipelineExecutor, executor, manageMessageFailures, settings, config)
         {
+            this.satellite = satellite;
         }
 
-        PipelineExecutor pipelineExecutor;
-
-        public void SetContext(SatelliteContext satelliteContext)
+        protected override void SetContext(IncomingContext context)
         {
-            this.satelliteContext = satelliteContext;
-            pipelineExecutor = satelliteContext.PipelineExecutor;
+            base.SetContext(context);
+            context.Set(satellite);
         }
 
-        protected override void InvokePipeline(MessageAvailable value)
+        public override void Start()
         {
-            var context = new IncomingContext(pipelineExecutor.CurrentContext);
+            base.Start();
+            satellite.Start();
+        }
 
-            value.InitializeContext(context);
-
-            context.Set(dequeueSettings);
-            context.Set(currentReceivePerformanceDiagnostics);
-            context.Set(satelliteContext.Instance);
-
-            pipelineExecutor.InvokeReceivePhysicalMessagePipeline(context);
+        public override void Stop()
+        {
+            base.Stop();
+            satellite.Stop();
         }
     }
 }

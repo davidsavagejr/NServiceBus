@@ -16,9 +16,7 @@ namespace NServiceBus.Unicast
     using Pipeline;
     using Pipeline.Contexts;
     using Routing;
-    using Satellites;
     using Settings;
-    using Transport;
     using Transports;
 
     /// <summary>
@@ -153,10 +151,14 @@ namespace NServiceBus.Unicast
         public ReadOnlySettings Settings { get; set; }
 
         /// <summary>
-        /// Sets an <see cref="TransportReceiver"/> implementation to use as the
-        /// listening endpoint for the bus.
+        /// Sets the collection of pipeline factories used to build pipelines for this bus.
         /// </summary>
-        public MainTransportReceiver Transport { get; set; }
+        public IEnumerable<PipelineFactory> PipelineFactories { get; set; }
+
+        /// <summary>
+        /// Sets the executor used by this bus.
+        /// </summary>
+        public IExecutor Executor { get; set; }
 
         /// <summary>
         /// Critical error handling
@@ -662,19 +664,14 @@ namespace NServiceBus.Unicast
                 }
 
                 AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+                var pipelines = PipelineFactories.SelectMany(x => x.BuildPipelines(Builder, Settings, Executor)).ToArray();
+                Executor.Start(pipelines.Select(x => x.Id).ToArray());
 
-                if (!DoNotStartTransport)
-                {
-                    var dequeueSettings = new DequeueSettings(InputAddress.Queue, MaximumConcurrencyLevel, PurgeOnStartup);
-
-                    Transport.Start(dequeueSettings);
-                }
+                pipelineCollection = new PipelineCollection(pipelines);
+                pipelineCollection.Start();
 
                 started = true;
             }
-
-            satelliteLauncher = new SatelliteLauncher(Builder);
-            satelliteLauncher.Start();
 
             ProcessStartupItems(
                 Builder.BuildAll<IWantToRunWhenBusStartsAndStops>().ToList(),
@@ -714,16 +711,6 @@ namespace NServiceBus.Unicast
 
             stopCompletedEvent.WaitOne();
         }
-
-        /// <summary>
-        /// Allow disabling the unicast bus.
-        /// </summary>
-        public bool DoNotStartTransport { get; set; }
-
-        /// <summary>
-        /// The address of this endpoint.
-        /// </summary>
-        public Address InputAddress { get; set; }
 
         void AssertHasLocalAddress()
         {
@@ -792,15 +779,9 @@ namespace NServiceBus.Unicast
             }
 
             Log.Info("Initiating shutdown.");
-
-            if (!DoNotStartTransport)
-            {
-                Transport.Stop();
-            }
-
+            pipelineCollection.Stop();
+            Executor.Stop();
             ExecuteIWantToRunAtStartupStopMethods();
-
-            satelliteLauncher.Stop();
 
             Log.Info("Shutdown complete.");
 
@@ -863,7 +844,7 @@ namespace NServiceBus.Unicast
         ManualResetEvent stopCompletedEvent = new ManualResetEvent(true);
 
         IMessageMapper messageMapper;
-        SatelliteLauncher satelliteLauncher;
+        PipelineCollection pipelineCollection;
 
         ConcurrentDictionary<string, string> staticOutgoingHeaders = new ConcurrentDictionary<string, string>();
 
@@ -892,16 +873,6 @@ namespace NServiceBus.Unicast
                 return Builder.Build<TransportDefinition>();
             }
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public  int MaximumConcurrencyLevel { get; set; }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool PurgeOnStartup { get; set; }
 
         static void ProcessStartupItems<T>(IEnumerable<T> items, Action<T> iteration, Action<Exception> inCaseOfFault, EventWaitHandle eventToSet)
         {

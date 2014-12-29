@@ -182,8 +182,6 @@
     <Compile Include="Outbox\OutboxDeduplicationBehaviorTests.cs" />
     <Compile Include="Routing\StaticMessageRouterTests.cs" />
     <Compile Include="Sagas\UniqueAttributeTests.cs" />
-    <Compile Include="Satellite\SatelliteLauncherContext.cs" />
-    <Compile Include="Satellite\SatelliteLauncherTests.cs" />
     <Compile Include="Scheduler\DefaultSchedulerTests.cs" />
     <Compile Include="Scheduler\ScheduledTaskMessageHandlerTests.cs" />
     <Compile Include="Scheduler\ScheduleTests.cs" />
@@ -223,9 +221,7 @@
     <Compile Include="Timeout\When_removing_timeouts_from_the_storage.cs" />
     <Compile Include="Fakes\FakeFailureManager.cs" />
     <Compile Include="Fakes\FakeReceiver.cs" />
-    <Compile Include="Transport\for_the_transactional_transport.cs" />
-    <Compile Include="Transport\When_specifying_a_non_zero_throughput_limit.cs" />
-    <Compile Include="Transport\When_specifying_a_zero_throughput_limit.cs" />
+    <Compile Include="Pipeline\When_specifying_a_non_zero_throughput_limit.cs" />
     <Compile Include="Unicast\ConfigurationSettings.cs" />
     <Compile Include="Unicast\ConfiguringMessageEndpointMapping.cs" />
     <Compile Include="Unicast\Config\ConfigurationSettings.cs" />

@@ -6,14 +6,14 @@ namespace NServiceBus.Features
     using System.Linq;
     using AutomaticSubscriptions;
     using Config;
-    using Faults;
     using Logging;
     using NServiceBus.FirstLevelRetries;
     using NServiceBus.Hosting;
+    using NServiceBus.Settings.Concurrency;
+    using NServiceBus.Settings.Throttling;
     using NServiceBus.Support;
     using NServiceBus.Unicast;
     using Pipeline;
-    using Transports;
     using Unicast.Messages;
     using Unicast.Routing;
     using Unicast.Transport;
@@ -36,6 +36,8 @@ namespace NServiceBus.Features
                     {"UserName", Environment.UserName},
                     {"PathToExecutable", fullPathToStartingExe}
                 });
+                s.SetDefault<IConcurrencyConfig>(new SharedConcurrencyConfig(null));
+                s.SetDefault<IThrottlingConfig>(new NoLimitThrottlingConfig());
             });
         }
 
@@ -47,24 +49,25 @@ namespace NServiceBus.Features
 
             context.Container.RegisterSingleton(hostInfo);
             
-            var defaultAddress = context.Settings.LocalAddress();
+            //var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
+            //var maximumConcurrencyLevel = 1;
 
-            
+            //if (transportConfig != null)
+            //{
+            //    maximumConcurrencyLevel = transportConfig.MaximumConcurrencyLevel;
+            //}
 
-            var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
-            var maximumConcurrencyLevel = 1;
+            var concurrencyConfig = context.Settings.Get<IConcurrencyConfig>();
+            var throttlingConfig = context.Settings.Get<IThrottlingConfig>();
 
-            if (transportConfig != null)
-            {
-                maximumConcurrencyLevel = transportConfig.MaximumConcurrencyLevel;
-            }
+            var executor = throttlingConfig.WrapExecutor(concurrencyConfig.BuildExecutor());
 
+            context.Container.ConfigureComponent<MainPipelineFactory>(DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent<SatellitePipelineFactory>(DependencyLifecycle.SingleInstance);
 
             context.Container.ConfigureComponent<Unicast.UnicastBus>(DependencyLifecycle.SingleInstance)
-                .ConfigureProperty(u => u.InputAddress, defaultAddress)
                 .ConfigureProperty(u => u.HostInformation, hostInfo)
-                .ConfigureProperty(u => u.MaximumConcurrencyLevel, maximumConcurrencyLevel)
-                .ConfigureProperty(u => u.PurgeOnStartup, context.Settings.GetOrDefault<bool>("Transport.PurgeOnStartup"));
+                .ConfigureProperty(u => u.Executor, executor);
 
             ConfigureSubscriptionAuthorization(context);
 
@@ -104,17 +107,6 @@ namespace NServiceBus.Features
 
             context.Pipeline.Register<InvokeFaultManagerBehavior.Registration>();
             context.Pipeline.Register<EnforceMessageIdBehavior.Registration>();   
-  
-           
-            context.Container.ConfigureComponent(b => new MainTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>(), b.Build<PipelineExecutor>())
-            {
-                Notifications = b.Build<BusNotifications>()
-            }, DependencyLifecycle.InstancePerCall);
-
-            context.Container.ConfigureComponent(b => new SatelliteTransportReceiver(transactionSettings, b.Build<IDequeueMessages>(), b.Build<IManageMessageFailures>(), context.Settings, b.Build<Configure>())
-            {
-                Notifications = b.Build<BusNotifications>()
-            }, DependencyLifecycle.InstancePerCall);
         }
 
         static Guid GenerateDefaultHostId(out string fullPathToStartingExe)

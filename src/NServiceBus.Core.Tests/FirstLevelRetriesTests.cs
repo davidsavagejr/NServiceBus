@@ -133,7 +133,7 @@
         {
             var context = new IncomingContext(null);
 
-            context.Set(new DequeueSettings(queueName,1));
+            context.Set(new DequeueSettings(queueName));
             context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage(messageId, new Dictionary<string, string>()));
 
             return context;

@@ -22,12 +22,6 @@
         /// Stops the dequeuing of messages.
         /// </summary>
         void Stop();
-
-        /// <summary>
-        /// Changes the concurrency level of the receiver
-        /// </summary>
-        /// <param name="newConcurrencyLevel">The new concurrency level to use</param>
-        void ChangeConcurrencyLevel(int newConcurrencyLevel);
     }
 
     /// <summary>
@@ -39,9 +33,8 @@
         /// 
         /// </summary>
         /// <param name="queue"></param>
-        /// <param name="maximumConcurrencyLevel"></param>
         /// <param name="purgeOnStartup"></param>
-        public DequeueSettings(string queue, int maximumConcurrencyLevel,bool purgeOnStartup = false)
+        public DequeueSettings(string queue, bool purgeOnStartup = false)
         {
             if (string.IsNullOrEmpty(queue))
             {
@@ -49,18 +42,12 @@
             }
             PurgeOnStartup = purgeOnStartup;
             QueueName = queue;
-            MaximumConcurrencyLevel = maximumConcurrencyLevel;
         }
 
         /// <summary>
         /// The native queue to consume messages from
         /// </summary>
         public string QueueName{ get; private set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public int MaximumConcurrencyLevel { get; private set; }
 
         /// <summary>
         /// Tells the dequeuer if the queue should be purged before starting to consume messages from it

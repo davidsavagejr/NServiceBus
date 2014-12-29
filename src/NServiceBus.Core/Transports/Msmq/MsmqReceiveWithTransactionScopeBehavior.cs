@@ -3,6 +3,7 @@ namespace NServiceBus.Transports.Msmq
     using System;
     using System.Diagnostics;
     using System.Messaging;
+    using System.Threading;
     using System.Transactions;
     using NServiceBus.Faults;
     using NServiceBus.Logging;
@@ -24,8 +25,8 @@ namespace NServiceBus.Transports.Msmq
             using (var scope = new TransactionScope(TransactionScopeOption.Required, transactionOptions))
             {
                 Message message;
-
-                if (!TryReceiveMessage(() => queue.Receive(TimeSpan.FromSeconds(1), MessageQueueTransactionType.Automatic), out message))
+                var peekResetEvent = context.Get<AutoResetEvent>("MsmqDequeueStrategy.PeekResetEvent");
+                if (!TryReceiveMessage(() => queue.Receive(TimeSpan.FromSeconds(1), MessageQueueTransactionType.Automatic), peekResetEvent, out message))
                 {
                     scope.Complete();
                     return;
@@ -66,7 +67,7 @@ namespace NServiceBus.Transports.Msmq
         }
 
         [DebuggerNonUserCode]
-        bool TryReceiveMessage(Func<Message> receive, out Message message)
+        bool TryReceiveMessage(Func<Message> receive, AutoResetEvent peekResetEvent, out Message message)
         {
             message = null;
 
@@ -89,10 +90,10 @@ namespace NServiceBus.Transports.Msmq
             //{
             //    //Logger.Error("Error in receiving messages.", ex);
             //}
-            //finally
-            //{
-            //    //peekResetEvent.Set();
-            //}
+            finally
+            {
+                peekResetEvent.Set();
+            }
 
             return false;
         }
