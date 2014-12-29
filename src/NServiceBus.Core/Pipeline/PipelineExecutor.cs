@@ -83,7 +83,7 @@
         /// <typeparam name="TContext">The context to use.</typeparam>
         /// <param name="behaviors">The behaviors to execute in the specified order.</param>
         /// <param name="context">The context instance.</param>
-        public void InvokePipeline<TContext>(IEnumerable<IBehaviorInstance<TContext>> behaviors, TContext context) where TContext : BehaviorContext
+        void InvokePipeline<TContext>(IEnumerable<IBehaviorInstance<TContext>> behaviors, TContext context) where TContext : BehaviorContext
         {
             var pipeline = new BehaviorChain<TContext>(behaviors, context, this, busNotifications);
 
