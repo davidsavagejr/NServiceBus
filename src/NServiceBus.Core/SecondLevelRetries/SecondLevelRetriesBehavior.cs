@@ -12,11 +12,13 @@ namespace NServiceBus
     {
         readonly IDeferMessages deferer;
         readonly RetryPolicy retryPolicy;
+        readonly BusNotifications notifications;
 
-        public SecondLevelRetriesBehavior(IDeferMessages deferer, RetryPolicy retryPolicy)
+        public SecondLevelRetriesBehavior(IDeferMessages deferer, RetryPolicy retryPolicy, BusNotifications notifications)
         {
             this.deferer = deferer;
             this.retryPolicy = retryPolicy;
+            this.notifications = notifications;
         }
 
         public void Invoke(IncomingContext context, Action next)
@@ -48,6 +50,8 @@ namespace NServiceBus
                     {
                         DelayDeliveryWith = delay
                     });
+
+                    notifications.Errors.InvokeMessageHasBeenSentToSecondLevelRetries(currentRetry,message,ex);
 
                     return;
                 }

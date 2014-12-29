@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using NServiceBus.Faults;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.SecondLevelRetries;
     using NServiceBus.Transports;
@@ -14,15 +15,25 @@
         [Test]
         public void ShouldRetryIfPolicyReturnsADelay()
         {
+            var notifications = new BusNotifications();
+
             var deferrer = new FakeMessageDeferrer();
             var delay = TimeSpan.FromSeconds(5);
-            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(delay));
+            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(delay), notifications);
+
+            var slrNotification = new SecondLevelRetry();
+
+            notifications.Errors.MessageHasBeenSentToSecondLevelRetries.Subscribe(slr =>
+            {
+                slrNotification = slr; });
 
             behavior.Invoke(CreateContext("someid", 1), () => { throw new Exception("testex"); });
 
             Assert.AreEqual("someid", deferrer.DeferredMessage.Id);
             Assert.AreEqual(delay, deferrer.Delay);
             Assert.AreEqual(Address.Parse("test-address-for-this-pipeline"), deferrer.MessageRoutedTo);
+
+            Assert.AreEqual("testex", slrNotification.Exception.Message);
         }
 
         [Test]
@@ -30,7 +41,7 @@
         {
             var deferrer = new FakeMessageDeferrer();
             var delay = TimeSpan.FromSeconds(5);
-            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(delay));
+            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(delay),new BusNotifications());
 
             behavior.Invoke(CreateContext("someid", 0), () => { throw new Exception("testex"); });
 
@@ -41,7 +52,7 @@
         public void ShouldSkipRetryIfNoDelayIsReturned()
         {
             var deferrer = new FakeMessageDeferrer();
-            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy());
+            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(), new BusNotifications());
             var context = CreateContext("someid", 1);
 
             Assert.Throws<Exception>(() => behavior.Invoke(context, () => { throw new Exception("testex"); }));
@@ -52,7 +63,7 @@
         public void ShouldSkipRetryForDeserializationErrors()
         {
             var deferrer = new FakeMessageDeferrer();
-            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(TimeSpan.FromSeconds(5)));
+            var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(TimeSpan.FromSeconds(5)), new BusNotifications());
             var context = CreateContext("someid", 1);
 
             Assert.Throws<MessageDeserializationException>(() => behavior.Invoke(context, () => { throw new MessageDeserializationException("testex"); }));
@@ -65,7 +76,7 @@
             var deferrer = new FakeMessageDeferrer();
             var retryPolicy = new FakePolicy(TimeSpan.FromSeconds(5));
 
-            var behavior = new SecondLevelRetriesBehavior(deferrer, retryPolicy);
+            var behavior = new SecondLevelRetriesBehavior(deferrer, retryPolicy, new BusNotifications());
             var currentRetry = 3;
 
             behavior.Invoke(CreateContext("someid", currentRetry), () => { throw new Exception("testex"); });
@@ -83,7 +94,7 @@
             context.PhysicalMessage.Headers.Clear();
 
 
-            var behavior = new SecondLevelRetriesBehavior(deferrer, retryPolicy);
+            var behavior = new SecondLevelRetriesBehavior(deferrer, retryPolicy, new BusNotifications());
 
             behavior.Invoke(context, () => { throw new Exception("testex"); });
 

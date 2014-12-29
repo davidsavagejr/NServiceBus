@@ -28,7 +28,7 @@ namespace NServiceBus.Features
             var  retryPolicy = GetRetryPolicy(context.Settings);
 
             context.Pipeline.Register<SecondLevelRetriesBehavior.Registration, SecondLevelRetriesBehavior>(
-                builder => new SecondLevelRetriesBehavior(builder.Build<IDeferMessages>(), retryPolicy));
+                builder => new SecondLevelRetriesBehavior(builder.Build<IDeferMessages>(), retryPolicy,builder.Build<BusNotifications>()));
         }
 
         bool IsEnabledInConfig(FeatureConfigurationContext context)
