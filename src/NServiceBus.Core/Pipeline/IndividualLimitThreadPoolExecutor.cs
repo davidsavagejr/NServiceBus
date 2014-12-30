@@ -3,17 +3,21 @@ namespace NServiceBus.Pipeline
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Janitor;
 
     class IndividualLimitThreadPoolExecutor : IExecutor
     {
         readonly int defaultLimit;
         readonly Dictionary<string, int> limits;
+        [SkipWeaving]
+        readonly BusNotifications busNotifications;
         Dictionary<string, LimitedThreadPoolExecutor> executors;
 
-        public IndividualLimitThreadPoolExecutor(int defaultLimit, Dictionary<string, int> limits)
+        public IndividualLimitThreadPoolExecutor(int defaultLimit, Dictionary<string, int> limits, BusNotifications busNotifications)
         {
             this.defaultLimit = defaultLimit;
             this.limits = limits;
+            this.busNotifications = busNotifications;
         }
 
         public virtual void Dispose()
@@ -38,13 +42,13 @@ namespace NServiceBus.Pipeline
             executors = pipelineIds.ToDictionary(x => x, x =>
             {
                 int overridden;
-                return limits.TryGetValue(x, out overridden) 
-                    ? new LimitedThreadPoolExecutor(overridden) 
-                    : new LimitedThreadPoolExecutor(defaultLimit);
+                return limits.TryGetValue(x, out overridden)
+                    ? new LimitedThreadPoolExecutor(overridden, busNotifications)
+                    : new LimitedThreadPoolExecutor(defaultLimit, busNotifications);
             });
             foreach (var executor in executors)
             {
-                executor.Value.Start(pipelineIds);
+                executor.Value.Start(new []{executor.Key});
             }
         }
 

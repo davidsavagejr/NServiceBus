@@ -130,6 +130,8 @@
     <Compile Include="Features\PrerequisiteStatus.cs" />
     <Compile Include="FirstLevelRetries\FirstLevelRetries.cs" />
     <Compile Include="FirstLevelRetries\FirstLevelRetryPolicy.cs" />
+    <Compile Include="Pipeline\ExecutorNotifications.cs" />
+    <Compile Include="Pipeline\ExecutorState.cs" />
     <Compile Include="Pipeline\PerCallBehavior.cs" />
     <Compile Include="Pipeline\IBehaviorInstance.cs" />
     <Compile Include="Pipeline\IExecutor.cs" />

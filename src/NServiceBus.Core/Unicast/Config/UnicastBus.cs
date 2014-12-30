@@ -47,7 +47,7 @@ namespace NServiceBus.Features
                 context.Settings.Get<Dictionary<string, string>>("NServiceBus.HostInformation.Properties"));
 
             context.Container.RegisterSingleton(hostInfo);
-
+            context.Container.ConfigureComponent<BusNotifications>(DependencyLifecycle.SingleInstance);
            
 
             var concurrencyConfig = context.Settings.Get<IConcurrencyConfig>();
@@ -71,14 +71,13 @@ namespace NServiceBus.Features
                 }
             }
 
-            var executor = throttlingConfig.WrapExecutor(concurrencyConfig.BuildExecutor());
+            context.Container.ConfigureComponent(b => throttlingConfig.WrapExecutor(concurrencyConfig.BuildExecutor(b.Build<BusNotifications>())), DependencyLifecycle.SingleInstance);
 
             context.Container.ConfigureComponent<MainPipelineFactory>(DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SatellitePipelineFactory>(DependencyLifecycle.SingleInstance);
 
             context.Container.ConfigureComponent<Unicast.UnicastBus>(DependencyLifecycle.SingleInstance)
-                .ConfigureProperty(u => u.HostInformation, hostInfo)
-                .ConfigureProperty(u => u.Executor, executor);
+                .ConfigureProperty(u => u.HostInformation, hostInfo);
 
             ConfigureSubscriptionAuthorization(context);
 

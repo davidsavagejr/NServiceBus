@@ -36,6 +36,7 @@
         public TransportMessage PhysicalMessage
         {
             get { return Get<TransportMessage>(IncomingPhysicalMessageKey); }
+            set { Set(IncomingPhysicalMessageKey, value); }
         }
         
         /// <summary>
