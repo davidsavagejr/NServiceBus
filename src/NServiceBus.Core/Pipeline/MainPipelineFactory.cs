@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Pipeline
 {
     using System.Collections.Generic;
-    using NServiceBus.Faults;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Settings;
     using NServiceBus.Transports;
@@ -17,10 +16,7 @@
                 settings.LocalAddress().Queue,
                 settings.GetOrDefault<bool>("Transport.PurgeOnStartup"),
                 builder.Build<PipelineExecutor>(),
-                executor,
-                builder.Build<IManageMessageFailures>(),
-                settings,
-                builder.Build<Configure>());
+                executor);
             yield return pipeline;
         }
     }

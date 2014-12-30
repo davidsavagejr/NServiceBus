@@ -1,11 +1,9 @@
 namespace NServiceBus.Unicast.Transport
 {
     using System;
-    using NServiceBus.Faults;
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Settings;
     using NServiceBus.Transports;
     using NServiceBus.Unicast.Transport.Monitoring;
 
@@ -19,15 +17,12 @@ namespace NServiceBus.Unicast.Transport
     /// </summary>
     public class TransportReceiver : IDisposable, IObserver<MessageAvailable>
     {
-        internal TransportReceiver(string id,IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config)
+        internal TransportReceiver(string id,IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor)
         {
             this.id = id;
             this.pipelineExecutor = pipelineExecutor;
             this.executor = executor;
-            this.settings = settings;
-            this.config = config;
             dequeueSettings = new DequeueSettings(queue, purgeOnStartup);
-            FailureManager = manageMessageFailures;
             Receiver = receiver;
         }
 
@@ -36,12 +31,6 @@ namespace NServiceBus.Unicast.Transport
         /// </summary>
         public IDequeueMessages Receiver { get; set; }
 
-        /// <summary>
-        ///     Manages failed message processing.
-        /// </summary>
-        public IManageMessageFailures FailureManager { get; set; }
-
-      
         /// <summary>
         /// Gets the ID of this pipeline
         /// </summary>
@@ -91,7 +80,6 @@ namespace NServiceBus.Unicast.Transport
         /// <param name="context"></param>
         protected virtual void SetContext(IncomingContext context)
         {
-            context.Set(FailureManager);
         }
         
         void IObserver<MessageAvailable>.OnError(Exception error)
@@ -111,26 +99,26 @@ namespace NServiceBus.Unicast.Transport
             {
                 throw new InvalidOperationException("The transport is already started");
             }
-            var address = Address.Parse(dequeueSettings.QueueName);
+            //var address = Address.Parse(dequeueSettings.QueueName);
 
-            receiveAddress = address;
+            //receiveAddress = address;
 
-            var returnAddressForFailures = address;
+            //var returnAddressForFailures = address;
 
-            var workerRunsOnThisEndpoint = settings.GetOrDefault<bool>("Worker.Enabled");
+            //var workerRunsOnThisEndpoint = settings.GetOrDefault<bool>("Worker.Enabled");
 
-            if (workerRunsOnThisEndpoint
-                && (returnAddressForFailures.Queue.ToLower().EndsWith(".worker") || address == config.LocalAddress))
-                //this is a hack until we can refactor the SLR to be a feature. "Worker" is there to catch the local worker in the distributor
-            {
-                returnAddressForFailures = settings.Get<Address>("MasterNode.Address");
+            //if (workerRunsOnThisEndpoint
+            //    && (returnAddressForFailures.Queue.ToLower().EndsWith(".worker") || address == config.LocalAddress))
+            //    //this is a hack until we can refactor the SLR to be a feature. "Worker" is there to catch the local worker in the distributor
+            //{
+            //    returnAddressForFailures = settings.Get<Address>("MasterNode.Address");
 
-                Logger.InfoFormat("Worker started, failures will be redirected to {0}", returnAddressForFailures);
-            }
+            //    Logger.InfoFormat("Worker started, failures will be redirected to {0}", returnAddressForFailures);
+            //}
 
-            FailureManager.Init(returnAddressForFailures);
+            //FailureManager.Init(returnAddressForFailures);
 
-            InitializePerformanceCounters();
+            InitializePerformanceCounters(Address.Parse(dequeueSettings.QueueName));
 
             Logger.DebugFormat("Pipeline {0} is starting receiver for queue {0}.", Id, dequeueSettings.QueueName);
 
@@ -149,9 +137,9 @@ namespace NServiceBus.Unicast.Transport
             InnerStop();
         }
 
-        void InitializePerformanceCounters()
+        void InitializePerformanceCounters(Address address)
         {
-            currentReceivePerformanceDiagnostics = new ReceivePerformanceDiagnostics(receiveAddress);
+            currentReceivePerformanceDiagnostics = new ReceivePerformanceDiagnostics(address);
 
             currentReceivePerformanceDiagnostics.Initialize();
         }
@@ -195,18 +183,15 @@ namespace NServiceBus.Unicast.Transport
 
         static ILog Logger = LogManager.GetLogger<TransportReceiver>();
 
-        readonly Configure config;
-
+       
 
         readonly string id;
         readonly PipelineExecutor pipelineExecutor;
         readonly IExecutor executor;
-        readonly ReadOnlySettings settings;
-
+       
         ReceivePerformanceDiagnostics currentReceivePerformanceDiagnostics;
         
         bool isStarted;
-        Address receiveAddress;
         readonly DequeueSettings dequeueSettings;
     }
 }

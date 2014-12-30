@@ -4,6 +4,7 @@ namespace NServiceBus.Features
     using Config;
     using NServiceBus.SecondLevelRetries;
     using NServiceBus.Settings;
+    using NServiceBus.Transports;
 
     /// <summary>
     /// Used to configure Second Level Retries.
@@ -13,6 +14,9 @@ namespace NServiceBus.Features
         internal SecondLevelRetries()
         {
             EnableByDefault();
+
+
+            Prerequisite(context => context.Container.HasComponent<IDeferMessages>(), "SLR relies on the defer capability of the transport");
 
             Prerequisite(context => !context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"), "Send only endpoints can't use SLR since it requires receive capabilities");
 

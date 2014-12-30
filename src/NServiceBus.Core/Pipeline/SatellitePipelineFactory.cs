@@ -2,7 +2,6 @@
 {
     using System.Collections.Generic;
     using System.Linq;
-    using NServiceBus.Faults;
     using NServiceBus.FirstLevelRetries;
     using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
@@ -37,9 +36,6 @@
                         false,
                         pipelineExecutor,
                         executor,
-                        builder.Build<IManageMessageFailures>(),
-                        settings,
-                        builder.Build<Configure>(),
                         satellite);
 
                     var advancedSatellite = satellite as IAdvancedSatellite;

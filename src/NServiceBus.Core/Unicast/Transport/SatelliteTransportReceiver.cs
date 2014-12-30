@@ -1,10 +1,8 @@
 namespace NServiceBus.Unicast.Transport
 {
-    using NServiceBus.Faults;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Satellites;
-    using NServiceBus.Settings;
     using NServiceBus.Transports;
 
     class SatelliteTransportReceiver : TransportReceiver
@@ -12,7 +10,7 @@ namespace NServiceBus.Unicast.Transport
         ISatellite satellite;
 
 
-        public SatelliteTransportReceiver(string id, IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, IManageMessageFailures manageMessageFailures, ReadOnlySettings settings, Configure config, ISatellite satellite) : base(id, receiver, queue, purgeOnStartup, pipelineExecutor, executor, manageMessageFailures, settings, config)
+        public SatelliteTransportReceiver(string id, IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor, ISatellite satellite) : base(id, receiver, queue, purgeOnStartup, pipelineExecutor, executor)
         {
             this.satellite = satellite;
         }

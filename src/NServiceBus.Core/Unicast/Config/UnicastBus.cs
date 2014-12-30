@@ -107,7 +107,6 @@ namespace NServiceBus.Features
                 context.Pipeline.Register<HandlerTransactionScopeWrapperBehavior.Registration>();
             }
            
-            context.Pipeline.Register<InvokeFaultManagerBehavior.Registration>();
             context.Pipeline.Register<EnforceMessageIdBehavior.Registration>();   
         }
 

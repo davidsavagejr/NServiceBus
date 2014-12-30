@@ -1,37 +1,35 @@
 namespace NServiceBus.Features
 {
     using NServiceBus.Faults;
-    using NServiceBus.Faults.Forwarder;
     using NServiceBus.Faults.Forwarder.Config;
     using NServiceBus.Hosting;
     using NServiceBus.Transports;
 
-    class ForwarderFaultManager : Feature
+    class StoreFaultsInErrorQueue : Feature
     {
-        internal ForwarderFaultManager()
+        internal StoreFaultsInErrorQueue()
         {
             EnableByDefault();
             Prerequisite(context => !context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"), "Send only endpoints can't be used to forward received messages to the error queue as the endpoint requires receive capabilities");
-            Prerequisite(c => !c.Container.HasComponent<IManageMessageFailures>(), "An IManageMessageFailures implementation is already registered.");
         }
 
         protected internal override void Setup(FeatureConfigurationContext context)
         {
-            if (context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"))
-            {
-                return;
-            }
-
+          
             var errorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(context.Settings);
 
-            context.Container.ConfigureComponent(b => new ForwardingFaultManager(b.Build<ISendMessages>(),
-                errorQueue.ToString(),
+            context.Container.ConfigureComponent(b => new MoveFaultsToErrorQueueBehavior(
+                b.Build<CriticalError>(),
+                b.Build<ISendMessages>(),
                 b.Build<HostInformation>(),
-                b.Build<BusNotifications>()), DependencyLifecycle.InstancePerCall);
+                b.Build<BusNotifications>(), 
+                errorQueue.ToString()), DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent<FaultsQueueCreator>(DependencyLifecycle.InstancePerCall)
                 .ConfigureProperty(p => p.Enabled, true)
                 .ConfigureProperty(t => t.ErrorQueue, errorQueue);
+
+            context.Pipeline.Register<MoveFaultsToErrorQueueBehavior.Registration>();
         }
 
 

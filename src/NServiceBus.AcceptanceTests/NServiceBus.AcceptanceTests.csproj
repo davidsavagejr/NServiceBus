@@ -179,7 +179,7 @@
     <Compile Include="PubSub\When_subscribing_to_a_polymorphic_event.cs" />
     <Compile Include="PubSub\When_publishing_on_brokers.cs" />
     <Compile Include="PubSub\When_publishin.cs" />
-    <Compile Include="Retries\When_sending_to_slr.cs" />
+    <Compile Include="Retries\When_performing_slr.cs" />
     <Compile Include="Retries\When_fails_flr.cs" />
     <Compile Include="Retries\When_fails_with_retries_set_to_0.cs" />
     <Compile Include="Retries\When_doing_flr_with_default_settings.cs" />

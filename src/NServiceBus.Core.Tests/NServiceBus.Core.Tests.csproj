@@ -105,10 +105,9 @@
     <Compile Include="Config\When_using_convention_based_messages.cs" />
     <Compile Include="Conventions\MessageConventionSpecs.cs" />
     <Compile Include="DataBus\InMemoryDataBus.cs" />
-    <Compile Include="Faults\FaultsForwarderTests.cs" />
     <Compile Include="Features\FeatureDefaultsTests.cs" />
     <Compile Include="FirstLevelRetriesTests.cs" />
-    <Compile Include="Faults\InvokeFaultManagerTests.cs" />
+    <Compile Include="Faults\ForwardFaultsToErrorQueueTests.cs" />
     <Compile Include="Logging\DefaultFactoryTests.cs" />
     <Compile Include="Msmq\ConnectionStringParserTests.cs" />
     <Compile Include="Persistence\InMemory\InMemorySagaPersistenceFixture.cs" />
@@ -220,7 +219,6 @@
     <Compile Include="Timeout\When_pooling_timeouts.cs" />
     <Compile Include="Timeout\When_receiving_timeouts.cs" />
     <Compile Include="Timeout\When_removing_timeouts_from_the_storage.cs" />
-    <Compile Include="Fakes\FakeFailureManager.cs" />
     <Compile Include="Fakes\FakeReceiver.cs" />
     <Compile Include="Pipeline\When_specifying_a_non_zero_throughput_limit.cs" />
     <Compile Include="Unicast\ConfigurationSettings.cs" />

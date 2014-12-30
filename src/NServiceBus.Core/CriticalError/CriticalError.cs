@@ -47,7 +47,7 @@ namespace NServiceBus
         /// <summary>
         /// Trigger the action defined by <see cref="ConfigureCriticalErrorAction.DefineCriticalErrorAction(Configure,Action{string,Exception})"/>.
         /// </summary>
-        public void Raise(string errorMessage, Exception exception)
+        public virtual void Raise(string errorMessage, Exception exception)
         {
             LogManager.GetLogger("NServiceBus").Fatal(errorMessage, exception);
 
