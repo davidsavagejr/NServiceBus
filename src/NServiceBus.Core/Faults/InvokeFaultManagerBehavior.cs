@@ -8,9 +8,8 @@ namespace NServiceBus
 
     class InvokeFaultManagerBehavior : IBehavior<IncomingContext>
     {
-        public InvokeFaultManagerBehavior(IManageMessageFailures failureManager,CriticalError criticalError)
+        public InvokeFaultManagerBehavior(CriticalError criticalError)
         {
-            this.failureManager = failureManager;
             this.criticalError = criticalError;
         }
 
@@ -26,18 +25,18 @@ namespace NServiceBus
             {
                 Logger.Error("Failed to deserialize message with ID: " + message.Id, serializationException);
 
-                InvokeFaultManager(f => f.SerializationFailedForMessage(message, serializationException),message);
+                InvokeFaultManager(f => f.SerializationFailedForMessage(message, serializationException), message, context.Get<IManageMessageFailures>());
             }
 
             catch (Exception exception)
             {
                 Logger.Error("Failed to process message with ID: " + message.Id, exception);
 
-                InvokeFaultManager(f => f.ProcessingAlwaysFailsForMessage(message, exception),message);
+                InvokeFaultManager(f => f.ProcessingAlwaysFailsForMessage(message, exception),message, context.Get<IManageMessageFailures>());
             }
         }
 
-        void InvokeFaultManager(Action<IManageMessageFailures> faultAction,TransportMessage message)
+        void InvokeFaultManager(Action<IManageMessageFailures> faultAction, TransportMessage message, IManageMessageFailures failureManager)
         {
             try
             {
@@ -51,7 +50,6 @@ namespace NServiceBus
             }
         }
 
-        readonly IManageMessageFailures failureManager;
         readonly CriticalError criticalError;
         ILog Logger = LogManager.GetLogger<InvokeFaultManagerBehavior>();
 

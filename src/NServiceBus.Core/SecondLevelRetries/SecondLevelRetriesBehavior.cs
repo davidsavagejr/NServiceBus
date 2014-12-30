@@ -11,10 +11,10 @@ namespace NServiceBus
     class SecondLevelRetriesBehavior : IBehavior<IncomingContext>
     {
         readonly IDeferMessages deferer;
-        readonly RetryPolicy retryPolicy;
+        readonly SecondLevelRetryPolicy retryPolicy;
         readonly BusNotifications notifications;
 
-        public SecondLevelRetriesBehavior(IDeferMessages deferer, RetryPolicy retryPolicy, BusNotifications notifications)
+        public SecondLevelRetriesBehavior(IDeferMessages deferer, SecondLevelRetryPolicy retryPolicy, BusNotifications notifications)
         {
             this.deferer = deferer;
             this.retryPolicy = retryPolicy;

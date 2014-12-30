@@ -13,7 +13,7 @@
         {
             var baseDelay = TimeSpan.FromSeconds(10);
 
-            var policy = new DefaultRetryPolicy(2, baseDelay);
+            var policy = new DefaultSecondLevelRetryPolicy(2, baseDelay);
             TimeSpan delay;
 
             Assert.True(policy.TryGetDelay(new TransportMessage("",new Dictionary<string, string>()),new Exception(""),1,out delay));
@@ -29,7 +29,7 @@
         {
             var baseDelay = TimeSpan.FromSeconds(10);
 
-            var policy = new DefaultRetryPolicy(2, baseDelay);
+            var policy = new DefaultSecondLevelRetryPolicy(2, baseDelay);
             TimeSpan delay;
 
             var headers = new Dictionary<string, string>

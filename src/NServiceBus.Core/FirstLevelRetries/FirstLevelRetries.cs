@@ -24,10 +24,12 @@ namespace NServiceBus.Features
         /// </summary>
         protected internal override void Setup(FeatureConfigurationContext context)
         {
-            context.Container.ConfigureComponent<FlrStatusStorage>(DependencyLifecycle.SingleInstance);
-             
-            context.Pipeline.Register<FirstLevelRetriesBehavior.Registration, FirstLevelRetriesBehavior>(
-                builder => new FirstLevelRetriesBehavior(builder.Build<FlrStatusStorage>(),GetMaxRetries(context.Settings),builder.Build<BusNotifications>()));
+            var transportConfig = context.Settings.GetConfigSection<TransportConfig>();
+            var maxRetries = transportConfig != null ? transportConfig.MaxRetries : 5;
+            var retryPolicy = new FirstLevelRetryPolicy(maxRetries);
+
+            context.Container.RegisterSingleton(retryPolicy);
+            context.Pipeline.Register<FirstLevelRetriesBehavior.Registration>();
         }
        
 

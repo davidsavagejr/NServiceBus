@@ -92,6 +92,7 @@ namespace NServiceBus.Unicast.Transport
         /// <param name="context"></param>
         protected virtual void SetContext(IncomingContext context)
         {
+            context.Set(FailureManager);
         }
         
         void IObserver<MessageAvailable>.OnError(Exception error)

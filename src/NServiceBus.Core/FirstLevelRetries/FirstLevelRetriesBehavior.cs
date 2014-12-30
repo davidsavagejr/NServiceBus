@@ -1,8 +1,6 @@
-namespace NServiceBus
+namespace NServiceBus.FirstLevelRetries
 {
     using System;
-    using NServiceBus.Config;
-    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
@@ -10,13 +8,23 @@ namespace NServiceBus
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
         readonly FlrStatusStorage storage;
-        readonly int maxRetries;
+        readonly FirstLevelRetryPolicy retryPolicy;
         readonly BusNotifications notifications;
 
-        public FirstLevelRetriesBehavior(FlrStatusStorage storage, int maxRetries, BusNotifications notifications)
+        public FirstLevelRetriesBehavior(FirstLevelRetryPolicy retryPolicy, BusNotifications notifications)
+            : this(new FlrStatusStorage(), retryPolicy, notifications)
+        {
+        }
+
+        public static FirstLevelRetriesBehavior CreateForTests(FlrStatusStorage storage, FirstLevelRetryPolicy retryPolicy, BusNotifications notifications)
+        {
+            return new FirstLevelRetriesBehavior(storage, retryPolicy, notifications);
+        }
+
+        FirstLevelRetriesBehavior(FlrStatusStorage storage, FirstLevelRetryPolicy retryPolicy, BusNotifications notifications)
         {
             this.storage = storage;
-            this.maxRetries = maxRetries;
+            this.retryPolicy = retryPolicy;
             this.notifications = notifications;
         }
 
@@ -36,7 +44,7 @@ namespace NServiceBus
 
                 var numberOfRetries = storage.GetRetriesForMessage(messageId);
 
-                if (numberOfRetries >= maxRetries)
+                if (retryPolicy.ShouldGiveUp(numberOfRetries))
                 {
                     storage.ClearFailuresForMessage(messageId);
                     context.PhysicalMessage.Headers[Headers.FLRetries] = numberOfRetries.ToString();
@@ -56,18 +64,10 @@ namespace NServiceBus
         public class Registration : RegisterStep
         {
             public Registration()
-                : base("FirstLevelRetries", typeof(FirstLevelRetriesBehavior), "Performs first level retries")
+                : base("FirstLevelRetries", typeof(FirstLevelRetriesBehavior), "Performs first level retries", true)
             {
                 InsertAfter("ReceiveMessage");
                 InsertBeforeIfExists("ReceivePerformanceDiagnosticsBehavior");
-
-                ContainerRegistration((builder, settings) =>
-                {
-                    var transportConfig = settings.GetConfigSection<TransportConfig>();
-                    var maxRetries = transportConfig != null ? transportConfig.MaxRetries : 5;
-           
-                    return new FirstLevelRetriesBehavior(builder.Build<FlrStatusStorage>(), maxRetries, builder.Build<BusNotifications>());
-                });
             }
         }
 

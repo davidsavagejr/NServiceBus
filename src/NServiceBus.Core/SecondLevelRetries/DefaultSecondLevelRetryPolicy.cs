@@ -2,12 +2,12 @@ namespace NServiceBus.SecondLevelRetries
 {
     using System;
 
-    class DefaultRetryPolicy:RetryPolicy
+    class DefaultSecondLevelRetryPolicy:SecondLevelRetryPolicy
     {
         readonly int maxRetries;
         readonly TimeSpan timeIncrease;
 
-        public DefaultRetryPolicy(int maxRetries,TimeSpan timeIncrease)
+        public DefaultSecondLevelRetryPolicy(int maxRetries,TimeSpan timeIncrease)
         {
             this.maxRetries = maxRetries;
             this.timeIncrease = timeIncrease;

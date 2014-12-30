@@ -3,6 +3,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Faults;
+    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Logging;
     using NServiceBus.ObjectBuilder;
     using NServiceBus.Satellites;

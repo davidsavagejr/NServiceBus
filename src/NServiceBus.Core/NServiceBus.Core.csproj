@@ -129,6 +129,7 @@
     <Compile Include="Features\ExposeSettings.cs" />
     <Compile Include="Features\PrerequisiteStatus.cs" />
     <Compile Include="FirstLevelRetries\FirstLevelRetries.cs" />
+    <Compile Include="FirstLevelRetries\FirstLevelRetryPolicy.cs" />
     <Compile Include="Pipeline\PerCallBehavior.cs" />
     <Compile Include="Pipeline\IBehaviorInstance.cs" />
     <Compile Include="Pipeline\IExecutor.cs" />
@@ -155,8 +156,8 @@
     <Compile Include="Settings\Throttling\ThrottlingSettingsExtensions.cs" />
     <Compile Include="Settings\Throttling\IThrottlingConfig.cs" />
     <Compile Include="Settings\Concurrency\SharedConcurrencyConfig.cs" />
-    <Compile Include="SecondLevelRetries\CustomRetryPolicy.cs" />
-    <Compile Include="SecondLevelRetries\RetryPolicy.cs" />
+    <Compile Include="SecondLevelRetries\CustomSecondLevelRetryPolicy.cs" />
+    <Compile Include="SecondLevelRetries\SecondLevelRetryPolicy.cs" />
     <Compile Include="SecondLevelRetries\SecondLevelRetriesBehavior.cs" />
     <Compile Include="Transports\IncomingContextExtensions.cs" />
     <Compile Include="Gateway\IDeduplicateMessages.cs" />
@@ -250,7 +251,7 @@
     <Compile Include="Scheduling\Schedule_Obsolete.cs" />
     <Compile Include="Scheduling\Scheduler.cs" />
     <Compile Include="Scheduling\TaskDefinition.cs" />
-    <Compile Include="SecondLevelRetries\DefaultRetryPolicy.cs" />
+    <Compile Include="SecondLevelRetries\DefaultSecondLevelRetryPolicy.cs" />
     <Compile Include="Serialization\CustomSerialization.cs" />
     <Compile Include="Serialization\CustomSerializer.cs" />
     <Compile Include="Serialization\SerializationConfigExtensions.cs" />

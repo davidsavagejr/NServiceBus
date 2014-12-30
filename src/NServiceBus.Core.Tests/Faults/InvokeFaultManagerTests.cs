@@ -14,9 +14,9 @@ namespace NServiceBus.Core.Tests
         public void ShouldInvokeTheSerializtionFailedForSerializationExceptions()
         {
             var faultManager = new FakeFaultManager();
-            var behavior = new InvokeFaultManagerBehavior(faultManager,new CriticalError((s,e)=>{},new FakeBuilder()));
+            var behavior = new InvokeFaultManagerBehavior(new CriticalError((s,e)=>{},new FakeBuilder()));
 
-            behavior.Invoke(CreateContext("someid"), () =>
+            behavior.Invoke(CreateContext("someid", faultManager), () =>
             {
                 throw new MessageDeserializationException("testex");
             });
@@ -30,9 +30,9 @@ namespace NServiceBus.Core.Tests
         public void ShouldInvokeTheProcessingFailedForExceptions()
         {
             var faultManager = new FakeFaultManager();
-            var behavior = new InvokeFaultManagerBehavior(faultManager, new CriticalError((s, e) => { }, new FakeBuilder()));
+            var behavior = new InvokeFaultManagerBehavior(new CriticalError((s, e) => { }, new FakeBuilder()));
 
-            behavior.Invoke(CreateContext("someid"), () =>
+            behavior.Invoke(CreateContext("someid", faultManager), () =>
             {
                 throw new Exception("testex");
             });
@@ -50,14 +50,14 @@ namespace NServiceBus.Core.Tests
             };
             var criticalErrorCalled = false;
 
-            var behavior = new InvokeFaultManagerBehavior(faultManager, new CriticalError((s, e) =>
+            var behavior = new InvokeFaultManagerBehavior(new CriticalError((s, e) =>
             {
                 criticalErrorCalled = true;
             }, new FakeBuilder()));
 
 
             //the ex should bubble to force the transport to rollback. If not the message will be lost
-            Assert.Throws<Exception>(()=>behavior.Invoke(CreateContext("someid"), () =>
+            Assert.Throws<Exception>(()=>behavior.Invoke(CreateContext("someid", faultManager), () =>
             {
                 throw new Exception("testex");
             }));
@@ -67,10 +67,10 @@ namespace NServiceBus.Core.Tests
 
 
 
-        IncomingContext CreateContext(string messageId)
+        IncomingContext CreateContext(string messageId, IManageMessageFailures faultManager)
         {
             var context = new IncomingContext(null);
-
+            context.Set(faultManager);
             context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage(messageId, new Dictionary<string, string>()));
 
             return context;

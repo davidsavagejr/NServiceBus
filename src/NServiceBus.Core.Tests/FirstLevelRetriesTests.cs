@@ -13,7 +13,7 @@
         [Test]
         public void ShouldNotPerformFLROnMessagesThatCantBeDeserialized()
         {
-            var behavior = new FirstLevelRetriesBehavior(null, 0, new BusNotifications());
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(null, new FirstLevelRetryPolicy(0), new BusNotifications());
 
             Assert.Throws<MessageDeserializationException>(() => behavior.Invoke(null, () =>
             {
@@ -24,7 +24,7 @@
         [Test]
         public void ShouldPerformFLRIfThereAreRetriesLeftToDo()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(), 1, new BusNotifications());
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(new FlrStatusStorage(), new FirstLevelRetryPolicy(1), new BusNotifications());
             var context = CreateContext("someid");
 
             behavior.Invoke(context, () =>
@@ -38,7 +38,7 @@
         [Test]
         public void ShouldBubbleTheExceptionUpIfThereAreNoMoreRetriesLeft()
         {
-            var behavior = new FirstLevelRetriesBehavior(new FlrStatusStorage(), 0, new BusNotifications());
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(new FlrStatusStorage(), new FirstLevelRetryPolicy(0), new BusNotifications());
             var context = CreateContext("someid");
 
             Assert.Throws<Exception>(() => behavior.Invoke(context, () =>
@@ -54,7 +54,7 @@
         public void ShouldClearStorageAfterGivingUp()
         {
             var storage = new FlrStatusStorage();
-            var behavior = new FirstLevelRetriesBehavior(storage, 1, new BusNotifications());
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), new BusNotifications());
 
             storage.IncrementFailuresForMessage("main/someid", new Exception(""));
 
@@ -70,7 +70,7 @@
         public void ShouldRememberRetryCountBetweenRetries()
         {
             var storage = new FlrStatusStorage();
-            var behavior = new FirstLevelRetriesBehavior(storage, 1, new BusNotifications());
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), new BusNotifications());
 
             behavior.Invoke(CreateContext("someid"), () =>
             {
@@ -85,7 +85,7 @@
         public void ShouldHandleMessageWithTheSameIdFailingInDifferentQueues()
         {
             var storage = new FlrStatusStorage();
-            var behavior = new FirstLevelRetriesBehavior(storage, 1, new BusNotifications());
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), new BusNotifications());
 
             behavior.Invoke(CreateContext("someid","main"), () =>
             {
@@ -108,7 +108,7 @@
         {
             var notifications = new BusNotifications();
             var storage = new FlrStatusStorage();
-            var behavior = new FirstLevelRetriesBehavior(storage, 1, notifications);
+            var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), notifications);
 
             var notificationFired = false;
 

@@ -114,7 +114,7 @@
         }
     }
 
-    class FakePolicy : RetryPolicy
+    class FakePolicy : SecondLevelRetryPolicy
     {
         readonly TimeSpan? delayToReturn;
 

@@ -4,7 +4,6 @@ namespace NServiceBus.Features
     using Config;
     using NServiceBus.SecondLevelRetries;
     using NServiceBus.Settings;
-    using NServiceBus.Transports;
 
     /// <summary>
     /// Used to configure Second Level Retries.
@@ -27,8 +26,8 @@ namespace NServiceBus.Features
         {
             var  retryPolicy = GetRetryPolicy(context.Settings);
 
-            context.Pipeline.Register<SecondLevelRetriesBehavior.Registration, SecondLevelRetriesBehavior>(
-                builder => new SecondLevelRetriesBehavior(builder.Build<IDeferMessages>(), retryPolicy,builder.Build<BusNotifications>()));
+            context.Container.RegisterSingleton(typeof(SecondLevelRetryPolicy), retryPolicy);
+            context.Pipeline.Register<SecondLevelRetriesBehavior.Registration>();
         }
 
         bool IsEnabledInConfig(FeatureConfigurationContext context)
@@ -44,22 +43,22 @@ namespace NServiceBus.Features
             return retriesConfig.Enabled;
         }
 
-        RetryPolicy GetRetryPolicy(ReadOnlySettings settings)
+        SecondLevelRetryPolicy GetRetryPolicy(ReadOnlySettings settings)
         {
             var customRetryPolicy = settings.GetOrDefault<Func<TransportMessage, TimeSpan>>("SecondLevelRetries.RetryPolicy");
 
             if (customRetryPolicy != null)
             {
-                return new CustomRetryPolicy(customRetryPolicy);
+                return new CustomSecondLevelRetryPolicy(customRetryPolicy);
             }
 
             var retriesConfig = settings.GetConfigSection<SecondLevelRetriesConfig>();
             if (retriesConfig != null)
             {
-                return new DefaultRetryPolicy(retriesConfig.NumberOfRetries, retriesConfig.TimeIncrease);
+                return new DefaultSecondLevelRetryPolicy(retriesConfig.NumberOfRetries, retriesConfig.TimeIncrease);
             }
 
-            return new DefaultRetryPolicy(DefaultRetryPolicy.DefaultNumberOfRetries,DefaultRetryPolicy.DefaultTimeIncrease);
+            return new DefaultSecondLevelRetryPolicy(DefaultSecondLevelRetryPolicy.DefaultNumberOfRetries,DefaultSecondLevelRetryPolicy.DefaultTimeIncrease);
         }
     }
 }
