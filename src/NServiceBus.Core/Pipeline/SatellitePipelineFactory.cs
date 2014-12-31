@@ -62,6 +62,7 @@
             var pipelineSettings = new PipelineSettings(pipelineModifications);
 
             pipelineSettings.Register(builder.Build<TransportReceiveBehaviorDefinition>().Registration);
+            pipelineSettings.Register<MoveFaultsToErrorQueueBehavior.Registration>();
             pipelineSettings.Register<FirstLevelRetriesBehavior.Registration>();
             pipelineSettings.Register<ExecuteSatelliteHandlerBehavior.Registration>();
 
