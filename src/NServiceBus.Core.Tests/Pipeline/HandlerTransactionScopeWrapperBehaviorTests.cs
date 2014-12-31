@@ -1,7 +1,6 @@
 ﻿namespace NServiceBus.Core.Tests.Pipeline
 {
     using System.Transactions;
-    using NServiceBus.Unicast.Transport;
     using NUnit.Framework;
 
     [TestFixture]

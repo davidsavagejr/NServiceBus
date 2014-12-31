@@ -67,7 +67,7 @@
         static IEnumerable<Type> GetBehaviors()
         {
             return typeof(UnicastBus).Assembly.GetTypes()
-                .Where(type => type.GetInterfaces().Any(face=>face.Name.StartsWith("IBehavior")) && !type.IsAbstract);
+                .Where(type => type.GetInterfaces().Any(face=>face.Name.StartsWith("IBehavior")) && !type.IsAbstract &&!type.IsGenericType);
         }
         static IEnumerable<Type> GetFeatures()
         {

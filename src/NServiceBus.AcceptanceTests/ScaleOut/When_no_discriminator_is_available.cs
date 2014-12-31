@@ -6,7 +6,6 @@
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Features;
     using NServiceBus.Pipeline;
-    using NServiceBus.Settings;
     using NServiceBus.Transports;
     using NUnit.Framework;
 

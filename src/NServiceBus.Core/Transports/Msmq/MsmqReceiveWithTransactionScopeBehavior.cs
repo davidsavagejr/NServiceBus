@@ -1,4 +1,4 @@
-namespace NServiceBus.Transports.Msmq
+namespace NServiceBus
 {
     using System;
     using System.Diagnostics;
@@ -8,6 +8,7 @@ namespace NServiceBus.Transports.Msmq
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
+    using NServiceBus.Transports;
 
     class MsmqReceiveWithTransactionScopeBehavior : IBehavior<IncomingContext>
     {
@@ -34,12 +35,12 @@ namespace NServiceBus.Transports.Msmq
                 TransportMessage transportMessage;
                 try
                 {
-                    transportMessage = NServiceBus.MsmqUtilities.Convert(message);
+                    transportMessage = MsmqUtilities.Convert(message);
                 }
                 catch (Exception ex)
                 {
                     LogCorruptedMessage(message, ex);
-                    using (var nativeErrorQueue = new MessageQueue(NServiceBus.MsmqUtilities.GetFullPath(errorQueue), false, true, QueueAccessMode.Send))
+                    using (var nativeErrorQueue = new MessageQueue(MsmqUtilities.GetFullPath(errorQueue), false, true, QueueAccessMode.Send))
                     {
                         nativeErrorQueue.Send(message, MessageQueueTransactionType.Automatic);
                     }

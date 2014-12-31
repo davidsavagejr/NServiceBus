@@ -1,7 +1,6 @@
 namespace NServiceBus.Pipeline
 {
     using NServiceBus.Logging;
-    using NServiceBus.Unicast.Transport;
 
     class HardcodedPipelineSteps
     {

@@ -59,7 +59,7 @@ namespace NServiceBus
         readonly HostInformation hostInformation;
         readonly BusNotifications notifications;
         readonly string errorQueueAddress;
-        ILog Logger = LogManager.GetLogger<MoveFaultsToErrorQueueBehavior>();
+        static ILog Logger = LogManager.GetLogger<MoveFaultsToErrorQueueBehavior>();
 
         public class Registration : RegisterStep
         {

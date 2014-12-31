@@ -1,6 +1,7 @@
-namespace NServiceBus.FirstLevelRetries
+namespace NServiceBus
 {
     using System;
+    using NServiceBus.FirstLevelRetries;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 

@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using NServiceBus.FirstLevelRetries;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Transports;
     using NUnit.Framework;
 
     [TestFixture]
@@ -56,7 +55,7 @@
             var storage = new FlrStatusStorage();
             var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), new BusNotifications());
 
-            storage.IncrementFailuresForMessage("main/someid", new Exception(""));
+            storage.IncrementFailuresForMessage("someid", new Exception(""));
 
             Assert.Throws<Exception>(() => behavior.Invoke(CreateContext("someid"), () =>
             {
@@ -64,7 +63,7 @@
             }));
 
 
-            Assert.AreEqual(0, storage.GetRetriesForMessage("main/someid"));
+            Assert.AreEqual(0, storage.GetRetriesForMessage("someid"));
         }
         [Test]
         public void ShouldRememberRetryCountBetweenRetries()
@@ -78,28 +77,7 @@
             });
 
 
-            Assert.AreEqual(1, storage.GetRetriesForMessage("main/someid"));
-        }
-
-        [Test]
-        public void ShouldHandleMessageWithTheSameIdFailingInDifferentQueues()
-        {
-            var storage = new FlrStatusStorage();
-            var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), new BusNotifications());
-
-            behavior.Invoke(CreateContext("someid","main"), () =>
-            {
-                throw new Exception("test");
-            });
-
-            behavior.Invoke(CreateContext("someid", "main.satellite"), () =>
-            {
-                throw new Exception("test");
-            });
-
-
-            Assert.AreEqual(1, storage.GetRetriesForMessage("main.satellite/someid"));
-            Assert.AreEqual(1, storage.GetRetriesForMessage("main/someid"));
+            Assert.AreEqual(1, storage.GetRetriesForMessage("someid"));
         }
 
 
@@ -129,11 +107,10 @@
 
             Assert.True(notificationFired);
         }
-        IncomingContext CreateContext(string messageId,string queueName="main")
+        IncomingContext CreateContext(string messageId)
         {
             var context = new IncomingContext(null);
 
-            context.Set(new DequeueSettings(queueName));
             context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage(messageId, new Dictionary<string, string>()));
 
             return context;
