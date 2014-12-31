@@ -40,7 +40,7 @@ namespace NServiceBus.FirstLevelRetries
             }
             catch (Exception ex)
             {
-                var messageId = context.Get<DequeueSettings>().QueueName + "/" + context.PhysicalMessage.Id;
+                var messageId = context.PhysicalMessage.Id;
 
                 var numberOfRetries = storage.GetRetriesForMessage(messageId);
 
