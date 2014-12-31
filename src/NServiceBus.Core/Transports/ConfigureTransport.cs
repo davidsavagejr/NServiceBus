@@ -45,11 +45,12 @@ namespace NServiceBus.Transports
 
             context.Container.RegisterSingleton(selectedTransportDefinition);
 
-            var receiveBehaviorRegistration = GetReceiveBehaviorRegistration(context.Settings);
-
-            context.Pipeline.Register(receiveBehaviorRegistration);
-            context.Container.RegisterSingleton(new TransportReceiveBehaviorDefinition(receiveBehaviorRegistration));
-
+            if (!context.Settings.Get<bool>("Endpoint.SendOnly"))
+            {
+                var receiveBehaviorRegistration = GetReceiveBehaviorRegistration(context.Settings);
+                context.Pipeline.Register(receiveBehaviorRegistration);
+                context.Container.RegisterSingleton(new TransportReceiveBehaviorDefinition(receiveBehaviorRegistration));
+            }
             Configure(context, connectionString);
         }
 
