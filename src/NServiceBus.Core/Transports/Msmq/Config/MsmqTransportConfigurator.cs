@@ -4,7 +4,6 @@
     using Config;
     using Logging;
     using NServiceBus.Pipeline;
-    using NServiceBus.Settings;
     using Transports;
     using Transports.Msmq;
     using Transports.Msmq.Config;
@@ -20,21 +19,18 @@
         }
 
         /// <summary>
-        /// 
+        /// Creates a <see cref="RegisterStep"/> for receive behavior.
         /// </summary>
-        /// <param name="settings"></param>
         /// <returns></returns>
-        protected override RegisterStep GetReceiveBehaviorRegistration(ReadOnlySettings settings)
+        protected override RegisterStep GetReceiveBehaviorRegistration(ReceiveOptions receiveOptions)
         {
-            var doNotUseDTCTransactions = settings.Get<bool>("Transactions.SuppressDistributedTransactions");
-
-            if (doNotUseDTCTransactions)
+            if (receiveOptions.Transactions.SuppressDistributedTransactions)
             {
                 throw new NotImplementedException();
             }
             else
             {
-                return new  MsmqReceiveWithTransactionScopeBehavior.Registration();
+                return new MsmqReceiveWithTransactionScopeBehavior.Registration(receiveOptions);
             }
         }
 

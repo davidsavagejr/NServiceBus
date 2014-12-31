@@ -5,7 +5,6 @@ namespace NServiceBus.Transports.Msmq
     using System.Messaging;
     using System.Threading;
     using System.Transactions;
-    using NServiceBus.Faults;
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
@@ -105,20 +104,18 @@ namespace NServiceBus.Transports.Msmq
 
         public class Registration : RegisterStep
         {
-            public Registration(): base("ReceiveMessage", typeof(MsmqReceiveWithTransactionScopeBehavior), "Performs a msmq receive using a transaction scope. This will require DTC to be enable on the machine")
+            public Registration(ReceiveOptions receiveOptions): base("ReceiveMessage", typeof(MsmqReceiveWithTransactionScopeBehavior), "Performs a msmq receive using a transaction scope. This will require DTC to be enable on the machine")
             {
                 InsertBeforeIfExists(WellKnownStep.ExecuteLogicalMessages);
                 ContainerRegistration((builder, settings) =>
                 {
                     var transactionOptions = new TransactionOptions
                    {
-                       IsolationLevel = settings.Get<IsolationLevel>("Transactions.IsolationLevel"),
-                       Timeout = settings.Get<TimeSpan>("Transactions.DefaultTimeout")
+                       IsolationLevel = receiveOptions.Transactions.IsolationLevel,
+                       Timeout = receiveOptions.Transactions.TransactionTimeout
                    };
 
-                    var errorQueue = ErrorQueueSettings.GetConfiguredErrorQueue(settings);
-
-                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions, errorQueue);
+                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions,Address.Parse(receiveOptions.ErrorQueue));
                 });
             }
         }

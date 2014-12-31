@@ -2,6 +2,7 @@ namespace NServiceBus.Transports
 {
     using System;
     using Features;
+    using NServiceBus.Faults;
     using NServiceBus.Pipeline;
     using NServiceBus.Settings;
     using Unicast.Transport;
@@ -47,7 +48,7 @@ namespace NServiceBus.Transports
 
             if (!context.Settings.Get<bool>("Endpoint.SendOnly"))
             {
-                var receiveBehaviorRegistration = GetReceiveBehaviorRegistration(context.Settings);
+                var receiveBehaviorRegistration = GetReceiveBehaviorRegistration(new ReceiveOptions(context.Settings));
                 context.Pipeline.Register(receiveBehaviorRegistration);
                 context.Container.RegisterSingleton(new TransportReceiveBehaviorDefinition(receiveBehaviorRegistration));
             }
@@ -55,10 +56,10 @@ namespace NServiceBus.Transports
         }
 
         /// <summary>
-        /// 
+        /// Creates a <see cref="RegisterStep"/> for receive behavior.
         /// </summary>
         /// <returns></returns>
-        protected abstract RegisterStep GetReceiveBehaviorRegistration(ReadOnlySettings settings);
+        protected abstract RegisterStep GetReceiveBehaviorRegistration(ReceiveOptions receiveOptions);
 
         /// <summary>
         ///  Allows the transport to control the local address of the endpoint if needed
