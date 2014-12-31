@@ -28,11 +28,14 @@
                 {
                     var pipelineExecutor = BuildPipelineExecutor(builder);
 
+                    var dequeueSettings = new DequeueSettings(satellite.InputAddress.Queue, 
+                        settings.GetOrDefault<bool>("Transport.PurgeOnStartup"));
+
+
                     var pipeline = new SatelliteTransportReceiver(
                         satellite.GetType().AssemblyQualifiedName,
                         builder.Build<IDequeueMessages>(),
-                        satellite.InputAddress.Queue,
-                        false,
+                        dequeueSettings,
                         pipelineExecutor,
                         executor,
                         satellite);

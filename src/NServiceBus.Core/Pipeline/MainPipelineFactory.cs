@@ -10,11 +10,12 @@
     {
         public virtual IEnumerable<TransportReceiver> BuildPipelines(IBuilder builder, ReadOnlySettings settings, IExecutor executor)
         {
+            var dequeueSettings = new DequeueSettings(settings.LocalAddress().Queue, settings.GetOrDefault<bool>("Transport.PurgeOnStartup"));
+
             var pipeline = new TransportReceiver(
                 "Main",
                 builder.Build<IDequeueMessages>(),
-                settings.LocalAddress().Queue,
-                settings.GetOrDefault<bool>("Transport.PurgeOnStartup"),
+                dequeueSettings,
                 builder.Build<PipelineExecutor>(),
                 executor);
             yield return pipeline;

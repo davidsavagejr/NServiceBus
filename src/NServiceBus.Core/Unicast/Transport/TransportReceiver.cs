@@ -17,12 +17,12 @@ namespace NServiceBus.Unicast.Transport
     /// </summary>
     public class TransportReceiver : IDisposable, IObserver<MessageAvailable>
     {
-        internal TransportReceiver(string id,IDequeueMessages receiver, string queue, bool purgeOnStartup, PipelineExecutor pipelineExecutor, IExecutor executor)
+        internal TransportReceiver(string id,IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor)
         {
             this.id = id;
             this.pipelineExecutor = pipelineExecutor;
             this.executor = executor;
-            dequeueSettings = new DequeueSettings(queue, purgeOnStartup);
+            this.dequeueSettings = dequeueSettings;
             Receiver = receiver;
         }
 
