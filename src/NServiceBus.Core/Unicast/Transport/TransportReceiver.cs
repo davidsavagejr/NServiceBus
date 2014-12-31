@@ -79,7 +79,6 @@ namespace NServiceBus.Unicast.Transport
 
             value.InitializeContext(context);
 
-            context.Set(dequeueSettings);
             context.Set(currentReceivePerformanceDiagnostics);
             SetContext(context);
 
@@ -204,9 +203,7 @@ namespace NServiceBus.Unicast.Transport
         readonly IExecutor executor;
         readonly ReadOnlySettings settings;
 
-        /// <summary>
-        /// </summary>
-        internal ReceivePerformanceDiagnostics currentReceivePerformanceDiagnostics;
+        ReceivePerformanceDiagnostics currentReceivePerformanceDiagnostics;
         
         bool isStarted;
         Address receiveAddress;

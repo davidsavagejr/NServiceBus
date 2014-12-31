@@ -3,7 +3,6 @@ namespace NServiceBus.FirstLevelRetries
     using System;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
-    using NServiceBus.Transports;
 
     class FirstLevelRetriesBehavior : IBehavior<IncomingContext>
     {
