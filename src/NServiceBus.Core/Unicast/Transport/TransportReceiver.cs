@@ -99,25 +99,7 @@ namespace NServiceBus.Unicast.Transport
             {
                 throw new InvalidOperationException("The transport is already started");
             }
-            //var address = Address.Parse(dequeueSettings.QueueName);
-
-            //receiveAddress = address;
-
-            //var returnAddressForFailures = address;
-
-            //var workerRunsOnThisEndpoint = settings.GetOrDefault<bool>("Worker.Enabled");
-
-            //if (workerRunsOnThisEndpoint
-            //    && (returnAddressForFailures.Queue.ToLower().EndsWith(".worker") || address == config.LocalAddress))
-            //    //this is a hack until we can refactor the SLR to be a feature. "Worker" is there to catch the local worker in the distributor
-            //{
-            //    returnAddressForFailures = settings.Get<Address>("MasterNode.Address");
-
-            //    Logger.InfoFormat("Worker started, failures will be redirected to {0}", returnAddressForFailures);
-            //}
-
-            //FailureManager.Init(returnAddressForFailures);
-
+            
             InitializePerformanceCounters(Address.Parse(dequeueSettings.QueueName));
 
             Logger.DebugFormat("Pipeline {0} is starting receiver for queue {0}.", Id, dequeueSettings.QueueName);

@@ -38,19 +38,7 @@ namespace NServiceBus.Transports.Msmq
                 throw new ArgumentException("Queue must be transactional if you configure your endpoint to be transactional (" + settings.QueueName + ").");
             }
 
-            var messageReadPropertyFilter = new MessagePropertyFilter
-            {
-                Body = true,
-                TimeToBeReceived = true,
-                Recoverable = true,
-                Id = true,
-                ResponseQueue = true,
-                CorrelationId = true,
-                Extension = true,
-                AppSpecific = true
-            };
-
-            queue.MessageReadPropertyFilter = messageReadPropertyFilter;
+            queue.MessageReadPropertyFilter = DefaultReadPropertyFilter;
 
             if (settings.PurgeOnStartup)
             {
@@ -173,6 +161,18 @@ namespace NServiceBus.Transports.Msmq
         Address publicReceiveAddress;
         
         Observable<MessageAvailable> observable = new Observable<MessageAvailable>();
+
+        static MessagePropertyFilter DefaultReadPropertyFilter = new MessagePropertyFilter
+        {
+            Body = true,
+            TimeToBeReceived = true,
+            Recoverable = true,
+            Id = true,
+            ResponseQueue = true,
+            CorrelationId = true,
+            Extension = true,
+            AppSpecific = true
+        };
 
         /// <summary>
         /// b

@@ -51,6 +51,19 @@
 
             if (!context.Settings.GetOrDefault<bool>("Endpoint.SendOnly"))
             {
+                //todo: move this to the external distributor
+                //var workerRunsOnThisEndpoint = settings.GetOrDefault<bool>("Worker.Enabled");
+
+                //if (workerRunsOnThisEndpoint
+                //    && (returnAddressForFailures.Queue.ToLower().EndsWith(".worker") || address == config.LocalAddress))
+                //    //this is a hack until we can refactor the SLR to be a feature. "Worker" is there to catch the local worker in the distributor
+                //{
+                //    returnAddressForFailures = settings.Get<Address>("MasterNode.Address");
+
+                //    Logger.InfoFormat("Worker started, failures will be redirected to {0}", returnAddressForFailures);
+                //}
+
+
                 context.Container.ConfigureComponent(b => new MsmqDequeueStrategy(b.Build<CriticalError>(), endpointIsTransactional),
                     DependencyLifecycle.InstancePerCall);
             }
