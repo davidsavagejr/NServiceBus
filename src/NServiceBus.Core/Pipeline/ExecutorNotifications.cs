@@ -25,6 +25,6 @@ namespace NServiceBus.Pipeline
             executorState.OnNext(new ExecutorState(pipelineIds, currentConcurrencyLevel));
         }
 
-        Observable<ExecutorState> executorState = new Observable<ExecutorState>();
+        BufferedObservable<ExecutorState> executorState = new BufferedObservable<ExecutorState>();
     }
 }

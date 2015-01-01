@@ -1,21 +1,27 @@
 namespace NServiceBus
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Threading;
+    using System.Threading.Tasks;
     using Janitor;
 
     [SkipWeaving]
-    class Observable<T> : IObservable<T>, IDisposable
+    class BufferedObservable<T> : IObservable<T>, IDisposable
     {
         List<IObserver<T>> observers;
+        BlockingCollection<Action<IObserver<T>>> buffer; 
         bool isDisposed;
         int disposeSignaled;
         ReaderWriterLockSlim observerLock = new ReaderWriterLockSlim();
+        Task dispatchTask;
 
-        public Observable()
+        public BufferedObservable(int bufferSize = 10)
         {
             observers = new List<IObserver<T>>();
+            buffer = new BlockingCollection<Action<IObserver<T>>>(bufferSize);
+            dispatchTask = Task.Factory.StartNew(Dispatch);
         }
 
         public void Dispose()
@@ -25,22 +31,14 @@ namespace NServiceBus
                 return;
             }
 
-            observerLock.EnterReadLock();
-            try
-            {
-                foreach (var observer in observers)
-                {
-                    observer.OnCompleted();
-                }
-            }
-            finally
-            {
-                observerLock.ExitReadLock();
-            }
+            buffer.Add(x => x.OnCompleted());
+            buffer.CompleteAdding();
+            dispatchTask.Wait();
 
             observerLock.Dispose();
             observerLock = null;
             observers = null;
+            buffer = null;
             isDisposed = true;
         }
 
@@ -69,55 +67,41 @@ namespace NServiceBus
         public void OnNext(T value)
         {
             CheckDisposed();
-
-            observerLock.EnterReadLock();
-            try
+            if (disposeSignaled == 1)
             {
-                foreach (var observer in observers)
-                {
-                    observer.OnNext(value);
-                }
+                return;
             }
-            finally
+            buffer.Add(x => x.OnNext(value));
+        }
+
+        void Dispatch()
+        {
+            var reader = buffer.GetConsumingEnumerable();
+            foreach (var action in reader)
             {
-                observerLock.ExitReadLock();
+                observerLock.EnterReadLock();
+                try
+                {
+                    foreach (var observer in observers)
+                    {
+                        action(observer);
+                    }
+                }
+                finally
+                {
+                    observerLock.ExitReadLock();
+                }
             }
         }
 
         public void OnError(Exception ex)
         {
+            if (disposeSignaled == 1)
+            {
+                return;
+            }
             CheckDisposed();
-
-            observerLock.EnterReadLock();
-            try
-            {
-                foreach (var observer in observers)
-                {
-                    observer.OnError(ex);
-                }
-            }
-            finally
-            {
-                observerLock.ExitReadLock();
-            }
-        }
-
-        public void OnCompleted()
-        {
-            CheckDisposed();
-
-            observerLock.EnterReadLock();
-            try
-            {
-                foreach (var observer in observers)
-                {
-                    observer.OnCompleted();
-                }
-            }
-            finally
-            {
-                observerLock.ExitReadLock();
-            }
+            buffer.Add(x => x.OnError(ex));
         }
 
         void Unsubscribe(IObserver<T> observer)
@@ -144,10 +128,10 @@ namespace NServiceBus
         [SkipWeaving]
         class Unsubscriber : IDisposable
         {
-            Observable<T> observable;
+            BufferedObservable<T> observable;
             IObserver<T> observer;
 
-            public Unsubscriber(Observable<T> observable, IObserver<T> observer)
+            public Unsubscriber(BufferedObservable<T> observable, IObserver<T> observer)
             {
                 this.observable = observable;
                 this.observer = observer;
@@ -163,6 +147,5 @@ namespace NServiceBus
                 }
             }
         }
-
     }
 }
