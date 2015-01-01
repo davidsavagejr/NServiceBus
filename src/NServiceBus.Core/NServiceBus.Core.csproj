@@ -161,6 +161,7 @@
     <Compile Include="SecondLevelRetries\CustomSecondLevelRetryPolicy.cs" />
     <Compile Include="SecondLevelRetries\SecondLevelRetryPolicy.cs" />
     <Compile Include="SecondLevelRetries\SecondLevelRetriesBehavior.cs" />
+    <Compile Include="Transports\DequeueSettings.cs" />
     <Compile Include="Transports\IncomingContextExtensions.cs" />
     <Compile Include="Gateway\IDeduplicateMessages.cs" />
     <Compile Include="Hosting\HostInfoConfigurationExtensions.cs" />
@@ -269,6 +270,7 @@
     <Compile Include="Settings\DurableMessagesConfig.cs" />
     <Compile Include="Timeout\ConfigurationBuilderExtensions.cs" />
     <Compile Include="Transports\ConfigurePurging_Obsolete.cs" />
+    <Compile Include="Transports\MessageAvailable.cs" />
     <Compile Include="Transports\Msmq\MsmqReceiveWithTransactionScopeBehavior.cs" />
     <Compile Include="Transports\ReceiveOptions.cs" />
     <Compile Include="Unicast\Behaviors\EnforceMessageIdBehavior.cs" />

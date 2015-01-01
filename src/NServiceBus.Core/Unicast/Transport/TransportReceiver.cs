@@ -62,12 +62,12 @@ namespace NServiceBus.Unicast.Transport
             //todo: I want to start a new instance of a pipeline and not use thread statics 
         }
 
-        private void InvokePipeline(MessageAvailable value)
+        private void InvokePipeline(MessageAvailable messageAvailable)
         {
             var context = new IncomingContext(pipelineExecutor.CurrentContext);
 
-            value.InitializeContext(context);
-
+            messageAvailable.InitializeContext(context);
+            context.SetPublicReceiveAddress(messageAvailable.PublicReceiveAddress);
             context.Set(currentReceivePerformanceDiagnostics);
             SetContext(context);
 

@@ -2,7 +2,6 @@ namespace NServiceBus.Transports
 {
     using System;
     using Features;
-    using NServiceBus.Faults;
     using NServiceBus.Pipeline;
     using NServiceBus.Settings;
     using Unicast.Transport;

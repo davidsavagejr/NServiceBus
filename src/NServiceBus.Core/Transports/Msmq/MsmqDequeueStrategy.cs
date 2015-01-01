@@ -109,9 +109,8 @@ namespace NServiceBus.Transports.Msmq
 
                 CallPeekWithExceptionHandling(() => queue.EndPeek(peekCompletedEventArgs.AsyncResult));
 
-                observable.OnNext(new MessageAvailable(c =>
+                observable.OnNext(new MessageAvailable(publicReceiveAddress.ToString(), c =>
                 {
-					c.SetPublicReceiveAddress(publicReceiveAddress.ToString());
                     c.Set(queue);
                     c.Set("MsmqDequeueStrategy.PeekResetEvent",peekResetEvent);
                 }));
