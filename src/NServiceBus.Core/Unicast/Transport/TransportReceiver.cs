@@ -23,14 +23,10 @@ namespace NServiceBus.Unicast.Transport
             this.pipelineExecutor = pipelineExecutor;
             this.executor = executor;
             this.dequeueSettings = dequeueSettings;
-            Receiver = receiver;
+            this.receiver = receiver;
         }
 
-        /// <summary>
-        ///     The receiver responsible for notifying the transport when new messages are available
-        /// </summary>
-        public IDequeueMessages Receiver { get; set; }
-
+      
         /// <summary>
         /// Gets the ID of this pipeline
         /// </summary>
@@ -104,7 +100,7 @@ namespace NServiceBus.Unicast.Transport
 
             Logger.DebugFormat("Pipeline {0} is starting receiver for queue {0}.", Id, dequeueSettings.QueueName);
 
-            Receiver.Init(dequeueSettings);
+            receiver.Init(dequeueSettings);
 
             StartReceiver();
 
@@ -126,8 +122,8 @@ namespace NServiceBus.Unicast.Transport
 
         void StartReceiver()
         {
-            Receiver.Subscribe(this);
-            Receiver.Start();
+            receiver.Subscribe(this);
+            receiver.Start();
         }
 
         /// <summary>
@@ -139,7 +135,7 @@ namespace NServiceBus.Unicast.Transport
                 return;
             }
 
-            Receiver.Stop();
+            receiver.Stop();
 
             isStarted = false;
         }
@@ -168,7 +164,8 @@ namespace NServiceBus.Unicast.Transport
         readonly string id;
         readonly PipelineExecutor pipelineExecutor;
         readonly IExecutor executor;
-       
+        readonly IDequeueMessages receiver;
+ 
         ReceivePerformanceDiagnostics currentReceivePerformanceDiagnostics;
         
         bool isStarted;
