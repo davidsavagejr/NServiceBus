@@ -119,6 +119,16 @@ namespace NServiceBus.Pipeline
             return new StepRegistrationSequence(AddStep, stepId);
         }
 
+        /// <summary>
+        /// Starts a step sequence after a well-defined step.
+        /// </summary>
+        /// <param name="step"></param>
+        /// <returns></returns>
+        public StepRegistrationSequence After(WellKnownStep step)
+        {
+            return new StepRegistrationSequence(AddStep, step);
+        }
+
 
         /// <summary>
         /// <see cref="Register(string,System.Type,string, bool)"/>

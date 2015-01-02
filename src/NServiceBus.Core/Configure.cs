@@ -114,7 +114,7 @@ namespace NServiceBus
 
             var featureStats = featureActivator.SetupFeatures(new FeatureConfigurationContext(this));
 
-            HardcodedPipelineSteps.Register(pipeline);
+            HardcodedPipelineSteps.Register(pipeline, Settings.GetOrDefault<bool>("Endpoint.SendOnly"));
 
             pipeline.RegisterBehaviorsInContainer(Settings, container);
 

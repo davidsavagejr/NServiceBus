@@ -17,7 +17,7 @@ namespace NServiceBus.Unicast.Transport
     /// </summary>
     public class TransportReceiver : IDisposable, IObserver<MessageAvailable>
     {
-        internal TransportReceiver(string id,IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor)
+        internal TransportReceiver(string id, IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor)
         {
             this.id = id;
             this.pipelineExecutor = pipelineExecutor;
@@ -26,7 +26,7 @@ namespace NServiceBus.Unicast.Transport
             this.receiver = receiver;
         }
 
-      
+
         /// <summary>
         /// Gets the ID of this pipeline
         /// </summary>
@@ -46,16 +46,10 @@ namespace NServiceBus.Unicast.Transport
 
         void IObserver<MessageAvailable>.OnNext(MessageAvailable value)
         {
-            try
-            {
-                InvokePipeline(value);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("boom", ex);
-            }
+            InvokePipeline(value);
             //TODO: I think I need to do some logging here, if a behavior can't be instantiated no error message is shown!
             //todo: I want to start a new instance of a pipeline and not use thread statics 
+            //todo: Szymon: removing the try as it impedes testing
         }
 
         private void InvokePipeline(MessageAvailable messageAvailable)
@@ -77,7 +71,7 @@ namespace NServiceBus.Unicast.Transport
         protected virtual void SetContext(IncomingContext context)
         {
         }
-        
+
         void IObserver<MessageAvailable>.OnError(Exception error)
         {
         }
@@ -95,7 +89,7 @@ namespace NServiceBus.Unicast.Transport
             {
                 throw new InvalidOperationException("The transport is already started");
             }
-            
+
             InitializePerformanceCounters(dequeueSettings.QueueName);
 
             Logger.DebugFormat("Pipeline {0} is starting receiver for queue {0}.", Id, dequeueSettings.QueueName);
@@ -159,15 +153,15 @@ namespace NServiceBus.Unicast.Transport
 
         static ILog Logger = LogManager.GetLogger<TransportReceiver>();
 
-       
+
 
         readonly string id;
         readonly PipelineExecutor pipelineExecutor;
         readonly IExecutor executor;
         readonly IDequeueMessages receiver;
- 
+
         ReceivePerformanceDiagnostics currentReceivePerformanceDiagnostics;
-        
+
         bool isStarted;
         readonly DequeueSettings dequeueSettings;
     }

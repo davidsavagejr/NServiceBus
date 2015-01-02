@@ -32,6 +32,10 @@ namespace NServiceBus.Pipeline
         }
 
         /// <summary>
+        /// Receive
+        /// </summary>
+        public static WellKnownStep Receive = new WellKnownStep("ReceiveMessage");
+        /// <summary>
         /// Statistics analysis
         /// </summary>
         public static WellKnownStep ProcessingStatistics = new WellKnownStep("ProcessingStatistics");

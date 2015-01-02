@@ -4,16 +4,20 @@ namespace NServiceBus.Pipeline
 
     class HardcodedPipelineSteps
     {
-        public static void Register(PipelineSettings pipeline)
+        public static void Register(PipelineSettings pipeline, bool isSendOnly)
         {
-            RegisterIncomingCoreBehaviors(pipeline);
-
+            if (!isSendOnly)
+            {
+                RegisterIncomingCoreBehaviors(pipeline);
+            }
             RegisterOutgoingCoreBehaviors(pipeline);
         }
 
         static void RegisterIncomingCoreBehaviors(PipelineSettings pipeline)
         {
-            pipeline.Register("ReceivePerformanceDiagnosticsBehavior", typeof(ReceivePerformanceDiagnosticsBehavior), "Add ProcessingStarted and ProcessingEnded headers")
+            pipeline
+                .After(WellKnownStep.Receive)
+                .Register("ReceivePerformanceDiagnosticsBehavior", typeof(ReceivePerformanceDiagnosticsBehavior), "Add ProcessingStarted and ProcessingEnded headers")
                 .Register(WellKnownStep.ProcessingStatistics, typeof(ProcessingStatisticsBehavior), "Add ProcessingStarted and ProcessingEnded headers")
                 .Register(WellKnownStep.CreateChildContainer, typeof(ChildContainerBehavior), "Creates the child container")
                 .Register(WellKnownStep.ExecuteUnitOfWork, typeof(UnitOfWorkBehavior), "Executes the UoW")

@@ -12,6 +12,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
     using MessageInterfaces.MessageMapper.Reflection;
     using MessageMutator;
     using Monitoring;
+    using NServiceBus.Core.Tests.Fakes;
     using NServiceBus.Hosting;
     using NServiceBus.ObjectBuilder;
     using NUnit.Framework;
@@ -39,7 +40,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
 
         //protected FakeTransport Transport;
         protected XmlMessageSerializer MessageSerializer;
-        protected FuncBuilder FuncBuilder;
+        protected FuncBuilder Builder;
         public static Address MasterNodeAddress;
         protected EstimatedTimeToSLABreachCalculator SLABreachCalculator = (EstimatedTimeToSLABreachCalculator) FormatterServices.GetUninitializedObject(typeof(EstimatedTimeToSLABreachCalculator));
         protected MessageMetadataRegistry MessageMetadataRegistry;
@@ -53,6 +54,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
         protected PipelineModifications pipelineModifications;
 
         PipelineExecutor pipelineFactory;
+        protected FakeMessagePump MessagePump;
 
         static using_a_configured_unicastBus()
         {
@@ -71,15 +73,16 @@ namespace NServiceBus.Unicast.Tests.Contexts
             settings.SetDefault("EndpointName", "TestEndpoint");
             settings.SetDefault("Endpoint.SendOnly", false);
             settings.SetDefault("MasterNode.Address", MasterNodeAddress);
+            settings.SetDefault("NServiceBus.LocalAddress", "TestEndpoint");
+
             pipelineModifications = new PipelineModifications();
             settings.Set<PipelineModifications>(pipelineModifications);
 
             ApplyPipelineModifications();
 
-            //Transport = new FakeTransport();
-            FuncBuilder = new FuncBuilder();
+            Builder = new FuncBuilder();
 
-            FuncBuilder.Register<ReadOnlySettings>(() => settings);
+            Builder.Register<ReadOnlySettings>(() => settings);
 
             router = new StaticMessageRouter(KnownMessageTypes());
             var conventions = new Conventions();
@@ -89,9 +92,10 @@ namespace NServiceBus.Unicast.Tests.Contexts
 
             messageSender = MockRepository.GenerateStub<ISendMessages>();
             subscriptionStorage = new FakeSubscriptionStorage();
-            configure = new Configure(settings, FuncBuilder, new List<Action<IConfigureComponents>>(), new PipelineSettings(new PipelineModifications()))
+            var localAddress = Address.Parse("TestEndpoint");
+            configure = new Configure(settings, Builder, new List<Action<IConfigureComponents>>(), new PipelineSettings(new PipelineModifications()))
             {
-                localAddress = Address.Parse("TestEndpoint")
+                localAddress = localAddress
             };
 
             subscriptionManager = new SubscriptionManager
@@ -101,29 +105,35 @@ namespace NServiceBus.Unicast.Tests.Contexts
                     Configure = configure
                 };
 
-            pipelineFactory = new PipelineExecutor(settings, FuncBuilder, new BusNotifications());
+            var pipelineSettings = new PipelineSettings(pipelineModifications);
+            HardcodedPipelineSteps.Register(pipelineSettings, false);
+            pipelineSettings.Register<FakeReceiveBehavior.Registration>();
 
-            FuncBuilder.Register<IMessageSerializer>(() => MessageSerializer);
-            FuncBuilder.Register<ISendMessages>(() => messageSender);
+            pipelineFactory = new PipelineExecutor(settings, Builder, new BusNotifications());
 
-            FuncBuilder.Register<LogicalMessageFactory>(() => new LogicalMessageFactory(MessageMetadataRegistry, MessageMapper, pipelineFactory));
+            Builder.Register<IMessageSerializer>(() => MessageSerializer);
+            Builder.Register<ISendMessages>(() => messageSender);
 
-            FuncBuilder.Register<IManageSubscriptions>(() => subscriptionManager);
-            FuncBuilder.Register<EstimatedTimeToSLABreachCalculator>(() => SLABreachCalculator);
-            FuncBuilder.Register<MessageMetadataRegistry>(() => MessageMetadataRegistry);
+            Builder.Register<LogicalMessageFactory>(() => new LogicalMessageFactory(MessageMetadataRegistry, MessageMapper, pipelineFactory));
 
-            FuncBuilder.Register<IMessageHandlerRegistry>(() => handlerRegistry);
-            FuncBuilder.Register<IMessageMapper>(() => MessageMapper);
+            Builder.Register<IManageSubscriptions>(() => subscriptionManager);
+            Builder.Register<EstimatedTimeToSLABreachCalculator>(() => SLABreachCalculator);
+            Builder.Register<MessageMetadataRegistry>(() => MessageMetadataRegistry);
 
-            FuncBuilder.Register<DeserializeLogicalMessagesBehavior>(() => new DeserializeLogicalMessagesBehavior
+            Builder.Register<IMessageHandlerRegistry>(() => handlerRegistry);
+            Builder.Register<IMessageMapper>(() => MessageMapper);
+
+            Builder.Register<DeserializeLogicalMessagesBehavior>(() => new DeserializeLogicalMessagesBehavior
                                                              {
                                                                  MessageSerializer = MessageSerializer,
                                                                  MessageMetadataRegistry = MessageMetadataRegistry,
                                                              });
 
-            FuncBuilder.Register<CreatePhysicalMessageBehavior>(() => new CreatePhysicalMessageBehavior());
-            FuncBuilder.Register<PipelineExecutor>(() => pipelineFactory);
-            FuncBuilder.Register<TransportDefinition>(() => transportDefinition);
+            Builder.Register<CreatePhysicalMessageBehavior>(() => new CreatePhysicalMessageBehavior());
+            Builder.Register<PipelineExecutor>(() => pipelineFactory);
+            Builder.Register<TransportDefinition>(() => transportDefinition);
+            MessagePump = new FakeMessagePump();
+            Builder.Register<IDequeueMessages>(() => MessagePump);
 
             var messagePublisher = new StorageDrivenPublisher
             {
@@ -138,14 +148,15 @@ namespace NServiceBus.Unicast.Tests.Contexts
                 Configure = configure,
             };
 
-            FuncBuilder.Register<IDeferMessages>(() => deferrer);
-            FuncBuilder.Register<IPublishMessages>(() => messagePublisher);
+            Builder.Register<IDeferMessages>(() => deferrer);
+            Builder.Register<IPublishMessages>(() => messagePublisher);
 
             bus = new UnicastBus
             {
-                Builder = FuncBuilder,
+                Builder = Builder,
                 MessageSender = messageSender,
-                // = Transport,
+                PipelineFactories = new PipelineFactory[] {new MainPipelineFactory(), new SatellitePipelineFactory()},
+                Executor = new FakeExecutor(),
                 MessageMapper = MessageMapper,
                 SubscriptionManager = subscriptionManager,
                 MessageRouter = router,
@@ -154,11 +165,11 @@ namespace NServiceBus.Unicast.Tests.Contexts
                 HostInformation = new HostInformation(Guid.NewGuid(), "HelloWorld")
             };
 
-            FuncBuilder.Register<IMutateOutgoingTransportMessages>(() => new CausationMutator { Bus = bus });
-            FuncBuilder.Register<IBus>(() => bus);
-            FuncBuilder.Register<UnicastBus>(() => bus);
-            FuncBuilder.Register<Conventions>(() => conventions);
-            FuncBuilder.Register<Configure>(() => configure);
+            Builder.Register<IMutateOutgoingTransportMessages>(() => new CausationMutator { Bus = bus });
+            Builder.Register<IBus>(() => bus);
+            Builder.Register<UnicastBus>(() => bus);
+            Builder.Register<Conventions>(() => conventions);
+            Builder.Register<Configure>(() => configure);
         }
 
         protected virtual void ApplyPipelineModifications()
@@ -182,13 +193,13 @@ namespace NServiceBus.Unicast.Tests.Contexts
 
         protected void RegisterUow(IManageUnitsOfWork uow)
         {
-            FuncBuilder.Register<IManageUnitsOfWork>(() => uow);
+            Builder.Register<IManageUnitsOfWork>(() => uow);
         }
 
         protected void RegisterMessageHandlerType<T>() where T : new()
         {
 // ReSharper disable HeapView.SlowDelegateCreation
-            FuncBuilder.Register<T>(() => new T());
+            Builder.Register<T>(() => new T());
 // ReSharper restore HeapView.SlowDelegateCreation
 
             handlerRegistry.RegisterHandler(typeof(T));
@@ -284,8 +295,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
                 };
 
                 bus.SetHeaderAction = (o, s, v) => { transportMessage.Headers[s] = v; };
-
-                //Transport.FakeMessageBeingProcessed(transportMessage);
+                MessagePump.SignalMessageAvailable(transportMessage);
             }
             catch (Exception ex)
             {
