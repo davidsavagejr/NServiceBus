@@ -123,6 +123,8 @@
     <Compile Include="FirstLevelRetries\FirstLevelRetry.cs" />
     <Compile Include="Faults\ErrorQueueSettings.cs" />
     <Compile Include="Faults\StoreFaultsInErrorQueue.cs" />
+    <Compile Include="Pipeline\BehaviorInvoker.cs" />
+    <Compile Include="Pipeline\IBehaviorInvoker.cs" />
     <Compile Include="SecondLevelRetries\SecondLevelRetry.cs" />
     <Compile Include="Features\AdvanceExtensibilityExtensions.cs" />
     <Compile Include="Features\DisplayDiagnosticsForFeatures.cs" />
@@ -133,7 +135,7 @@
     <Compile Include="Pipeline\ExecutorNotifications.cs" />
     <Compile Include="Pipeline\ExecutorState.cs" />
     <Compile Include="Pipeline\PerCallBehavior.cs" />
-    <Compile Include="Pipeline\IBehaviorInstance.cs" />
+    <Compile Include="Pipeline\BehaviorInstance.cs" />
     <Compile Include="Pipeline\IExecutor.cs" />
     <Compile Include="Pipeline\IndividualLimitThreadPoolExecutor.cs" />
     <Compile Include="Pipeline\IndividualThroughputLimitExecutor.cs" />
@@ -276,6 +278,7 @@
     <Compile Include="Unicast\Behaviors\EnforceMessageIdBehavior.cs" />
     <Compile Include="Unicast\Behaviors\ForwardReceivedMessages.cs" />
     <Compile Include="FirstLevelRetries\FirstLevelRetriesBehavior.cs" />
+    <Compile Include="Unicast\Behaviors\HandlingContext.cs" />
     <Compile Include="Unicast\BusAsyncResultEventArgs.cs" />
     <Compile Include="Unicast\Config\LoadMessageHandlersExtentions_Obsolete.cs" />
     <Compile Include="Unicast\Config\RegisterHandlersInOrder.cs" />
@@ -357,7 +360,6 @@
     <Compile Include="Pipeline\RegisterStep.cs" />
     <Compile Include="Pipeline\RemoveStep.cs" />
     <Compile Include="Pipeline\ReplaceBehavior.cs" />
-    <Compile Include="Pipeline\SnapshotRegion.cs" />
     <Compile Include="Pipeline\WellknownStep.cs" />
     <Compile Include="Sagas\PopulateAutoCorrelationHeadersForRepliesBehavior.cs" />
     <Compile Include="Saga\ContainSagaData.cs" />
@@ -420,7 +422,7 @@
     <Compile Include="Unicast\Transport\TransportMessageExtensions.cs" />
     <Compile Include="Unicast\UnicastBus_Obsolete.cs" />
     <Compile Include="UnitOfWork\UnitOfWorkBehavior.cs" />
-    <Compile Include="Pipeline\IBehavior.cs" />
+    <Compile Include="Pipeline\HomomorphicBehavior.cs" />
     <Compile Include="Pipeline\BehaviorChain.cs" />
     <Compile Include="Serializers\Binary\Config\BinarySerialization.cs" />
     <Compile Include="Serializers\Binary\Config\ConfigureBinarySerializer_Obsolete.cs" />

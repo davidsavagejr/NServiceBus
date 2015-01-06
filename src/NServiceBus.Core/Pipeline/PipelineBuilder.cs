@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus.Pipeline
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Contexts;
 
     class PipelineBuilder
@@ -15,20 +16,18 @@
 
             Incoming = new List<RegisterStep>();
             Outgoing = new List<RegisterStep>();
-            var behaviorType = typeof(IBehavior<>);
             var outgoingContextType = typeof(OutgoingContext);
-            var incomingContextType = typeof(IncomingContext);
 
             foreach (var rego in model)
             {
-                if (behaviorType.MakeGenericType(incomingContextType).IsAssignableFrom(rego.BehaviorType))
-                {
-                    Incoming.Add(rego);
-                }
-
-                if (behaviorType.MakeGenericType(outgoingContextType).IsAssignableFrom(rego.BehaviorType))
+                var behaviorInterface = rego.BehaviorType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IBehavior<,>));
+                if (behaviorInterface.GetGenericArguments()[0] == outgoingContextType)
                 {
                     Outgoing.Add(rego);
+                }
+                else
+                {
+                    Incoming.Add(rego);
                 }
             }
         }

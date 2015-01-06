@@ -8,7 +8,7 @@
     using Pipeline.Contexts;
     using Unicast.Transport;
 
-    class DataBusSendBehavior : IBehavior<OutgoingContext>
+    class DataBusSendBehavior : HomomorphicBehavior<OutgoingContext>
     {
         public IDataBus DataBus { get; set; }
 
@@ -16,7 +16,7 @@
 
         public Conventions Conventions { get; set; }
 
-        public void Invoke(OutgoingContext context, Action next)
+        public override void DoInvoke(OutgoingContext context, Action next)
         {
             if (context.OutgoingLogicalMessage.IsControlMessage())
             {

@@ -8,7 +8,7 @@
     using Unicast;
 
 
-    class AuditBehavior : IBehavior<IncomingContext>
+    class AuditBehavior : HomomorphicBehavior<IncomingContext>
     {
         public HostInformation HostInformation { get; set; }
 
@@ -18,7 +18,7 @@
 
         public TimeSpan? TimeToBeReceivedOnForwardedMessages { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             next();
 

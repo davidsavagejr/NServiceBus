@@ -6,9 +6,9 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class NotifyOnInvalidLicenseBehavior : IBehavior<IncomingContext>
+    class NotifyOnInvalidLicenseBehavior : HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             context.PhysicalMessage.Headers[Headers.HasLicenseExpired] = true.ToString().ToLower();
 

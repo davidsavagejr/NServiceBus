@@ -5,11 +5,11 @@ namespace NServiceBus
     using Pipeline;
     using Pipeline.Contexts;
 
-    class OutboxSendBehavior : IBehavior<OutgoingContext>
+    class OutboxSendBehavior : HomomorphicBehavior<OutgoingContext>
     {
         public DispatchMessageToTransportBehavior DispatchMessageToTransportBehavior { get; set; }
 
-        public void Invoke(OutgoingContext context, Action next)
+        public override void DoInvoke(OutgoingContext context, Action next)
         {
             OutboxMessage currentOutboxMessage;
 

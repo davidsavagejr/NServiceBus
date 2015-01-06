@@ -5,9 +5,9 @@ namespace NServiceBus
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Satellites;
 
-    class ExecuteSatelliteHandlerBehavior: IBehavior<IncomingContext>
+    class ExecuteSatelliteHandlerBehavior: HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             var satellite = context.Get<ISatellite>();
 

@@ -5,11 +5,11 @@ namespace NServiceBus
     using Pipeline;
     using Pipeline.Contexts;
 
-    class OutboxRecordBehavior : IBehavior<IncomingContext>
+    class OutboxRecordBehavior : HomomorphicBehavior<IncomingContext>
     {
         public IOutboxStorage OutboxStorage { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             next();
             

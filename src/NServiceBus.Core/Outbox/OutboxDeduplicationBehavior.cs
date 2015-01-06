@@ -11,7 +11,7 @@
     using Unicast.Messages;
     using Unicast.Transport;
 
-    class OutboxDeduplicationBehavior : IBehavior<IncomingContext>
+    class OutboxDeduplicationBehavior : HomomorphicBehavior<IncomingContext>
     {
         public IOutboxStorage OutboxStorage { get; set; }
         public DispatchMessageToTransportBehavior DispatchMessageToTransportBehavior { get; set; }
@@ -22,7 +22,7 @@
 
         public TransactionSettings TransactionSettings { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             var messageId = context.PhysicalMessage.Id;
             OutboxMessage outboxMessage;

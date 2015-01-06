@@ -10,7 +10,7 @@ namespace NServiceBus
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
 
-    class MsmqReceiveWithTransactionScopeBehavior : IBehavior<IncomingContext>
+    class MsmqReceiveWithTransactionScopeBehavior : HomomorphicBehavior<IncomingContext>
     {
         public MsmqReceiveWithTransactionScopeBehavior(TransactionOptions transactionOptions, Address errorQueue)
         {
@@ -18,7 +18,7 @@ namespace NServiceBus
             this.errorQueue = errorQueue;
         }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             var queue = context.Get<MessageQueue>();
 
@@ -55,6 +55,7 @@ namespace NServiceBus
                 if (context.MessageHandledSuccessfully())
                 {
                     scope.Complete();
+                    scope.Dispose();
                 }
             }
 
@@ -66,7 +67,7 @@ namespace NServiceBus
             Logger.Error(error, ex);
         }
 
-        [DebuggerNonUserCode]
+        //[DebuggerNonUserCode]
         bool TryReceiveMessage(Func<Message> receive, AutoResetEvent peekResetEvent, out Message message)
         {
             message = null;

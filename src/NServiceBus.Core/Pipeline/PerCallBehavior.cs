@@ -3,24 +3,15 @@
     using System;
     using NServiceBus.ObjectBuilder;
 
-    class PerCallBehavior<TContext> : IBehaviorInstance<TContext> 
-        where TContext : BehaviorContext
+    class PerCallBehavior : BehaviorInstance
     {
-        readonly Type type;
-
-        public PerCallBehavior(Type type)
+        public PerCallBehavior(Type type) : base(type)
         {
-            this.type = type;
         }
 
-        public Type Type
+        public override object GetInstance(IBuilder contextBuilder)
         {
-            get { return type; }
-        }
-
-        public IBehavior<TContext> GetInstance(IBuilder contextBuilder)
-        {
-            return (IBehavior<TContext>) contextBuilder.Build(Type);
+            return contextBuilder.Build(Type);
         }
     }
 }

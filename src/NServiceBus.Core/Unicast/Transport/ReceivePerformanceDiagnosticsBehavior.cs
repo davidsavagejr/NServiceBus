@@ -5,9 +5,9 @@ namespace NServiceBus
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast.Transport.Monitoring;
 
-    class ReceivePerformanceDiagnosticsBehavior : IBehavior<IncomingContext>
+    class ReceivePerformanceDiagnosticsBehavior : HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             context.Get<ReceivePerformanceDiagnostics>().MessageDequeued();
             next();

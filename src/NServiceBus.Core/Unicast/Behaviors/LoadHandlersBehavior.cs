@@ -8,7 +8,7 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class LoadHandlersBehavior : IBehavior<IncomingContext>
+    class LoadHandlersBehavior : IBehavior<IncomingLogicalMessageContext, HandlingContext>
     {
         public IMessageHandlerRegistry HandlerRegistry { get; set; }
 
@@ -16,7 +16,7 @@
 
         public PipelineExecutor PipelineFactory { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public void Invoke(IncomingLogicalMessageContext context, Action<HandlingContext> next)
         {
             var messageToHandle = context.IncomingLogicalMessage;
 
@@ -33,23 +33,19 @@
 
             foreach (var handlerType in handlerTypedToInvoke)
             {
-                using (context.CreateSnapshotRegion())
+                var loadedHandler = new MessageHandler
                 {
-                    var loadedHandler = new MessageHandler
-                    {
-                        Instance = context.Builder.Build(handlerType),
-                        Invocation = (handlerInstance, message) => HandlerRegistry.InvokeHandle(handlerInstance, message)
-                    };
+                    Instance = context.Builder.Build(handlerType),
+                    Invocation = (handlerInstance, message) => HandlerRegistry.InvokeHandle(handlerInstance, message)
+                };
 
-                    context.MessageHandler = loadedHandler;
+                var handlingContext = new HandlingContext(loadedHandler, context);
+                next(handlingContext);
 
-                    next();
-
-                    if (context.HandlerInvocationAborted)
-                    {
-                        //if the chain was aborted skip the other handlers
-                        break;
-                    }
+                if (handlingContext.HandlerInvocationAborted)
+                {
+                    //if the chain was aborted skip the other handlers
+                    break;
                 }
             }
         }

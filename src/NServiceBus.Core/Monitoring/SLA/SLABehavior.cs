@@ -4,7 +4,7 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class SLABehavior : IBehavior<IncomingContext>
+    class SLABehavior : HomomorphicBehavior<IncomingContext>
     {
         EstimatedTimeToSLABreachCalculator breachCalculator;
 
@@ -13,7 +13,7 @@
             this.breachCalculator = breachCalculator;
         }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             next();
 

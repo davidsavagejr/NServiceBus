@@ -6,7 +6,7 @@ namespace NServiceBus
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast.Transport;
 
-    class DecryptBehavior : IBehavior<IncomingContext>
+    class DecryptBehavior : HomomorphicBehavior<IncomingLogicalMessageContext>
     {
         EncryptionMutator messageMutator;
 
@@ -14,7 +14,7 @@ namespace NServiceBus
         {
             this.messageMutator = messageMutator;
         }
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingLogicalMessageContext context, Action next)
         {
             if (context.IncomingLogicalMessage.IsControlMessage())
             {

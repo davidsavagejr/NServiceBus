@@ -62,11 +62,11 @@
                     });
             }
 
-            class InspectRawMessageStep : IBehavior<IncomingContext>
+            class InspectRawMessageStep : HomomorphicBehavior<IncomingContext>
             {
                 public Context ScenarioContext { get; set; }
 
-                public void Invoke(IncomingContext ctx, Action next)
+                public override void DoInvoke(IncomingContext ctx, Action next)
                 {
                     if (!ctx.PhysicalMessage.Headers.ContainsKey("ScenarioContextId"))
                     {

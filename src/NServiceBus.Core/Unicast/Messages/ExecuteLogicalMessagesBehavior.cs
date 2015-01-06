@@ -8,19 +8,15 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class ExecuteLogicalMessagesBehavior : IBehavior<IncomingContext>
+    class ExecuteLogicalMessagesBehavior : IBehavior<IncomingContext, IncomingLogicalMessageContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public void Invoke(IncomingContext context, Action<IncomingLogicalMessageContext> next)
         {
             var logicalMessages = context.LogicalMessages;
 
             foreach (var message in logicalMessages)
             {
-                using (context.CreateSnapshotRegion())
-                {
-                    context.IncomingLogicalMessage = message;
-                    next();
-                }
+                next(new IncomingLogicalMessageContext(message, context));
             }
 
             if (!context.PhysicalMessage.IsControlMessage())

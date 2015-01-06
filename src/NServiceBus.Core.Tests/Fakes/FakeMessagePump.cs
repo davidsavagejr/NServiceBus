@@ -32,9 +32,9 @@ namespace NServiceBus.Core.Tests.Fakes
         }
     }
 
-    class FakeReceiveBehavior : IBehavior<IncomingContext>
+    class FakeReceiveBehavior : HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             var msg = context.Get<TransportMessage>("FakeMessage");
             context.Set(IncomingContext.IncomingPhysicalMessageKey, msg);

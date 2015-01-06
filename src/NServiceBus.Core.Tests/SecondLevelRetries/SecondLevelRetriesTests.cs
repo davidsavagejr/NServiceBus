@@ -27,7 +27,7 @@
             {
                 slrNotification = slr; });
 
-            behavior.Invoke(CreateContext("someid", 1), () => { throw new Exception("testex"); });
+            behavior.DoInvoke(CreateContext("someid", 1), () => { throw new Exception("testex"); });
 
             Assert.AreEqual("someid", deferrer.DeferredMessage.Id);
             Assert.AreEqual(delay, deferrer.Delay);
@@ -43,7 +43,7 @@
             var delay = TimeSpan.FromSeconds(5);
             var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(delay),new BusNotifications());
 
-            behavior.Invoke(CreateContext("someid", 0), () => { throw new Exception("testex"); });
+            behavior.DoInvoke(CreateContext("someid", 0), () => { throw new Exception("testex"); });
 
             Assert.True(deferrer.DeferredMessage.Headers.ContainsKey(SecondLevelRetriesBehavior.RetriesTimestamp));
          }
@@ -55,7 +55,7 @@
             var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(), new BusNotifications());
             var context = CreateContext("someid", 1);
 
-            Assert.Throws<Exception>(() => behavior.Invoke(context, () => { throw new Exception("testex"); }));
+            Assert.Throws<Exception>(() => behavior.DoInvoke(context, () => { throw new Exception("testex"); }));
 
             Assert.False(context.PhysicalMessage.Headers.ContainsKey(Headers.Retries));
         }
@@ -66,7 +66,7 @@
             var behavior = new SecondLevelRetriesBehavior(deferrer, new FakePolicy(TimeSpan.FromSeconds(5)), new BusNotifications());
             var context = CreateContext("someid", 1);
 
-            Assert.Throws<MessageDeserializationException>(() => behavior.Invoke(context, () => { throw new MessageDeserializationException("testex"); }));
+            Assert.Throws<MessageDeserializationException>(() => behavior.DoInvoke(context, () => { throw new MessageDeserializationException("testex"); }));
             Assert.False(context.PhysicalMessage.Headers.ContainsKey(Headers.Retries));
         }
 
@@ -79,7 +79,7 @@
             var behavior = new SecondLevelRetriesBehavior(deferrer, retryPolicy, new BusNotifications());
             var currentRetry = 3;
 
-            behavior.Invoke(CreateContext("someid", currentRetry), () => { throw new Exception("testex"); });
+            behavior.DoInvoke(CreateContext("someid", currentRetry), () => { throw new Exception("testex"); });
 
             Assert.AreEqual(currentRetry+1, retryPolicy.InvokedWithCurrentRetry);
         }
@@ -96,7 +96,7 @@
 
             var behavior = new SecondLevelRetriesBehavior(deferrer, retryPolicy, new BusNotifications());
 
-            behavior.Invoke(context, () => { throw new Exception("testex"); });
+            behavior.DoInvoke(context, () => { throw new Exception("testex"); });
 
             Assert.AreEqual(1, retryPolicy.InvokedWithCurrentRetry);
             Assert.AreEqual("1", context.PhysicalMessage.Headers[Headers.Retries]);

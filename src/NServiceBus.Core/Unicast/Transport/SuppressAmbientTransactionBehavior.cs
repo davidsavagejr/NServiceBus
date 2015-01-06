@@ -5,9 +5,9 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class SuppressAmbientTransactionBehavior : IBehavior<IncomingContext>
+    class SuppressAmbientTransactionBehavior : HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             if (Transaction.Current == null)
             {

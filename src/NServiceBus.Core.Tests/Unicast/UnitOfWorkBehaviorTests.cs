@@ -49,7 +49,7 @@
 
             var context = new IncomingContext(new RootContext(builder));
 
-            runner.Invoke(context, () => { });
+            runner.DoInvoke(context, () => { });
 
         }
 

@@ -14,7 +14,7 @@
         {
             var behavior = FirstLevelRetriesBehavior.CreateForTests(null, new FirstLevelRetryPolicy(0), new BusNotifications());
 
-            Assert.Throws<MessageDeserializationException>(() => behavior.Invoke(null, () =>
+            Assert.Throws<MessageDeserializationException>(() => behavior.DoInvoke(null, () =>
             {
                 throw new MessageDeserializationException("test");
             }));
@@ -26,7 +26,7 @@
             var behavior = FirstLevelRetriesBehavior.CreateForTests(new FlrStatusStorage(), new FirstLevelRetryPolicy(1), new BusNotifications());
             var context = CreateContext("someid");
 
-            behavior.Invoke(context, () =>
+            behavior.DoInvoke(context, () =>
             {
                 throw new Exception("test"); 
             });
@@ -40,7 +40,7 @@
             var behavior = FirstLevelRetriesBehavior.CreateForTests(new FlrStatusStorage(), new FirstLevelRetryPolicy(0), new BusNotifications());
             var context = CreateContext("someid");
 
-            Assert.Throws<Exception>(() => behavior.Invoke(context, () =>
+            Assert.Throws<Exception>(() => behavior.DoInvoke(context, () =>
             {
                 throw new Exception("test");
             }));
@@ -57,7 +57,7 @@
 
             storage.IncrementFailuresForMessage("someid", new Exception(""));
 
-            Assert.Throws<Exception>(() => behavior.Invoke(CreateContext("someid"), () =>
+            Assert.Throws<Exception>(() => behavior.DoInvoke(CreateContext("someid"), () =>
             {
                 throw new Exception("test");
             }));
@@ -71,7 +71,7 @@
             var storage = new FlrStatusStorage();
             var behavior = FirstLevelRetriesBehavior.CreateForTests(storage, new FirstLevelRetryPolicy(1), new BusNotifications());
 
-            behavior.Invoke(CreateContext("someid"), () =>
+            behavior.DoInvoke(CreateContext("someid"), () =>
             {
                 throw new Exception("test");
             });
@@ -99,7 +99,7 @@
                 notificationFired = true;
             })
                 ;
-            behavior.Invoke(CreateContext("someid"), () =>
+            behavior.DoInvoke(CreateContext("someid"), () =>
             {
                 throw new Exception("test");
             });

@@ -8,7 +8,7 @@ namespace NServiceBus
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
 
-    class MoveFaultsToErrorQueueBehavior : IBehavior<IncomingContext>
+    class MoveFaultsToErrorQueueBehavior : HomomorphicBehavior<IncomingContext>
     {
         public MoveFaultsToErrorQueueBehavior(CriticalError criticalError, ISendMessages sender, HostInformation hostInformation, BusNotifications notifications, string errorQueueAddress)
         {
@@ -19,7 +19,7 @@ namespace NServiceBus
             this.errorQueueAddress = errorQueueAddress;
         }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             try
             {

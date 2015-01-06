@@ -46,9 +46,9 @@ namespace NServiceBus.AcceptanceTests.PipelineExt
                 }
             }
 
-            class MyExceptionFilteringBehavior : IBehavior<IncomingContext>
+            class MyExceptionFilteringBehavior : HomomorphicBehavior<IncomingContext>
             {
-                public void Invoke(IncomingContext context, Action next)
+                public override void DoInvoke(IncomingContext context, Action next)
                 {
                     try
                     {

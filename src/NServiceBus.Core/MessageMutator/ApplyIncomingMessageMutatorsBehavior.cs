@@ -6,9 +6,9 @@
     using NServiceBus.Pipeline.Contexts;
 
 
-    class ApplyIncomingMessageMutatorsBehavior : IBehavior<IncomingContext>
+    class ApplyIncomingMessageMutatorsBehavior : HomomorphicBehavior<IncomingLogicalMessageContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingLogicalMessageContext context, Action next)
         {
             var current = context.IncomingLogicalMessage.Instance;
 

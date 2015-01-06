@@ -38,11 +38,11 @@
             }
 
             //and then we handle the physical message our self
-            class MyRawMessageHandler:IBehavior<IncomingContext>
+            class MyRawMessageHandler:HomomorphicBehavior<IncomingContext>
             {
                 public Context Context { get; set; }
 
-                public void Invoke(IncomingContext context, Action next)
+                public override void DoInvoke(IncomingContext context, Action next)
                 {
                     var transportMessage = context.PhysicalMessage;
 

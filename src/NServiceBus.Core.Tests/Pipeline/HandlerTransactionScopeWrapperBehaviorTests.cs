@@ -16,7 +16,7 @@
                 IsolationLevel = IsolationLevel.Serializable
             }))
             {
-                behavior.Invoke(null, () => { });
+                behavior.DoInvoke(null, () => { });
             }
         }
 
@@ -25,7 +25,7 @@
         {
             var behavior = new HandlerTransactionScopeWrapperBehavior(new TransactionOptions { IsolationLevel = IsolationLevel.ReadCommitted });
 
-            behavior.Invoke(null, () => Assert.NotNull(Transaction.Current));
+            behavior.DoInvoke(null, () => Assert.NotNull(Transaction.Current));
 
         }
     }

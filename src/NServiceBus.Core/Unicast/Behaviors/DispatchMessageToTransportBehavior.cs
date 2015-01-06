@@ -9,7 +9,7 @@
     using Support;
     using Transports;
 
-    class DispatchMessageToTransportBehavior : IBehavior<OutgoingContext>
+    class DispatchMessageToTransportBehavior : HomomorphicBehavior<OutgoingContext>
     {
         public ISendMessages MessageSender { get; set; }
 
@@ -21,7 +21,7 @@
 
         public UnicastBus UnicastBus { get; set; }
 
-        public void Invoke(OutgoingContext context, Action next)
+        public override void DoInvoke(OutgoingContext context, Action next)
         {
             InvokeNative(context.DeliveryOptions, context.OutgoingMessage);
 

@@ -7,13 +7,13 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class CallbackInvocationBehavior : IBehavior<IncomingContext>
+    class CallbackInvocationBehavior : HomomorphicBehavior<IncomingContext>
     {
         public const string CallbackInvokedKey = "NServiceBus.CallbackInvocationBehavior.CallbackWasInvoked";
 
         public UnicastBus UnicastBus { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             var messageWasHandled = HandleCorrelatedMessage(context.PhysicalMessage, context);
 

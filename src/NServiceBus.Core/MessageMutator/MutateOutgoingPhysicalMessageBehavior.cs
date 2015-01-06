@@ -5,9 +5,9 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class MutateOutgoingPhysicalMessageBehavior : IBehavior<OutgoingContext>
+    class MutateOutgoingPhysicalMessageBehavior : HomomorphicBehavior<OutgoingContext>
     {
-        public void Invoke(OutgoingContext context, Action next)
+        public override void DoInvoke(OutgoingContext context, Action next)
         {
             foreach (var mutator in context.Builder.BuildAll<IMutateOutgoingTransportMessages>())
             {

@@ -5,7 +5,7 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class HandlerTransactionScopeWrapperBehavior : IBehavior<IncomingContext>
+    class HandlerTransactionScopeWrapperBehavior : HomomorphicBehavior<IncomingContext>
     {
         readonly TransactionOptions transactionOptions;
 
@@ -14,7 +14,7 @@ namespace NServiceBus
             this.transactionOptions = transactionOptions;
         }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             if (Transaction.Current != null)
             {

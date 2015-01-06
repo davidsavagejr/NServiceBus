@@ -6,7 +6,7 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class DataBusReceiveBehavior : IBehavior<IncomingContext>
+    class DataBusReceiveBehavior : HomomorphicBehavior<IncomingLogicalMessageContext>
     {
         public IDataBus DataBus { get; set; }
 
@@ -14,7 +14,7 @@
 
         public Conventions Conventions { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingLogicalMessageContext context, Action next)
         {
             var message = context.IncomingLogicalMessage.Instance;
 

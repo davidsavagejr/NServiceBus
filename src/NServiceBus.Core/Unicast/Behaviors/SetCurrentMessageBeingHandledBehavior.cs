@@ -2,11 +2,10 @@
 {
     using System;
     using Pipeline;
-    using Pipeline.Contexts;
 
-    class SetCurrentMessageBeingHandledBehavior : IBehavior<IncomingContext>
+    class SetCurrentMessageBeingHandledBehavior : HomomorphicBehavior<HandlingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(HandlingContext context, Action next)
         {
             var logicalMessage = context.IncomingLogicalMessage;
 

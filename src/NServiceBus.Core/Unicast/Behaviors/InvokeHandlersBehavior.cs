@@ -5,9 +5,9 @@
     using Pipeline.Contexts;
     using Sagas;
 
-    class InvokeHandlersBehavior : IBehavior<IncomingContext>
+    class InvokeHandlersBehavior : HomomorphicBehavior<HandlingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(HandlingContext context, Action next)
         {
             ActiveSagaInstance saga;
 

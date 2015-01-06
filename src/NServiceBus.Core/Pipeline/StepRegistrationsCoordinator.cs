@@ -176,7 +176,42 @@ namespace NServiceBus.Pipeline
                 node.Visit(output);
             }
 
+            // Step 4: Validate intput and output types
+            //for (var i = 1; i < output.Count; i++)
+            //{
+            //    var previousBehavior = output[i-1].BehaviorType;
+            //    var thisBehavior = output[i].BehaviorType;
+
+            //    var incomingType = GetOutputType(previousBehavior);
+            //    var inputType = GetInputType(thisBehavior);
+            //    if (!inputType.IsAssignableFrom(incomingType))
+            //    {
+            //        throw new Exception(string.Format("Cannot chain behavior {0} and {1} together because output type of behvaior {0} ({2}) cannot be passed as input for behavior {1} ({3})",
+            //            previousBehavior.FullName,
+            //            thisBehavior.FullName,
+            //            incomingType,
+            //            inputType));
+            //    }
+            //}
             return output;
+        }
+
+        static Type GetOutputType(Type behaviorType)
+        {
+            var behaviorInterface = GetBehaviorInterface(behaviorType);
+            return behaviorInterface.GetGenericArguments()[1];
+        }
+
+        static Type GetBehaviorInterface(Type behaviorType)
+        {
+            var behaviorInterface = behaviorType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IBehavior<,>));
+            return behaviorInterface;
+        }
+
+        static Type GetInputType(Type behaviorType)
+        {
+            var behaviorInterface = GetBehaviorInterface(behaviorType);
+            return behaviorInterface.GetGenericArguments()[0];
         }
 
         List<RegisterStep> additions = new List<RegisterStep>();

@@ -25,7 +25,7 @@ namespace NServiceBus.Pipeline
             }
         }
 
-        static Type iBehaviorType = typeof(IBehavior<>);
+        static Type iBehaviorType = typeof(IBehavior<,>);
 
         static bool IsAssignableToIBehavior(Type givenType)
         {

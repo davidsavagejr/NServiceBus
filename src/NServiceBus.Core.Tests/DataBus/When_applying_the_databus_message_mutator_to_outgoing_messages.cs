@@ -32,7 +32,7 @@ namespace NServiceBus.Core.Tests.DataBus
            
             var context = new OutgoingContext(null, new SendOptions(Address.Parse("MyEndpoint")), message);
 
-            sendBehavior.Invoke(context, () => { });
+            sendBehavior.DoInvoke(context, () => { });
         }
 
         [Test]

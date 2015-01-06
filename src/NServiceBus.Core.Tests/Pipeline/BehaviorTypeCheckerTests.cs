@@ -14,9 +14,9 @@
             BehaviorTypeChecker.ThrowIfInvalid(typeof(ValidBehavior), "foo");
         }
 
-        class ValidBehavior : IBehavior<RootContext>
+        class ValidBehavior : HomomorphicBehavior<RootContext>
         {
-            public void Invoke(RootContext context, Action next)
+            public override void DoInvoke(RootContext context, Action next)
             {
             }
         }
@@ -39,9 +39,9 @@
             Assert.Throws<ArgumentException>(() => BehaviorTypeChecker.ThrowIfInvalid(typeof(GenericBehavior<>), "foo"));
         }
 
-        class GenericBehavior<T> : IBehavior<RootContext>
+        class GenericBehavior<T> : HomomorphicBehavior<RootContext>
         {
-            public void Invoke(RootContext context, Action next)
+            public override void DoInvoke(RootContext context, Action next)
             {
             }
         }
@@ -52,9 +52,9 @@
             Assert.Throws<ArgumentException>(() => BehaviorTypeChecker.ThrowIfInvalid(typeof(AbstractBehavior), "foo"));
         }
 
-        abstract class AbstractBehavior : IBehavior<RootContext>
+        abstract class AbstractBehavior : HomomorphicBehavior<RootContext>
         {
-            public void Invoke(RootContext context, Action next)
+            public override void DoInvoke(RootContext context, Action next)
             {
             }
         }

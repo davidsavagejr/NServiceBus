@@ -5,9 +5,9 @@ namespace NServiceBus
     using Pipeline;
     using Pipeline.Contexts;
 
-    class ChildContainerBehavior : IBehavior<IncomingContext>
+    class ChildContainerBehavior : HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             using (var childBuilder = context.Builder.CreateChildBuilder())
             {

@@ -34,14 +34,14 @@
             Incoming = pipelineBuilder.Incoming.AsReadOnly();
             Outgoing = pipelineBuilder.Outgoing.AsReadOnly();
 
-            incomingBehaviors = Incoming.Select(r => r.CreateBehavior<IncomingContext>(builder)).ToArray();
-            outgoingBehaviors = Outgoing.Select(r => r.CreateBehavior<OutgoingContext>(builder)).ToArray();
+            incomingBehaviors = Incoming.Select(r => r.CreateBehavior(builder)).ToArray();
+            outgoingBehaviors = Outgoing.Select(r => r.CreateBehavior(builder)).ToArray();
         }
 
         /// <summary>
         ///     The list of incoming steps registered.
         /// </summary>
-        public IList<RegisterStep> Incoming{ get; private set; }
+        public IList<RegisterStep> Incoming { get; private set; }
 
         /// <summary>
         ///     The list of outgoing steps registered.
@@ -83,11 +83,11 @@
         /// <typeparam name="TContext">The context to use.</typeparam>
         /// <param name="behaviors">The behaviors to execute in the specified order.</param>
         /// <param name="context">The context instance.</param>
-        void InvokePipeline<TContext>(IEnumerable<IBehaviorInstance<TContext>> behaviors, TContext context) where TContext : BehaviorContext
+        void InvokePipeline<TContext>(IEnumerable<BehaviorInstance> behaviors, TContext context) where TContext : BehaviorContext
         {
-            var pipeline = new BehaviorChain<TContext>(behaviors, context, this, busNotifications);
+            var pipeline = new BehaviorChain(behaviors, context, this, busNotifications);
 
-            Execute(pipeline, context);
+            Execute(pipeline);
         }
 
         internal void InvokeReceivePhysicalMessagePipeline(IncomingContext context)
@@ -109,22 +109,14 @@
             contextStacker.Dispose();
         }
 
-        void Execute<T>(BehaviorChain<T> pipelineAction, T context) where T : BehaviorContext
+        void Execute(BehaviorChain pipelineAction)
         {
-            try
-            {
-                contextStacker.Push(context);
-                pipelineAction.Invoke();
-            }
-            finally
-            {
-                contextStacker.Pop();
-            }
+            pipelineAction.Invoke(contextStacker);
         }
 
         BehaviorContextStacker contextStacker = new BehaviorContextStacker();
-        IEnumerable<IBehaviorInstance<IncomingContext>> incomingBehaviors;
-        IEnumerable<IBehaviorInstance<OutgoingContext>> outgoingBehaviors;
+        IEnumerable<BehaviorInstance> incomingBehaviors;
+        IEnumerable<BehaviorInstance> outgoingBehaviors;
         IBuilder rootBuilder;
         readonly BusNotifications busNotifications;
     }

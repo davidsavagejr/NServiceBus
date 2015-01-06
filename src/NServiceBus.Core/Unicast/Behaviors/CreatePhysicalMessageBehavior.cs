@@ -6,7 +6,7 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class CreatePhysicalMessageBehavior : IBehavior<OutgoingContext>
+    class CreatePhysicalMessageBehavior : HomomorphicBehavior<OutgoingContext>
     {
         public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
 
@@ -14,7 +14,7 @@
 
         public PipelineExecutor PipelineExecutor { get; set; }
 
-        public void Invoke(OutgoingContext context, Action next)
+        public override void DoInvoke(OutgoingContext context, Action next)
         {
             var deliveryOptions = context.DeliveryOptions;
 

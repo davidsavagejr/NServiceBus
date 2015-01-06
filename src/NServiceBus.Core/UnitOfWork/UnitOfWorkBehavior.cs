@@ -8,9 +8,9 @@
     using Pipeline.Contexts;
 
 
-    class UnitOfWorkBehavior : IBehavior<IncomingContext>
+    class UnitOfWorkBehavior : HomomorphicBehavior<IncomingContext>
     {
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             try
             {

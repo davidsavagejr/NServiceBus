@@ -3,24 +3,16 @@
     using System;
     using NServiceBus.ObjectBuilder;
 
-    class StaticBehavior<TContext> : IBehaviorInstance<TContext> 
-        where TContext : BehaviorContext
+    class StaticBehavior: BehaviorInstance 
     {
-        readonly Type type;
-        readonly Lazy<IBehavior<TContext>> lazyInstance; 
+        readonly Lazy<object> lazyInstance; 
 
-        public StaticBehavior(Type type, IBuilder defaultBuilder)
+        public StaticBehavior(Type type, IBuilder defaultBuilder) : base(type)
         {
-            this.type = type;
-            lazyInstance = new Lazy<IBehavior<TContext>>(() => (IBehavior<TContext>)defaultBuilder.Build(type));
+            lazyInstance = new Lazy<object>(() => defaultBuilder.Build(type));
         }
 
-        public Type Type
-        {
-            get { return type; }
-        }
-
-        public IBehavior<TContext> GetInstance(IBuilder contextBuilder)
+        public override object GetInstance(IBuilder contextBuilder)
         {
             return lazyInstance.Value;
         }

@@ -27,7 +27,7 @@ namespace NServiceBus.Core.Tests
 
             var context = CreateContext("someid");
 
-            behavior.Invoke(context, () =>
+            behavior.DoInvoke(context, () =>
             {
                 throw new Exception("testex");
             });
@@ -48,7 +48,7 @@ namespace NServiceBus.Core.Tests
 
 
             //the ex should bubble to force the transport to rollback. If not the message will be lost
-            Assert.Throws<Exception>(() => behavior.Invoke(CreateContext("someid"), () =>
+            Assert.Throws<Exception>(() => behavior.DoInvoke(CreateContext("someid"), () =>
             {
                 throw new Exception("testex");
             }));
@@ -67,7 +67,7 @@ namespace NServiceBus.Core.Tests
 
             var behavior = new MoveFaultsToErrorQueueBehavior(new FakeCriticalError(), sender, hostInfo, new BusNotifications(), "error");
 
-            behavior.Invoke(context, () =>
+            behavior.DoInvoke(context, () =>
             {
                 throw new Exception("testex");
             });
@@ -97,7 +97,7 @@ namespace NServiceBus.Core.Tests
 
             notifications.Errors.MessageSentToErrorQueue.Subscribe(f => { failedMessageNotification = f; });
 
-            behavior.Invoke(CreateContext("someid"), () =>
+            behavior.DoInvoke(CreateContext("someid"), () =>
             {
                 throw new Exception("testex");
             });

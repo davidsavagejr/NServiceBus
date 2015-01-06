@@ -8,9 +8,9 @@
     using Unicast.Transport;
 
 
-    class PopulateAutoCorrelationHeadersForRepliesBehavior : IBehavior<OutgoingContext>
+    class PopulateAutoCorrelationHeadersForRepliesBehavior : HomomorphicBehavior<OutgoingContext>
     {
-        public void Invoke(OutgoingContext context, Action next)
+        public override void DoInvoke(OutgoingContext context, Action next)
         {
             if (context.OutgoingLogicalMessage.IsControlMessage())
             {

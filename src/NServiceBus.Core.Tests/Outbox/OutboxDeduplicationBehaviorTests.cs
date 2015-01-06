@@ -56,7 +56,7 @@
 
         void Invoke(IncomingContext context, bool shouldAbort = false)
         {
-            behavior.Invoke(context, () =>
+            behavior.DoInvoke(context, () =>
             {
                 if (shouldAbort)
                 {

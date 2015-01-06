@@ -175,17 +175,17 @@ namespace NServiceBus.Core.Tests.Pipeline
                 }
             }
         }
-        class FakeBehavior:IBehavior<IncomingContext>
+        class FakeBehavior:HomomorphicBehavior<IncomingContext>
         {
-            public void Invoke(IncomingContext context, Action next)
+            public override void DoInvoke(IncomingContext context, Action next)
             {
                 throw new NotImplementedException();
             }
         }
 
-        class ReplacedBehavior : IBehavior<IncomingContext>
+        class ReplacedBehavior : HomomorphicBehavior<IncomingContext>
         {
-            public void Invoke(IncomingContext context, Action next)
+            public override void DoInvoke(IncomingContext context, Action next)
             {
                 throw new NotImplementedException();
             }

@@ -5,7 +5,7 @@
     using Pipeline.Contexts;
 
 
-    class CriticalTimeBehavior : IBehavior<IncomingContext>
+    class CriticalTimeBehavior : HomomorphicBehavior<IncomingContext>
     {
         CriticalTimeCalculator criticalTimeCounter;
 
@@ -14,7 +14,7 @@
             this.criticalTimeCounter = criticalTimeCounter;
         }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             next();
 

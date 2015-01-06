@@ -1,8 +1,38 @@
 ﻿namespace NServiceBus.Pipeline.Contexts
 {
     using System.Collections.Generic;
-    using Unicast.Behaviors;
     using Unicast.Messages;
+
+    /// <summary>
+    /// Context for processing a single logical message
+    /// </summary>
+    public class IncomingLogicalMessageContext : IncomingContext
+    {
+        const string IncomingLogicalMessageKey = "NServiceBus.IncomingLogicalMessageKey";
+
+        internal IncomingLogicalMessageContext(LogicalMessage logicalMessage, BehaviorContext parentContext) : base(parentContext)
+        {
+            IncomingLogicalMessage = logicalMessage;
+        }
+
+        /// <summary>
+        /// Creates a new context
+        /// </summary>
+        /// <param name="parentContext"></param>
+        protected IncomingLogicalMessageContext(IncomingLogicalMessageContext parentContext)
+            : base(parentContext)
+        {
+        }
+
+        /// <summary>
+        /// The current logical message being processed.
+        /// </summary>
+        public LogicalMessage IncomingLogicalMessage
+        {
+            get { return Get<LogicalMessage>(IncomingLogicalMessageKey); }
+            private set { Set(IncomingLogicalMessageKey, value); }
+        }
+    }
 
     /// <summary>
     /// Incoming pipeline context.
@@ -48,25 +78,7 @@
             set { Set(value); }
         }
 
-        /// <summary>
-        /// The current logical message being processed.
-        /// </summary>
-        public LogicalMessage IncomingLogicalMessage
-        {
-            get { return Get<LogicalMessage>(IncomingLogicalMessageKey); }
-            set { Set(IncomingLogicalMessageKey, value); }
-        }
-
-        /// <summary>
-        /// The current <see cref="IHandleMessages{T}"/> being executed.
-        /// </summary>
-        public MessageHandler MessageHandler
-        {
-            get { return Get<MessageHandler>(); }
-            set { Set(value); }
-        }
-
+        
         internal const string IncomingPhysicalMessageKey = "NServiceBus.IncomingPhysicalMessage";
-        const string IncomingLogicalMessageKey = "NServiceBus.IncomingLogicalMessageKey";
     }
 }

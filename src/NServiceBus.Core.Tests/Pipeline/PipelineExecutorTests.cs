@@ -53,11 +53,11 @@ namespace NServiceBus.Core.Tests.Pipeline
             Assert.AreEqual(3, sum);
         }
 
-        class SumBehavior : IBehavior<IncomingContext>
+        class SumBehavior : HomomorphicBehavior<IncomingContext>
         {
             int sum;
 
-            public void Invoke(IncomingContext context, Action next)
+            public override void DoInvoke(IncomingContext context, Action next)
             {
                 var value = context.Get<int>("Value");
                 sum += value;

@@ -6,7 +6,7 @@
     using Pipeline.Contexts;
     using Transports;
 
-    class ForwardBehavior : IBehavior<IncomingContext>
+    class ForwardBehavior : HomomorphicBehavior<IncomingContext>
     {
         public IAuditMessages MessageAuditer { get; set; }
 
@@ -14,7 +14,7 @@
 
         public TimeSpan? TimeToBeReceivedOnForwardedMessages { get; set; }
 
-        public void Invoke(IncomingContext context, Action next)
+        public override void DoInvoke(IncomingContext context, Action next)
         {
             next();
 
