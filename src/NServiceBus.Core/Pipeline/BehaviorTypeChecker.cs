@@ -11,10 +11,10 @@ namespace NServiceBus.Pipeline
             {
                 throw new ArgumentNullException(paramName);
             }
-            if (behavior.IsAbstract)
-            {
-                throw new ArgumentException(string.Format("The behavior '{0}' is invalid since it is abstract.", behavior.Name), paramName);
-            }
+            //if (behavior.IsAbstract)
+            //{
+            //    throw new ArgumentException(string.Format("The behavior '{0}' is invalid since it is abstract.", behavior.Name), paramName);
+            //}
             if (behavior.IsGenericTypeDefinition)
             {
                 throw new ArgumentException(string.Format("The behavior '{0}' is invalid since it is an open generic.", behavior.Name), paramName);

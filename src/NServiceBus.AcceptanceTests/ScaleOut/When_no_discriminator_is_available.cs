@@ -5,6 +5,7 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Features;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
     using NServiceBus.Transports;
     using NUnit.Framework;
@@ -53,7 +54,7 @@
 
             public class TransportThatDoesntSetADefaultDiscriminatorConfigurator : ConfigureTransport
             {
-                protected override RegisterStep GetReceiveBehaviorRegistration(ReceiveOptions settings)
+                protected override Func<IBuilder, ReceiveBehavior> GetReceiveBehaviorFactory(ReceiveOptions settings)
                 {
                     throw new NotImplementedException();
                 }

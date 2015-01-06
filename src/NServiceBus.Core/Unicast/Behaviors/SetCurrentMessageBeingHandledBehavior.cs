@@ -1,6 +1,7 @@
 ﻿namespace NServiceBus
 {
     using System;
+    using NServiceBus.Pipeline.Contexts;
     using Pipeline;
 
     class SetCurrentMessageBeingHandledBehavior : HomomorphicBehavior<HandlingContext>

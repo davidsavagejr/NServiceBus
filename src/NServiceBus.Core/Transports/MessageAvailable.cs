@@ -8,7 +8,7 @@ namespace NServiceBus.Transports
     /// </summary>
     public class MessageAvailable
     {
-        readonly Action<IncomingContext> contextAction;
+        readonly Action<BootstrapContext> contextAction;
         readonly string publicReceiveAddress;
 
         /// <summary>
@@ -16,7 +16,7 @@ namespace NServiceBus.Transports
         /// </summary>
         /// <param name="publicReceiveAddress">Public receive address for this message</param>
         /// <param name="contextAction">A callback that sets up the pipeline context for processing a received message.</param>
-        public MessageAvailable(string publicReceiveAddress, Action<IncomingContext> contextAction)
+        public MessageAvailable(string publicReceiveAddress, Action<BootstrapContext> contextAction)
         {
             this.contextAction = contextAction;
             this.publicReceiveAddress = publicReceiveAddress;
@@ -30,7 +30,7 @@ namespace NServiceBus.Transports
             get { return publicReceiveAddress; }
         }
 
-        internal void InitializeContext(IncomingContext context)
+        internal void InitializeContext(BootstrapContext context)
         {
             contextAction(context);
         }

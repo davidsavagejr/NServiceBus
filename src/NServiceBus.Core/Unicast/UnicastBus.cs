@@ -415,7 +415,7 @@ namespace NServiceBus.Unicast
 
             PipelineFactory.CurrentContext.handleCurrentMessageLaterWasCalled = true;
 
-            ((IncomingContext)PipelineFactory.CurrentContext).DoNotInvokeAnyMoreHandlers();
+            ((HandlingContext)PipelineFactory.CurrentContext).DoNotInvokeAnyMoreHandlers();
         }
 
         /// <summary>
@@ -739,7 +739,7 @@ namespace NServiceBus.Unicast
         /// </summary>
         public void DoNotContinueDispatchingCurrentMessageToHandlers()
         {
-            ((IncomingContext)PipelineFactory.CurrentContext).DoNotInvokeAnyMoreHandlers();
+            ((HandlingContext)PipelineFactory.CurrentContext).DoNotInvokeAnyMoreHandlers();
         }
 
         /// <summary>

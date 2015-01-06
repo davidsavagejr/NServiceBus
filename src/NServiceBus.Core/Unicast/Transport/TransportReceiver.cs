@@ -54,7 +54,7 @@ namespace NServiceBus.Unicast.Transport
 
         private void InvokePipeline(MessageAvailable messageAvailable)
         {
-            var context = new IncomingContext(pipelineExecutor.CurrentContext);
+            var context = new BootstrapContext(pipelineExecutor.CurrentContext);
 
             messageAvailable.InitializeContext(context);
             context.SetPublicReceiveAddress(messageAvailable.PublicReceiveAddress);
@@ -68,7 +68,7 @@ namespace NServiceBus.Unicast.Transport
         /// Sets the context for processing an incoming message.
         /// </summary>
         /// <param name="context"></param>
-        protected virtual void SetContext(IncomingContext context)
+        protected virtual void SetContext(BootstrapContext context)
         {
         }
 

@@ -1,8 +1,10 @@
 ﻿namespace NServiceBus.Features
 {
     using System;
+    using System.Transactions;
     using Config;
     using Logging;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
     using Transports;
     using Transports.Msmq;
@@ -22,7 +24,7 @@
         /// Creates a <see cref="RegisterStep"/> for receive behavior.
         /// </summary>
         /// <returns></returns>
-        protected override RegisterStep GetReceiveBehaviorRegistration(ReceiveOptions receiveOptions)
+        protected override Func<IBuilder, ReceiveBehavior> GetReceiveBehaviorFactory(ReceiveOptions receiveOptions)
         {
             if (receiveOptions.Transactions.SuppressDistributedTransactions)
             {
@@ -30,7 +32,16 @@
             }
             else
             {
-                return new MsmqReceiveWithTransactionScopeBehavior.Registration(receiveOptions);
+                return b =>
+                {
+                    var transactionOptions = new TransactionOptions
+                    {
+                        IsolationLevel = receiveOptions.Transactions.IsolationLevel,
+                        Timeout = receiveOptions.Transactions.TransactionTimeout
+                    };
+
+                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions, Address.Parse(receiveOptions.ErrorQueue));
+                };
             }
         }
 

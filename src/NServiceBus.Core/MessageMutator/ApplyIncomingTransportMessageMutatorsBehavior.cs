@@ -6,9 +6,9 @@
     using Pipeline.Contexts;
 
 
-    class ApplyIncomingTransportMessageMutatorsBehavior : HomomorphicBehavior<IncomingContext>
+    class ApplyIncomingTransportMessageMutatorsBehavior : HomomorphicBehavior<AbortableContext>
     {
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void DoInvoke(AbortableContext context, Action next)
         {
             var mutators = context.Builder.BuildAll<IMutateIncomingTransportMessages>();
 

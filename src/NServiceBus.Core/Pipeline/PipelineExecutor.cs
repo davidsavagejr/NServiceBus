@@ -90,7 +90,7 @@
             Execute(pipeline);
         }
 
-        internal void InvokeReceivePhysicalMessagePipeline(IncomingContext context)
+        internal void InvokeReceivePhysicalMessagePipeline(BootstrapContext context)
         {
             InvokePipeline(incomingBehaviors, context);
         }

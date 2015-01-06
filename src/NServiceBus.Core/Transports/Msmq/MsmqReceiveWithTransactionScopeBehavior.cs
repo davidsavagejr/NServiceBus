@@ -1,7 +1,6 @@
 namespace NServiceBus
 {
     using System;
-    using System.Diagnostics;
     using System.Messaging;
     using System.Threading;
     using System.Transactions;
@@ -10,7 +9,7 @@ namespace NServiceBus
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
 
-    class MsmqReceiveWithTransactionScopeBehavior : HomomorphicBehavior<IncomingContext>
+    class MsmqReceiveWithTransactionScopeBehavior : ReceiveBehavior
     {
         public MsmqReceiveWithTransactionScopeBehavior(TransactionOptions transactionOptions, Address errorQueue)
         {
@@ -18,7 +17,7 @@ namespace NServiceBus
             this.errorQueue = errorQueue;
         }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        protected override void Invoke(BootstrapContext context, Action<TransportMessage> onMessage)
         {
             var queue = context.Get<MessageQueue>();
 
@@ -48,15 +47,9 @@ namespace NServiceBus
                     return;
                 }
 
-                context.Set(IncomingContext.IncomingPhysicalMessageKey, transportMessage);
-
-                next();
-
-                if (context.MessageHandledSuccessfully())
-                {
-                    scope.Complete();
-                    scope.Dispose();
-                }
+                onMessage(transportMessage);
+                scope.Complete();
+                scope.Dispose();
             }
 
         }
@@ -103,22 +96,5 @@ namespace NServiceBus
         readonly Address errorQueue;
 
         static ILog Logger = LogManager.GetLogger<MsmqReceiveWithTransactionScopeBehavior>();
-
-        public class Registration : RegisterStep
-        {
-            public Registration(ReceiveOptions receiveOptions): base(WellKnownStep.Receive, typeof(MsmqReceiveWithTransactionScopeBehavior), "Performs a msmq receive using a transaction scope. This will require DTC to be enable on the machine")
-            {
-                ContainerRegistration((builder, settings) =>
-                {
-                    var transactionOptions = new TransactionOptions
-                   {
-                       IsolationLevel = receiveOptions.Transactions.IsolationLevel,
-                       Timeout = receiveOptions.Transactions.TransactionTimeout
-                   };
-
-                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions,Address.Parse(receiveOptions.ErrorQueue));
-                });
-            }
-        }
     }
 }

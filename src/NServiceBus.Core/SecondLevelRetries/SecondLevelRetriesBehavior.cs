@@ -8,7 +8,7 @@ namespace NServiceBus
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
 
-    class SecondLevelRetriesBehavior : HomomorphicBehavior<IncomingContext>
+    class SecondLevelRetriesBehavior : HomomorphicBehavior<AbortableContext>
     {
         readonly IDeferMessages deferer;
         readonly SecondLevelRetryPolicy retryPolicy;
@@ -21,7 +21,7 @@ namespace NServiceBus
             this.notifications = notifications;
         }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void DoInvoke(AbortableContext context, Action next)
         {
             try
             {

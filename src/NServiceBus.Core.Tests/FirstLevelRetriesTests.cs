@@ -31,7 +31,7 @@
                 throw new Exception("test"); 
             });
 
-            Assert.False(context.MessageHandledSuccessfully());
+            Assert.False(context.MessageHandledSuccessfully);
         }
 
         [Test]

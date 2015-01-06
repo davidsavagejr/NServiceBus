@@ -15,7 +15,7 @@
     using Unicast;
 
 
-    class DeserializeLogicalMessagesBehavior : HomomorphicBehavior<IncomingContext>
+    class DeserializeLogicalMessagesBehavior : IBehavior<AbortableContext, IncomingContext>
     {
         public IMessageSerializer MessageSerializer { get; set; }
     
@@ -25,26 +25,30 @@
 
         public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public void Invoke(AbortableContext context, Action<IncomingContext> next)
         {
             var transportMessage = context.PhysicalMessage;
 
             if (transportMessage.IsControlMessage())
             {
                 log.Info("Received a control message. Skipping deserialization as control message data is contained in the header.");
-                next();
+                next(new IncomingContext(Enumerable.Empty<LogicalMessage>(),context));
                 return;
             }
+            var messages = ExtractWithExceptionHandling(transportMessage);
+            next(new IncomingContext(messages, context));
+        }
+
+        List<LogicalMessage> ExtractWithExceptionHandling(TransportMessage transportMessage)
+        {
             try
             {
-                context.LogicalMessages = Extract(transportMessage);
+                return Extract(transportMessage);
             }
             catch (Exception exception)
             {
                 throw new MessageDeserializationException(transportMessage.Id, exception);
             }
-
-            next();
         }
 
         List<LogicalMessage> Extract(TransportMessage physicalMessage)

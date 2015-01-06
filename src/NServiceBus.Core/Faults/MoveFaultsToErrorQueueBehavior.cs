@@ -8,7 +8,7 @@ namespace NServiceBus
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
 
-    class MoveFaultsToErrorQueueBehavior : HomomorphicBehavior<IncomingContext>
+    class MoveFaultsToErrorQueueBehavior : HomomorphicBehavior<AbortableContext>
     {
         public MoveFaultsToErrorQueueBehavior(CriticalError criticalError, ISendMessages sender, HostInformation hostInformation, BusNotifications notifications, string errorQueueAddress)
         {
@@ -19,7 +19,7 @@ namespace NServiceBus
             this.errorQueueAddress = errorQueueAddress;
         }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void DoInvoke(AbortableContext context, Action next)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace NServiceBus
             public Registration()
                 : base("MoveFaultsToErrorQueue", typeof(MoveFaultsToErrorQueueBehavior), "Invokes the configured fault manager for messages that fails processing (and any retries)")
             {
-                InsertAfter(WellKnownStep.Receive);
+                InsertAfter("AbortableBehavior");
 
                 InsertBeforeIfExists("HandlerTransactionScopeWrapper");
                 InsertBeforeIfExists("FirstLevelRetries");

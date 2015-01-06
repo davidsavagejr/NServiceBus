@@ -4,9 +4,9 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class EnforceMessageIdBehavior : HomomorphicBehavior<IncomingContext>
+    class EnforceMessageIdBehavior : HomomorphicBehavior<AbortableContext>
     {
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void DoInvoke(AbortableContext context, Action next)
         {
             if (string.IsNullOrWhiteSpace(context.PhysicalMessage.Id))
             {     
@@ -21,7 +21,7 @@ namespace NServiceBus
             public Registration()
                 : base("EnforceMessageId", typeof(EnforceMessageIdBehavior), "Makes sure that the message pulled from the transport contains a message id")
             {
-                InsertAfter("ReceiveMessage");
+                InsertAfter("AbortableBehavior");
                 InsertBeforeIfExists("FirstLevelRetries");
             }
         }
