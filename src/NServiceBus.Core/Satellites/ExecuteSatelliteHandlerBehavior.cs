@@ -2,12 +2,11 @@ namespace NServiceBus
 {
     using System;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Satellites;
 
-    class ExecuteSatelliteHandlerBehavior: HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class ExecuteSatelliteHandlerBehavior: PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var satellite = context.Get<ISatellite>();
 

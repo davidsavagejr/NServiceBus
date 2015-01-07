@@ -6,11 +6,11 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class SendValidatorBehavior : HomomorphicBehavior<OutgoingContext>
+    class SendValidatorBehavior : Behavior<OutgoingContext>
     {
         public Conventions Conventions { get; set; }
 
-        public override void DoInvoke(OutgoingContext context, Action next)
+        public override void Invoke(OutgoingContext context, Action next)
         {
             if (!context.OutgoingLogicalMessage.IsControlMessage())
             {

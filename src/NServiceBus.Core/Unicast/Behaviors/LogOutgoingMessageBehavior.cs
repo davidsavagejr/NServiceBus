@@ -7,9 +7,9 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class LogOutgoingMessageBehavior : HomomorphicBehavior<OutgoingContext>
+    class LogOutgoingMessageBehavior : Behavior<OutgoingContext>
     {
-        public override void DoInvoke(OutgoingContext context, Action next)
+        public override void Invoke(OutgoingContext context, Action next)
         {
             var options = context.DeliveryOptions as SendOptions;
 

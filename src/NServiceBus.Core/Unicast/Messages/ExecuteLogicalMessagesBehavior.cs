@@ -8,15 +8,15 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class ExecuteLogicalMessagesBehavior : IBehavior<IncomingContext, IncomingLogicalMessageContext>
+    class ExecuteLogicalMessagesBehavior : StageConnector<LogicalMessagesProcessingStageBehavior.Context, LogicalMessageProcessingStageBehavior.Context>
     {
-        public void Invoke(IncomingContext context, Action<IncomingLogicalMessageContext> next)
+        public override void Invoke(LogicalMessagesProcessingStageBehavior.Context context, Action<LogicalMessageProcessingStageBehavior.Context> next)
         {
             var logicalMessages = context.LogicalMessages;
 
             foreach (var message in logicalMessages)
             {
-                next(new IncomingLogicalMessageContext(message, context));
+                next(new LogicalMessageProcessingStageBehavior.Context(message, context));
             }
 
             if (!context.PhysicalMessage.IsControlMessage())

@@ -5,13 +5,12 @@
     using System.Transactions;
     using NServiceBus.Outbox;
     using Pipeline;
-    using Pipeline.Contexts;
     using Transports;
     using Unicast;
     using Unicast.Messages;
     using Unicast.Transport;
 
-    class OutboxDeduplicationBehavior : HomomorphicBehavior<IncomingContext>
+    class OutboxDeduplicationBehavior : PhysicalMessageProcessingStageBehavior
     {
         public IOutboxStorage OutboxStorage { get; set; }
         public DispatchMessageToTransportBehavior DispatchMessageToTransportBehavior { get; set; }
@@ -22,7 +21,7 @@
 
         public TransactionSettings TransactionSettings { get; set; }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var messageId = context.PhysicalMessage.Id;
             OutboxMessage outboxMessage;

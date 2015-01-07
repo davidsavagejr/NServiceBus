@@ -3,11 +3,10 @@ namespace NServiceBus
     using System;
     using System.Transactions;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
 
-    class SuppressAmbientTransactionBehavior : HomomorphicBehavior<IncomingContext>
+    class SuppressAmbientTransactionBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             if (Transaction.Current == null)
             {

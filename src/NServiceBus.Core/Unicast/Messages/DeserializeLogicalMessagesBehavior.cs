@@ -15,7 +15,7 @@
     using Unicast;
 
 
-    class DeserializeLogicalMessagesBehavior : IBehavior<PhysicalMessageProcessingContext, IncomingContext>
+    class DeserializeLogicalMessagesBehavior : StageConnector<PhysicalMessageProcessingStageBehavior.Context, LogicalMessagesProcessingStageBehavior.Context>
     {
         public IMessageSerializer MessageSerializer { get; set; }
     
@@ -25,18 +25,18 @@
 
         public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
 
-        public void Invoke(PhysicalMessageProcessingContext context, Action<IncomingContext> next)
+        public override void Invoke(PhysicalMessageProcessingStageBehavior.Context context, Action<LogicalMessagesProcessingStageBehavior.Context> next)
         {
             var transportMessage = context.PhysicalMessage;
 
             if (transportMessage.IsControlMessage())
             {
                 log.Info("Received a control message. Skipping deserialization as control message data is contained in the header.");
-                next(new IncomingContext(Enumerable.Empty<LogicalMessage>(),context));
+                next(new LogicalMessagesProcessingStageBehavior.Context(Enumerable.Empty<LogicalMessage>(), context));
                 return;
             }
             var messages = ExtractWithExceptionHandling(transportMessage);
-            next(new IncomingContext(messages, context));
+            next(new LogicalMessagesProcessingStageBehavior.Context(messages, context));
         }
 
         List<LogicalMessage> ExtractWithExceptionHandling(TransportMessage transportMessage)

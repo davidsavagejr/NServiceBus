@@ -19,18 +19,19 @@
         void Invoke(TIn context, Action<TOut> next);
     }
 
+
     /// <summary>
     /// This is the base interface to implement to create a behavior that can be registered in a pipeline.
     /// </summary>
     /// <typeparam name="TContext">The context that this behavior should receive.</typeparam>
-    public abstract class HomomorphicBehavior<TContext> : IBehavior<TContext,TContext> where TContext : BehaviorContext
+    public abstract class Behavior<TContext> : IBehavior<TContext,TContext> where TContext : BehaviorContext
     {
         /// <summary>
         /// Called when the behavior is executed.
         /// </summary>
         /// <param name="context">The current context.</param>
         /// <param name="next">The next <see cref="!:IBehavior{TContext}" /> in the chain to execute.</param>
-        public abstract void DoInvoke(TContext context, Action next);
+        public abstract void Invoke(TContext context, Action next);
 
         /// <summary>
         /// Called when the behavior is executed.
@@ -39,7 +40,7 @@
         /// <param name="next">The next <see cref="IBehavior{TIn,TOut}"/> in the chain to execute.</param>
         public void Invoke(TContext context, Action<TContext> next)
         {
-            DoInvoke(context, () => next(context));
+            Invoke(context, () => next(context));
         }
     }
 }

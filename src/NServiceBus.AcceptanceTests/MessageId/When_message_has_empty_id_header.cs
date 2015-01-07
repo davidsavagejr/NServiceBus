@@ -62,11 +62,11 @@
                     });
             }
 
-            class InspectRawMessageStep : HomomorphicBehavior<IncomingContext>
+            class InspectRawMessageStep : PhysicalMessageProcessingStageBehavior
             {
-                public Context ScenarioContext { get; set; }
+                public When_message_has_empty_id_header.Context ScenarioContext { get; set; }
 
-                public override void DoInvoke(IncomingContext ctx, Action next)
+                public override void Invoke(Context ctx, Action next)
                 {
                     if (!ctx.PhysicalMessage.Headers.ContainsKey("ScenarioContextId"))
                     {

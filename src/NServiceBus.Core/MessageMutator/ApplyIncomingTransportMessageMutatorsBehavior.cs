@@ -2,13 +2,11 @@
 {
     using System;
     using NServiceBus.MessageMutator;
-    using Pipeline;
-    using Pipeline.Contexts;
 
 
-    class ApplyIncomingTransportMessageMutatorsBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class ApplyIncomingTransportMessageMutatorsBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var mutators = context.Builder.BuildAll<IMutateIncomingTransportMessages>();
 

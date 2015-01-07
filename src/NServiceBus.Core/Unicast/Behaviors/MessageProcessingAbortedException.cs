@@ -2,21 +2,6 @@ namespace NServiceBus
 {
     using System;
     using System.Runtime.Serialization;
-    using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
-
-    internal class AbortableBehavior : IBehavior<PhysicalMessageReceiveContext, PhysicalMessageProcessingContext>
-    {
-        public void Invoke(PhysicalMessageReceiveContext context, Action<PhysicalMessageProcessingContext> next)
-        {
-            var abortableContext = new PhysicalMessageProcessingContext(context);
-            next(abortableContext);
-            if (!abortableContext.MessageHandledSuccessfully)
-            {
-                throw new MessageProcessingAbortedException();
-            }
-        }
-    }
 
     /// <summary>
     /// Informs that message processing has been aborted.

@@ -123,12 +123,13 @@
     <Compile Include="FirstLevelRetries\FirstLevelRetry.cs" />
     <Compile Include="Faults\ErrorQueueSettings.cs" />
     <Compile Include="Faults\StoreFaultsInErrorQueue.cs" />
+    <Compile Include="Pipeline\Contexts\PhysicalMessageProcessingStageBehavior.cs" />
     <Compile Include="Pipeline\BehaviorInvoker.cs" />
-    <Compile Include="Pipeline\Contexts\PhysicalMessageProcessingContext.cs" />
     <Compile Include="Pipeline\Contexts\BootstrapContext.cs" />
-    <Compile Include="Pipeline\Contexts\PhysicalMessageReceiveContext.cs" />
+    <Compile Include="Pipeline\Contexts\TransportReceiveContext.cs" />
+    <Compile Include="Pipeline\StageConnector.cs" />
     <Compile Include="Transports\ReceiveBehavior.cs" />
-    <Compile Include="Unicast\Behaviors\AbortableBehavior.cs" />
+    <Compile Include="Unicast\Behaviors\TransportReceiveToPhysicalMessageProcessingConnector.cs" />
     <Compile Include="Pipeline\Contexts\IncomingLogicalMessageContext.cs" />
     <Compile Include="Pipeline\IBehaviorInvoker.cs" />
     <Compile Include="SecondLevelRetries\SecondLevelRetry.cs" />
@@ -285,6 +286,7 @@
     <Compile Include="Unicast\Behaviors\ForwardReceivedMessages.cs" />
     <Compile Include="FirstLevelRetries\FirstLevelRetriesBehavior.cs" />
     <Compile Include="Pipeline\Contexts\HandlingContext.cs" />
+    <Compile Include="Unicast\Behaviors\MessageProcessingAbortedException.cs" />
     <Compile Include="Unicast\BusAsyncResultEventArgs.cs" />
     <Compile Include="Unicast\Config\LoadMessageHandlersExtentions_Obsolete.cs" />
     <Compile Include="Unicast\Config\RegisterHandlersInOrder.cs" />
@@ -411,7 +413,7 @@
     <Compile Include="Unicast\Behaviors\DispatchMessageToTransportBehavior.cs" />
     <Compile Include="MessageMutator\MutateOutgoingMessageBehavior.cs" />
     <Compile Include="MessageMutator\MutateOutgoingPhysicalMessageBehavior.cs" />
-    <Compile Include="Pipeline\Contexts\IncomingContext.cs" />
+    <Compile Include="Pipeline\Contexts\LogicalMessagesProcessingStageBehavior.cs" />
     <Compile Include="Pipeline\PipelineExecutor.cs" />
     <Compile Include="Pipeline\Contexts\RootContext.cs" />
     <Compile Include="Pipeline\Contexts\OutgoingContext.cs" />
@@ -428,7 +430,7 @@
     <Compile Include="Unicast\Transport\TransportMessageExtensions.cs" />
     <Compile Include="Unicast\UnicastBus_Obsolete.cs" />
     <Compile Include="UnitOfWork\UnitOfWorkBehavior.cs" />
-    <Compile Include="Pipeline\HomomorphicBehavior.cs" />
+    <Compile Include="Pipeline\Behavior.cs" />
     <Compile Include="Pipeline\BehaviorChain.cs" />
     <Compile Include="Serializers\Binary\Config\BinarySerialization.cs" />
     <Compile Include="Serializers\Binary\Config\ConfigureBinarySerializer_Obsolete.cs" />

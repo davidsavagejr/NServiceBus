@@ -18,8 +18,7 @@
 
             fakeOutbox.ExistingMessage = new OutboxMessage(incomingTransportMessage.Id);
 
-            var context = new IncomingContext(null);
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, incomingTransportMessage);
+            var context = new PhysicalMessageProcessingStageBehavior.Context(new TransportReceiveContext(incomingTransportMessage, null));
 
             Invoke(context);
 
@@ -31,11 +30,10 @@
         {
             var incomingTransportMessage = new TransportMessage();
 
-            var context = new IncomingContext(null)
+            var context = new PhysicalMessageProcessingStageBehavior.Context(new TransportReceiveContext(incomingTransportMessage, null))
             {
                 handleCurrentMessageLaterWasCalled = true
             };
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, incomingTransportMessage);
 
             Invoke(context);
 
@@ -54,9 +52,9 @@
             };
         }
 
-        void Invoke(IncomingContext context, bool shouldAbort = false)
+        void Invoke(PhysicalMessageProcessingStageBehavior.Context context, bool shouldAbort = false)
         {
-            behavior.DoInvoke(context, () =>
+            behavior.Invoke(context, () =>
             {
                 if (shouldAbort)
                 {

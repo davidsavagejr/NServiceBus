@@ -3,12 +3,11 @@
     using System;
     using NServiceBus.Hosting;
     using Pipeline;
-    using Pipeline.Contexts;
     using Transports;
     using Unicast;
 
 
-    class AuditBehavior : HomomorphicBehavior<IncomingContext>
+    class AuditBehavior : PhysicalMessageProcessingStageBehavior
     {
         public HostInformation HostInformation { get; set; }
 
@@ -18,7 +17,7 @@
 
         public TimeSpan? TimeToBeReceivedOnForwardedMessages { get; set; }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             next();
 

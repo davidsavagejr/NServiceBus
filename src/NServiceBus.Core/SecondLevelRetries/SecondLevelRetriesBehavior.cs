@@ -3,12 +3,11 @@ namespace NServiceBus
     using System;
     using System.Collections.Generic;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.SecondLevelRetries;
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
 
-    class SecondLevelRetriesBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class SecondLevelRetriesBehavior : PhysicalMessageProcessingStageBehavior
     {
         readonly IDeferMessages deferer;
         readonly SecondLevelRetryPolicy retryPolicy;
@@ -21,7 +20,7 @@ namespace NServiceBus
             this.notifications = notifications;
         }
 
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             try
             {

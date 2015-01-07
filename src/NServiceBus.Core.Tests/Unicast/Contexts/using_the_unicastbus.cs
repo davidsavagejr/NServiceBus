@@ -107,7 +107,10 @@ namespace NServiceBus.Unicast.Tests.Contexts
 
             var pipelineSettings = new PipelineSettings(pipelineModifications);
             HardcodedPipelineSteps.Register(pipelineSettings, false);
-            pipelineSettings.Register<FakeReceiveBehavior.Registration>();
+
+            var receiveBehaviorRegistration = new ReceiveBehaviorRegistration();
+            receiveBehaviorRegistration.ContainerRegistration((b, s) => new FakeReceiveBehavior());
+            pipelineSettings.Register(receiveBehaviorRegistration);
 
             pipelineFactory = new PipelineExecutor(settings, Builder, new BusNotifications());
 
@@ -123,6 +126,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
             Builder.Register<IMessageHandlerRegistry>(() => handlerRegistry);
             Builder.Register<IMessageMapper>(() => MessageMapper);
 
+            Builder.Register<ReceiveBehavior>(() => new FakeReceiveBehavior());
             Builder.Register<DeserializeLogicalMessagesBehavior>(() => new DeserializeLogicalMessagesBehavior
                                                              {
                                                                  MessageSerializer = MessageSerializer,

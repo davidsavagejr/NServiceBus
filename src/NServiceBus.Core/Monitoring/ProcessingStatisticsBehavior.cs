@@ -1,12 +1,10 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using Pipeline;
-    using Pipeline.Contexts;
 
-    class ProcessingStatisticsBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class ProcessingStatisticsBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             string timeSentString;
             var headers = context.PhysicalMessage.Headers;

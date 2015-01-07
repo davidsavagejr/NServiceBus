@@ -3,9 +3,8 @@ namespace NServiceBus
     using System;
     using System.Transactions;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
 
-    class HandlerTransactionScopeWrapperBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class HandlerTransactionScopeWrapperBehavior : PhysicalMessageProcessingStageBehavior
     {
         readonly TransactionOptions transactionOptions;
 
@@ -14,7 +13,7 @@ namespace NServiceBus
             this.transactionOptions = transactionOptions;
         }
 
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             if (Transaction.Current != null)
             {

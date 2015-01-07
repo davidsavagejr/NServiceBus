@@ -32,21 +32,12 @@ namespace NServiceBus.Core.Tests.Fakes
         }
     }
 
-    class FakeReceiveBehavior : HomomorphicBehavior<IncomingContext>
+    class FakeReceiveBehavior : ReceiveBehavior
     {
-        public override void DoInvoke(IncomingContext context, Action next)
+        protected override void Invoke(BootstrapContext context, Action<TransportMessage> onMessage)
         {
             var msg = context.Get<TransportMessage>("FakeMessage");
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, msg);
-            next();
-        }
-
-        public class Registration : RegisterStep
-        {
-            public Registration()
-                : base(WellKnownStep.Receive, typeof(FakeReceiveBehavior), "Receives a fake message")
-            {
-            }
+            onMessage(msg);
         }
     }
 }

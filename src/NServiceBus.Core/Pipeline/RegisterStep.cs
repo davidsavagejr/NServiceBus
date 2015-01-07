@@ -16,7 +16,7 @@ namespace NServiceBus.Pipeline
         /// Initializes a new instance of the <see cref="RegisterStep"/> class.
         /// </summary>
         /// <param name="stepId">The unique identifier for this steps.</param>
-        /// <param name="behavior">The type of <see cref="HomomorphicBehavior{TContext}"/> to register.</param>
+        /// <param name="behavior">The type of <see cref="Behavior{TContext}"/> to register.</param>
         /// <param name="description">A brief description of what this step does.</param>
         /// <param name="isStatic">If a behavior is pipeline-static (shared between executions)</param>
         protected RegisterStep(string stepId, Type behavior, string description, bool isStatic = false)
@@ -81,7 +81,7 @@ namespace NServiceBus.Pipeline
         internal IList<Dependency> Afters { get; private set; }
         
         /// <summary>
-        /// Gets the type of <see cref="HomomorphicBehavior{TContext}"/> that is being registered.
+        /// Gets the type of <see cref="Behavior{TContext}"/> that is being registered.
         /// </summary>
         public Type BehaviorType { get; internal set; }
 

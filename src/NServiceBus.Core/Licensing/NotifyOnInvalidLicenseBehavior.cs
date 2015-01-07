@@ -4,11 +4,10 @@
     using System.Diagnostics;
     using Logging;
     using Pipeline;
-    using Pipeline.Contexts;
 
-    class NotifyOnInvalidLicenseBehavior : HomomorphicBehavior<IncomingContext>
+    class NotifyOnInvalidLicenseBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             context.PhysicalMessage.Headers[Headers.HasLicenseExpired] = true.ToString().ToLower();
 

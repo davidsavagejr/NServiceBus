@@ -19,7 +19,7 @@ namespace NServiceBus.Pipeline
         /// Register a new step into the pipeline.
         /// </summary>
         /// <param name="stepId">The identifier of the new step to add.</param>
-        /// <param name="behavior">The <see cref="HomomorphicBehavior{TContext}"/> to execute.</param>
+        /// <param name="behavior">The <see cref="Behavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
         /// <param name="isStatic">Is this behavior pipeline-static</param>
         public StepRegistrationSequence Register(string stepId, Type behavior, string description, bool isStatic = false)
@@ -48,7 +48,7 @@ namespace NServiceBus.Pipeline
         /// <see cref="Register(string,System.Type,string, bool)"/>
         /// </summary>
         /// <param name="wellKnownStep">The identifier of the step to add.</param>
-        /// <param name="behavior">The <see cref="HomomorphicBehavior{TContext}"/> to execute.</param>
+        /// <param name="behavior">The <see cref="Behavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
         /// <param name="isStatic">Is this behavior pipeline-static</param>
         public StepRegistrationSequence Register(WellKnownStep wellKnownStep, Type behavior, string description, bool isStatic = false)

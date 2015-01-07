@@ -2,18 +2,17 @@
 {
     using System;
     using System.Linq;
+    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast.Transport;
-    using Pipeline;
-    using Pipeline.Contexts;
     using Unicast;
 
-    class CallbackInvocationBehavior : HomomorphicBehavior<IncomingContext>
+    class CallbackInvocationBehavior : LogicalMessagesProcessingStageBehavior
     {
         public const string CallbackInvokedKey = "NServiceBus.CallbackInvocationBehavior.CallbackWasInvoked";
 
         public UnicastBus UnicastBus { get; set; }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var messageWasHandled = HandleCorrelatedMessage(context.PhysicalMessage, context);
 
@@ -22,7 +21,7 @@
             next();
         }
 
-        bool HandleCorrelatedMessage(TransportMessage transportMessage, IncomingContext context)
+        bool HandleCorrelatedMessage(TransportMessage transportMessage, Context context)
         {
             if (transportMessage.CorrelationId == null)
             {

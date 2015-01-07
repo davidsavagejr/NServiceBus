@@ -2,11 +2,10 @@ namespace NServiceBus
 {
     using System;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
 
-    class EnforceMessageIdBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class EnforceMessageIdBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             if (string.IsNullOrWhiteSpace(context.PhysicalMessage.Id))
             {     

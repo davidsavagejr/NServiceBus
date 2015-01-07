@@ -1,13 +1,11 @@
 namespace NServiceBus
 {
     using System;
-    using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast.Transport.Monitoring;
 
-    class ReceivePerformanceDiagnosticsBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class ReceivePerformanceDiagnosticsBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             context.Get<ReceivePerformanceDiagnostics>().MessageDequeued();
             next();

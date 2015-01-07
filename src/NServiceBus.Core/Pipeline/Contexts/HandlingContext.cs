@@ -5,11 +5,11 @@
     /// <summary>
     /// A context of handling a logical message by a handler
     /// </summary>
-    public class HandlingContext : IncomingLogicalMessageContext
+    public class HandlingContext : LogicalMessageProcessingStageBehavior.Context
     {
         const string HandlerInvocationAbortedKey = "NServiceBus.HandlerInvocationAborted";
 
-        internal HandlingContext(MessageHandler handler, IncomingLogicalMessageContext parentContext)
+        internal HandlingContext(MessageHandler handler, LogicalMessageProcessingStageBehavior.Context parentContext)
             : base(parentContext)
         {
             Set(handler);

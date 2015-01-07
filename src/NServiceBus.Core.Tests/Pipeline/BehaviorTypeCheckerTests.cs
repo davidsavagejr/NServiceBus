@@ -14,9 +14,9 @@
             BehaviorTypeChecker.ThrowIfInvalid(typeof(ValidBehavior), "foo");
         }
 
-        class ValidBehavior : HomomorphicBehavior<RootContext>
+        class ValidBehavior : Behavior<RootContext>
         {
-            public override void DoInvoke(RootContext context, Action next)
+            public override void Invoke(RootContext context, Action next)
             {
             }
         }
@@ -39,22 +39,9 @@
             Assert.Throws<ArgumentException>(() => BehaviorTypeChecker.ThrowIfInvalid(typeof(GenericBehavior<>), "foo"));
         }
 
-        class GenericBehavior<T> : HomomorphicBehavior<RootContext>
+        class GenericBehavior<T> : Behavior<RootContext>
         {
-            public override void DoInvoke(RootContext context, Action next)
-            {
-            }
-        }
-
-        [Test]
-        public void Should_throw_for_abstract_behavior()
-        {
-            Assert.Throws<ArgumentException>(() => BehaviorTypeChecker.ThrowIfInvalid(typeof(AbstractBehavior), "foo"));
-        }
-
-        abstract class AbstractBehavior : HomomorphicBehavior<RootContext>
-        {
-            public override void DoInvoke(RootContext context, Action next)
+            public override void Invoke(RootContext context, Action next)
             {
             }
         }

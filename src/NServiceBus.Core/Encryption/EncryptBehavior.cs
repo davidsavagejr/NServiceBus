@@ -6,7 +6,7 @@
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast.Transport;
 
-    class EncryptBehavior : HomomorphicBehavior<OutgoingContext>
+    class EncryptBehavior : Behavior<OutgoingContext>
     {
         EncryptionMutator messageMutator;
 
@@ -15,7 +15,7 @@
             this.messageMutator = messageMutator;
         }
 
-        public override void DoInvoke(OutgoingContext context, Action next)
+        public override void Invoke(OutgoingContext context, Action next)
         {
             if (context.OutgoingLogicalMessage.IsControlMessage())
             {

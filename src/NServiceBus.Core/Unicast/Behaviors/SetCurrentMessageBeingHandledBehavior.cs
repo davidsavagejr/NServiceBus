@@ -4,9 +4,9 @@
     using NServiceBus.Pipeline.Contexts;
     using Pipeline;
 
-    class SetCurrentMessageBeingHandledBehavior : HomomorphicBehavior<HandlingContext>
+    class SetCurrentMessageBeingHandledBehavior : Behavior<HandlingContext>
     {
-        public override void DoInvoke(HandlingContext context, Action next)
+        public override void Invoke(HandlingContext context, Action next)
         {
             var logicalMessage = context.IncomingLogicalMessage;
 

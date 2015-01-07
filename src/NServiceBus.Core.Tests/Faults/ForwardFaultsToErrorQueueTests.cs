@@ -27,7 +27,7 @@ namespace NServiceBus.Core.Tests
 
             var context = CreateContext("someid");
 
-            behavior.DoInvoke(context, () =>
+            behavior.Invoke(context, () =>
             {
                 throw new Exception("testex");
             });
@@ -48,7 +48,7 @@ namespace NServiceBus.Core.Tests
 
 
             //the ex should bubble to force the transport to rollback. If not the message will be lost
-            Assert.Throws<Exception>(() => behavior.DoInvoke(CreateContext("someid"), () =>
+            Assert.Throws<Exception>(() => behavior.Invoke(CreateContext("someid"), () =>
             {
                 throw new Exception("testex");
             }));
@@ -67,7 +67,7 @@ namespace NServiceBus.Core.Tests
 
             var behavior = new MoveFaultsToErrorQueueBehavior(new FakeCriticalError(), sender, hostInfo, new BusNotifications(), "error");
 
-            behavior.DoInvoke(context, () =>
+            behavior.Invoke(context, () =>
             {
                 throw new Exception("testex");
             });
@@ -97,7 +97,7 @@ namespace NServiceBus.Core.Tests
 
             notifications.Errors.MessageSentToErrorQueue.Subscribe(f => { failedMessageNotification = f; });
 
-            behavior.DoInvoke(CreateContext("someid"), () =>
+            behavior.Invoke(CreateContext("someid"), () =>
             {
                 throw new Exception("testex");
             });
@@ -111,13 +111,13 @@ namespace NServiceBus.Core.Tests
 
 
 
-        IncomingContext CreateContext(string messageId)
+        PhysicalMessageProcessingStageBehavior.Context CreateContext(string messageId)
         {
-            var context = new IncomingContext(null);
+            var transportMessage = new TransportMessage(messageId, new Dictionary<string, string>());
+
+            var context = new PhysicalMessageProcessingStageBehavior.Context(new TransportReceiveContext(transportMessage, null));
 
             context.SetPublicReceiveAddress("public-receive-address");
-            context.Set(IncomingContext.IncomingPhysicalMessageKey, new TransportMessage(messageId, new Dictionary<string, string>()));
-
             return context;
         }
 

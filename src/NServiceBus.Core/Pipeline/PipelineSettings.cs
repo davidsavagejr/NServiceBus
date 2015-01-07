@@ -63,7 +63,7 @@ namespace NServiceBus.Pipeline
         /// Replaces an existing step behavior with a new one.
         /// </summary>
         /// <param name="stepId">The identifier of the step to replace its implementation.</param>
-        /// <param name="newBehavior">The new <see cref="HomomorphicBehavior{TContext}"/> to use.</param>
+        /// <param name="newBehavior">The new <see cref="Behavior{TContext}"/> to use.</param>
         /// <param name="description">The description of the new behavior.</param>
         public void Replace(string stepId, Type newBehavior, string description = null)
         {
@@ -82,7 +82,7 @@ namespace NServiceBus.Pipeline
         /// <see cref="Replace(string,System.Type,string)"/>
         /// </summary>
         /// <param name="wellKnownStep">The identifier of the well known step to replace.</param>
-        /// <param name="newBehavior">The new <see cref="HomomorphicBehavior{TContext}"/> to use.</param>
+        /// <param name="newBehavior">The new <see cref="Behavior{TContext}"/> to use.</param>
         /// <param name="description">The description of the new behavior.</param>
         public void Replace(WellKnownStep wellKnownStep, Type newBehavior, string description = null)
         {
@@ -98,7 +98,7 @@ namespace NServiceBus.Pipeline
         /// Register a new step into the pipeline.
         /// </summary>
         /// <param name="stepId">The identifier of the new step to add.</param>
-        /// <param name="behavior">The <see cref="HomomorphicBehavior{TContext}"/> to execute.</param>
+        /// <param name="behavior">The <see cref="Behavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
         /// <param name="isStatic">Is this behavior pipeline-static</param>
         public StepRegistrationSequence Register(string stepId, Type behavior, string description, bool isStatic = false)
@@ -134,7 +134,7 @@ namespace NServiceBus.Pipeline
         /// <see cref="Register(string,System.Type,string, bool)"/>
         /// </summary>
         /// <param name="wellKnownStep">The identifier of the step to add.</param>
-        /// <param name="behavior">The <see cref="HomomorphicBehavior{TContext}"/> to execute.</param>
+        /// <param name="behavior">The <see cref="Behavior{TContext}"/> to execute.</param>
         /// <param name="description">The description of the behavior.</param>
         /// <param name="isStatic">Is this behavior pipeline-static</param>
         public StepRegistrationSequence Register(WellKnownStep wellKnownStep, Type behavior, string description, bool isStatic = false)

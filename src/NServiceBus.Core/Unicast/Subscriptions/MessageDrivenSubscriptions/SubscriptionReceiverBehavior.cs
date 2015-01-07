@@ -6,10 +6,8 @@
     using Logging;
     using NServiceBus.Unicast.Subscriptions;
     using NServiceBus.Unicast.Subscriptions.MessageDrivenSubscriptions;
-    using Pipeline;
-    using Pipeline.Contexts;
 
-    class SubscriptionReceiverBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class SubscriptionReceiverBehavior : PhysicalMessageProcessingStageBehavior
     {
         public ISubscriptionStorage SubscriptionStorage { get; set; }
 
@@ -19,7 +17,7 @@
             set { subscriptionAuthorizer = value; }
         }
 
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var transportMessage = context.PhysicalMessage;
             var messageTypeString = GetSubscriptionMessageTypeFrom(transportMessage);

@@ -20,7 +20,7 @@
         }
     }
 
-    class SubscriptionBehavior<TContext> : HomomorphicBehavior<IncomingContext> where TContext : ScenarioContext
+    class SubscriptionBehavior<TContext> : PhysicalMessageProcessingStageBehavior where TContext : ScenarioContext
     {
         readonly Action<SubscriptionEventArgs, TContext> action;
         readonly TContext scenarioContext;
@@ -31,7 +31,7 @@
             this.scenarioContext = scenarioContext;
         }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             next();
             var subscriptionMessageType = GetSubscriptionMessageTypeFrom(context.PhysicalMessage);

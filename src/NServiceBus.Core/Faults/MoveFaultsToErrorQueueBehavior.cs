@@ -4,11 +4,10 @@ namespace NServiceBus
     using NServiceBus.Hosting;
     using NServiceBus.Logging;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
     using NServiceBus.Unicast;
 
-    class MoveFaultsToErrorQueueBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
+    class MoveFaultsToErrorQueueBehavior : PhysicalMessageProcessingStageBehavior
     {
         public MoveFaultsToErrorQueueBehavior(CriticalError criticalError, ISendMessages sender, HostInformation hostInformation, BusNotifications notifications, string errorQueueAddress)
         {
@@ -19,7 +18,7 @@ namespace NServiceBus
             this.errorQueueAddress = errorQueueAddress;
         }
 
-        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             try
             {

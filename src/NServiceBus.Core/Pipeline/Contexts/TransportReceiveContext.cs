@@ -3,11 +3,11 @@
     /// <summary>
     /// Context containing a physical message
     /// </summary>
-    public class PhysicalMessageReceiveContext : BootstrapContext
+    public class TransportReceiveContext : BootstrapContext
     {
         internal const string IncomingPhysicalMessageKey = "NServiceBus.IncomingPhysicalMessage";
 
-        internal PhysicalMessageReceiveContext(TransportMessage physicalMessage, BehaviorContext parentContext) 
+        internal TransportReceiveContext(TransportMessage physicalMessage, BehaviorContext parentContext) 
             : base(parentContext)
         {
             PhysicalMessage = physicalMessage;
@@ -17,7 +17,7 @@
         /// Allows context inheritence
         /// </summary>
         /// <param name="parentContext"></param>
-        protected PhysicalMessageReceiveContext(BehaviorContext parentContext)
+        protected TransportReceiveContext(BehaviorContext parentContext)
             : base(parentContext)
         {
         }

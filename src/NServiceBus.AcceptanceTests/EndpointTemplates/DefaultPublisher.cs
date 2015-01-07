@@ -19,11 +19,11 @@ namespace NServiceBus.AcceptanceTests.EndpointTemplates
             });
         }
 
-        class SubscriptionTracer : HomomorphicBehavior<OutgoingContext>
+        class SubscriptionTracer : Behavior<OutgoingContext>
         {
             public ScenarioContext Context { get; set; }
 
-            public override void DoInvoke(OutgoingContext context, Action next)
+            public override void Invoke(OutgoingContext context, Action next)
             {
                 next();
 

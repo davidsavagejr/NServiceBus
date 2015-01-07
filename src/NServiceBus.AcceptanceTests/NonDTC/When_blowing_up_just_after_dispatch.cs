@@ -74,7 +74,7 @@
         class SendOrderAcknowledgement : IMessage { }
     }
 
-    public class BlowUpAfterDispatchBehavior : HomomorphicBehavior<IncomingContext>
+    public class BlowUpAfterDispatchBehavior : PhysicalMessageProcessingStageBehavior
     {
         public class Registration : RegisterStep
         {
@@ -84,7 +84,7 @@
             }
         }
 
-        public override void DoInvoke(IncomingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             if (!context.PhysicalMessage.Headers[Headers.EnclosedMessageTypes].Contains(typeof(When_blowing_up_just_after_dispatch.PlaceOrder).Name))
             {

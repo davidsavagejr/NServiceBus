@@ -9,11 +9,11 @@
     using Pipeline.Contexts;
     using Serialization;
 
-    class SerializeMessagesBehavior : HomomorphicBehavior<OutgoingContext>
+    class SerializeMessagesBehavior : Behavior<OutgoingContext>
     {
         public IMessageSerializer MessageSerializer { get; set; }
 
-        public override void DoInvoke(OutgoingContext context, Action next)
+        public override void Invoke(OutgoingContext context, Action next)
         {
             if (!context.OutgoingMessage.IsControlMessage())
             {

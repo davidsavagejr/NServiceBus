@@ -17,7 +17,7 @@ namespace NServiceBus.Pipeline
         {
             pipeline
                 .After(WellKnownStep.Receive)
-                .Register("AbortableBehavior", typeof(AbortableBehavior), "Allows to abort processing the message")
+                .Register("AbortableBehavior", typeof(TransportReceiveToPhysicalMessageProcessingConnector), "Allows to abort processing the message")
                 .Register("ReceivePerformanceDiagnosticsBehavior", typeof(ReceivePerformanceDiagnosticsBehavior), "Add ProcessingStarted and ProcessingEnded headers")
                 .Register(WellKnownStep.ProcessingStatistics, typeof(ProcessingStatisticsBehavior), "Add ProcessingStarted and ProcessingEnded headers")
                 .Register(WellKnownStep.CreateChildContainer, typeof(ChildContainerBehavior), "Creates the child container")

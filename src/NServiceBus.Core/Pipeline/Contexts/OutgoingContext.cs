@@ -38,21 +38,6 @@
         }
 
         /// <summary>
-        /// The received message, if any.
-        /// </summary>
-        public TransportMessage IncomingMessage
-        {
-            get
-            {
-                TransportMessage message;
-
-                parentContext.TryGet(IncomingContext.IncomingPhysicalMessageKey, out message);
-
-                return message;
-            }
-        }
-
-        /// <summary>
         /// The message about to be sent out.
         /// </summary>
         public TransportMessage OutgoingMessage

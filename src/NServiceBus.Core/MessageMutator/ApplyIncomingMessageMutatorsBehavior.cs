@@ -2,13 +2,12 @@
 {
     using System;
     using NServiceBus.MessageMutator;
-    using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
 
-    class ApplyIncomingMessageMutatorsBehavior : HomomorphicBehavior<IncomingLogicalMessageContext>
+    class ApplyIncomingMessageMutatorsBehavior : LogicalMessageProcessingStageBehavior
     {
-        public override void DoInvoke(IncomingLogicalMessageContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var current = context.IncomingLogicalMessage.Instance;
 
