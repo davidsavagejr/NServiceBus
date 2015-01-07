@@ -3,19 +3,19 @@
     using NServiceBus.Unicast.Messages;
 
     /// <summary>
-    /// 
+    /// A behavior that belongs to logical message processing stage.
     /// </summary>
     public abstract class LogicalMessageProcessingStageBehavior : Behavior<LogicalMessageProcessingStageBehavior.Context>
     {
         /// <summary>
-        /// Context for processing a single logical message
+        /// A context of behavior execution in logical message processing stage.
         /// </summary>
         public class Context : LogicalMessagesProcessingStageBehavior.Context
         {
             const string IncomingLogicalMessageKey = "NServiceBus.IncomingLogicalMessageKey";
 
             /// <summary>
-            /// 
+            /// Creates new instance.
             /// </summary>
             /// <param name="logicalMessage">The logical message</param>
             /// <param name="parentContext">The wrapped context</param>

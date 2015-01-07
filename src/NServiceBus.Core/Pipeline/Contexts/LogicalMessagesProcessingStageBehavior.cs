@@ -5,12 +5,12 @@
     using Unicast.Messages;
 
     /// <summary>
-    /// 
+    /// A behavior that belongs to a legacy logical messages processing stage where we still have multiple logical messages.
     /// </summary>
     public abstract class LogicalMessagesProcessingStageBehavior : Behavior<LogicalMessagesProcessingStageBehavior.Context>
     {
         /// <summary>
-        /// Incoming pipeline context.
+        /// A context of behavior execution in a legacy logical messages processing stage.
         /// </summary>
         public class Context : PhysicalMessageProcessingStageBehavior.Context
         {
@@ -30,7 +30,7 @@
             /// Allows context inheritence.
             /// </summary>
             /// <param name="parentContext"></param>
-            protected internal Context(BehaviorContext parentContext)
+            protected Context(BehaviorContext parentContext)
                 : base(parentContext)
             {
 

@@ -4,19 +4,19 @@
     using NServiceBus.Pipeline.Contexts;
 
     /// <summary>
-    /// 
+    /// A behavior in physical message processing stage
     /// </summary>
     public abstract class PhysicalMessageProcessingStageBehavior : Behavior<PhysicalMessageProcessingStageBehavior.Context>
     {
         /// <summary>
-        /// 
+        /// A context of behavior execution in physical message processing stage.
         /// </summary>
         public class Context : TransportReceiveContext
         {
             const string MessageHandledSuccessfullyKey = "TransportReceiver.MessageHandledSuccessfully";
 
             /// <summary>
-            /// 
+            /// Creates new instance.
             /// </summary>
             /// <param name="parentContext"></param>
             protected Context(BehaviorContext parentContext)
@@ -25,6 +25,10 @@
 
             }
 
+            /// <summary>
+            /// Creates new instance.
+            /// </summary>
+            /// <param name="parentContext"></param>
             internal Context(TransportReceiveContext parentContext)
                 : base(parentContext)
             {
