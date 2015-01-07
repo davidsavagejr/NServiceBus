@@ -124,9 +124,9 @@
     <Compile Include="Faults\ErrorQueueSettings.cs" />
     <Compile Include="Faults\StoreFaultsInErrorQueue.cs" />
     <Compile Include="Pipeline\BehaviorInvoker.cs" />
-    <Compile Include="Pipeline\Contexts\AbortableContext.cs" />
+    <Compile Include="Pipeline\Contexts\PhysicalMessageProcessingContext.cs" />
     <Compile Include="Pipeline\Contexts\BootstrapContext.cs" />
-    <Compile Include="Pipeline\Contexts\PhysicalMessageContext.cs" />
+    <Compile Include="Pipeline\Contexts\PhysicalMessageReceiveContext.cs" />
     <Compile Include="Transports\ReceiveBehavior.cs" />
     <Compile Include="Unicast\Behaviors\AbortableBehavior.cs" />
     <Compile Include="Pipeline\Contexts\IncomingLogicalMessageContext.cs" />

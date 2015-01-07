@@ -5,11 +5,11 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    internal class AbortableBehavior : IBehavior<PhysicalMessageContext, AbortableContext>
+    internal class AbortableBehavior : IBehavior<PhysicalMessageReceiveContext, PhysicalMessageProcessingContext>
     {
-        public void Invoke(PhysicalMessageContext context, Action<AbortableContext> next)
+        public void Invoke(PhysicalMessageReceiveContext context, Action<PhysicalMessageProcessingContext> next)
         {
-            var abortableContext = new AbortableContext(context);
+            var abortableContext = new PhysicalMessageProcessingContext(context);
             next(abortableContext);
             if (!abortableContext.MessageHandledSuccessfully)
             {

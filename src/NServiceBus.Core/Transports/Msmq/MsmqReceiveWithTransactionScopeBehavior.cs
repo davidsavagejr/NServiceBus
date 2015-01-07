@@ -5,7 +5,6 @@ namespace NServiceBus
     using System.Threading;
     using System.Transactions;
     using NServiceBus.Logging;
-    using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
 
@@ -49,7 +48,6 @@ namespace NServiceBus
 
                 onMessage(transportMessage);
                 scope.Complete();
-                scope.Dispose();
             }
 
         }

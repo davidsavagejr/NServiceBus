@@ -7,10 +7,14 @@
     /// <summary>
     /// Incoming pipeline context.
     /// </summary>
-    public class IncomingContext : AbortableContext
+    public class IncomingContext : PhysicalMessageProcessingContext
     {
-
-        internal IncomingContext(IEnumerable<LogicalMessage> logicalMessages, BehaviorContext parentContext)
+        /// <summary>
+        /// Enriches a processing context with deserialized logical messsages.
+        /// </summary>
+        /// <param name="logicalMessages">A collection of logical messages</param>
+        /// <param name="parentContext">Atext wrapped con</param>
+        public IncomingContext(IEnumerable<LogicalMessage> logicalMessages, PhysicalMessageProcessingContext parentContext)
             : base(parentContext)
         {
             handleCurrentMessageLaterWasCalled = false;
@@ -18,7 +22,7 @@
         }
 
         /// <summary>
-        /// 
+        /// Allows context inheritence.
         /// </summary>
         /// <param name="parentContext"></param>
         protected internal IncomingContext(BehaviorContext parentContext)

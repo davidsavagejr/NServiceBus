@@ -9,16 +9,22 @@
     {
         const string IncomingLogicalMessageKey = "NServiceBus.IncomingLogicalMessageKey";
 
-        internal IncomingLogicalMessageContext(LogicalMessage logicalMessage, BehaviorContext parentContext) : base(parentContext)
+        /// <summary>
+        /// Enriches an <see cref="IncomingContext"/> with a logical message to be processed.
+        /// </summary>
+        /// <param name="logicalMessage">The logical message</param>
+        /// <param name="parentContext">The wrapped context</param>
+        public IncomingLogicalMessageContext(LogicalMessage logicalMessage, IncomingContext parentContext)
+            : base(parentContext)
         {
             IncomingLogicalMessage = logicalMessage;
         }
 
         /// <summary>
-        /// Creates a new context
+        /// Allows context inheritence
         /// </summary>
         /// <param name="parentContext"></param>
-        protected IncomingLogicalMessageContext(IncomingLogicalMessageContext parentContext)
+        protected IncomingLogicalMessageContext(BehaviorContext parentContext)
             : base(parentContext)
         {
         }

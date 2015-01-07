@@ -7,16 +7,16 @@ namespace NServiceBus.Transports
     /// <summary>
     /// 
     /// </summary>
-    public abstract class ReceiveBehavior : IBehavior<BootstrapContext, PhysicalMessageContext>
+    public abstract class ReceiveBehavior : IBehavior<BootstrapContext, PhysicalMessageReceiveContext>
     {
         /// <summary>
         /// Called when the behavior is executed.
         /// </summary>
         /// <param name="context">The current context.</param>
         /// <param name="next">The next <see cref="IBehavior{TIn,TOut}"/> in the chain to execute.</param>
-        public void Invoke(BootstrapContext context, Action<PhysicalMessageContext> next)
+        public void Invoke(BootstrapContext context, Action<PhysicalMessageReceiveContext> next)
         {
-            Invoke(context, x => next(new PhysicalMessageContext(x, context)));
+            Invoke(context, x => next(new PhysicalMessageReceiveContext(x, context)));
         }
 
         //TODO: change to header and body ony

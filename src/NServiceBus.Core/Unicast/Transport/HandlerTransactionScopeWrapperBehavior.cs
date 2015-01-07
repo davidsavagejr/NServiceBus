@@ -5,7 +5,7 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class HandlerTransactionScopeWrapperBehavior : HomomorphicBehavior<AbortableContext>
+    class HandlerTransactionScopeWrapperBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
         readonly TransactionOptions transactionOptions;
 
@@ -14,7 +14,7 @@ namespace NServiceBus
             this.transactionOptions = transactionOptions;
         }
 
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             if (Transaction.Current != null)
             {

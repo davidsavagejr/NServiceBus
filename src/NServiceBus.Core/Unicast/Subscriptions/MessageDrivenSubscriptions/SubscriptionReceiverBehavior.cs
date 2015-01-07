@@ -9,7 +9,7 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class SubscriptionReceiverBehavior : HomomorphicBehavior<AbortableContext>
+    class SubscriptionReceiverBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
         public ISubscriptionStorage SubscriptionStorage { get; set; }
 
@@ -19,7 +19,7 @@
             set { subscriptionAuthorizer = value; }
         }
 
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             var transportMessage = context.PhysicalMessage;
             var messageTypeString = GetSubscriptionMessageTypeFrom(transportMessage);

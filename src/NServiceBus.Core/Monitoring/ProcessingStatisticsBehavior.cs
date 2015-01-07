@@ -4,9 +4,9 @@
     using Pipeline;
     using Pipeline.Contexts;
 
-    class ProcessingStatisticsBehavior : HomomorphicBehavior<AbortableContext>
+    class ProcessingStatisticsBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             string timeSentString;
             var headers = context.PhysicalMessage.Headers;

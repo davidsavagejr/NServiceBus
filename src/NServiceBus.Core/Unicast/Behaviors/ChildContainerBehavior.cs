@@ -5,9 +5,9 @@ namespace NServiceBus
     using Pipeline;
     using Pipeline.Contexts;
 
-    class ChildContainerBehavior : HomomorphicBehavior<AbortableContext>
+    class ChildContainerBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             using (var childBuilder = context.Builder.CreateChildBuilder())
             {

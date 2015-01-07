@@ -3,7 +3,7 @@
     /// <summary>
     /// 
     /// </summary>
-    public class AbortableContext : PhysicalMessageContext
+    public class PhysicalMessageProcessingContext : PhysicalMessageReceiveContext
     {
         const string MessageHandledSuccessfullyKey = "TransportReceiver.MessageHandledSuccessfully";
 
@@ -11,7 +11,7 @@
         /// 
         /// </summary>
         /// <param name="parentContext"></param>
-        protected internal AbortableContext(BehaviorContext parentContext)
+        protected internal PhysicalMessageProcessingContext(BehaviorContext parentContext)
             : base(parentContext)
         {
             

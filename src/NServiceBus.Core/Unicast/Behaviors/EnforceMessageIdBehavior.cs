@@ -4,9 +4,9 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class EnforceMessageIdBehavior : HomomorphicBehavior<AbortableContext>
+    class EnforceMessageIdBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             if (string.IsNullOrWhiteSpace(context.PhysicalMessage.Id))
             {     

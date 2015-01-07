@@ -8,9 +8,9 @@
     using Pipeline.Contexts;
 
 
-    class UnitOfWorkBehavior : HomomorphicBehavior<AbortableContext>
+    class UnitOfWorkBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             try
             {

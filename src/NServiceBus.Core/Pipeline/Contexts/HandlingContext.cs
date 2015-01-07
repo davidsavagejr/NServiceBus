@@ -16,6 +16,15 @@
         }
 
         /// <summary>
+        /// Allows context inheritence
+        /// </summary>
+        /// <param name="context"></param>
+        protected HandlingContext(BehaviorContext context)
+            : base(context)
+        {
+        }
+
+        /// <summary>
         /// The current <see cref="IHandleMessages{T}"/> being executed.
         /// </summary>
         public MessageHandler MessageHandler

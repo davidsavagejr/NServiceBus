@@ -5,7 +5,7 @@ namespace NServiceBus
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
 
-    class FirstLevelRetriesBehavior : HomomorphicBehavior<AbortableContext>
+    class FirstLevelRetriesBehavior : HomomorphicBehavior<PhysicalMessageProcessingContext>
     {
         readonly FlrStatusStorage storage;
         readonly FirstLevelRetryPolicy retryPolicy;
@@ -28,7 +28,7 @@ namespace NServiceBus
             this.notifications = notifications;
         }
 
-        public override void DoInvoke(AbortableContext context, Action next)
+        public override void DoInvoke(PhysicalMessageProcessingContext context, Action next)
         {
             try
             {

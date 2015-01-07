@@ -15,7 +15,7 @@
     using Unicast;
 
 
-    class DeserializeLogicalMessagesBehavior : IBehavior<AbortableContext, IncomingContext>
+    class DeserializeLogicalMessagesBehavior : IBehavior<PhysicalMessageProcessingContext, IncomingContext>
     {
         public IMessageSerializer MessageSerializer { get; set; }
     
@@ -25,7 +25,7 @@
 
         public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
 
-        public void Invoke(AbortableContext context, Action<IncomingContext> next)
+        public void Invoke(PhysicalMessageProcessingContext context, Action<IncomingContext> next)
         {
             var transportMessage = context.PhysicalMessage;
 
