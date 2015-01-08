@@ -26,6 +26,14 @@
         /// <returns></returns>
         protected override Func<IBuilder, ReceiveBehavior> GetReceiveBehaviorFactory(ReceiveOptions receiveOptions)
         {
+            options = receiveOptions;
+
+
+            if (!receiveOptions.Transactions.IsTransactional)
+            {
+                throw new NotImplementedException();
+            }
+
             if (receiveOptions.Transactions.SuppressDistributedTransactions)
             {
                 throw new NotImplementedException();
@@ -40,7 +48,7 @@
                         Timeout = receiveOptions.Transactions.TransactionTimeout
                     };
 
-                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions, Address.Parse(receiveOptions.ErrorQueue));
+                    return new MsmqReceiveWithTransactionScopeBehavior(transactionOptions);
                 };
             }
         }
@@ -75,7 +83,7 @@
                 //}
 
 
-                context.Container.ConfigureComponent(b => new MsmqDequeueStrategy(b.Build<CriticalError>(), endpointIsTransactional),
+                context.Container.ConfigureComponent(b => new MsmqDequeueStrategy(b.Build<CriticalError>(), endpointIsTransactional, Address.Parse(options.ErrorQueue)),
                     DependencyLifecycle.InstancePerCall);
             }
 
@@ -120,6 +128,8 @@
         {
             get { return false; }
         }
+
+        ReceiveOptions options;
 
         static ILog Logger = LogManager.GetLogger<MsmqTransportConfigurator>();
 

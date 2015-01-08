@@ -18,10 +18,12 @@ namespace NServiceBus.Transports.Msmq
         /// </summary>
         /// <param name="criticalError">CriticalError</param>
         /// <param name="isTransactional"></param>
-        public MsmqDequeueStrategy(CriticalError criticalError, bool isTransactional)
+        /// <param name="errorQueueAddress"></param>
+        public MsmqDequeueStrategy(CriticalError criticalError, bool isTransactional,Address errorQueueAddress)
         {
             this.criticalError = criticalError;
             this.isTransactional = isTransactional;
+            this.errorQueueAddress = errorQueueAddress;
         }
 
         /// <summary>
@@ -101,6 +103,7 @@ namespace NServiceBus.Transports.Msmq
                 {
                     c.Set(queue);
                     c.Set("MsmqDequeueStrategy.PeekResetEvent",peekResetEvent);
+                    c.Set("MsmqDequeueStrategy.ErrorQueue",errorQueueAddress);
                 }));
 
                 peekResetEvent.WaitOne();
@@ -151,6 +154,7 @@ namespace NServiceBus.Transports.Msmq
         static ILog Logger = LogManager.GetLogger<MsmqDequeueStrategy>();
         CriticalError criticalError;
         readonly bool isTransactional;
+        readonly Address errorQueueAddress;
 
         [SkipWeaving]
         CircuitBreaker circuitBreaker = new CircuitBreaker(100, TimeSpan.FromSeconds(30));
