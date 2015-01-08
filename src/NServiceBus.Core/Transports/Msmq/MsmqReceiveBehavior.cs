@@ -39,33 +39,20 @@ namespace NServiceBus
             return false;
         }
 
-        protected bool TryConvertMessage(Message message,  BootstrapContext context,out TransportMessage transportMessage)
+
+        protected void HandleCorruptMessage( BootstrapContext context,Message message,Exception ex, Action<MessageQueue,Message> onError)
         {
-            try
+            var errorQueue = context.Get<Address>("MsmqDequeueStrategy.ErrorQueue");
+
+            LogCorruptedMessage(message, ex, errorQueue);
+
+
+            using (var nativeErrorQueue = new MessageQueue(MsmqUtilities.GetFullPath(errorQueue), false, true, QueueAccessMode.Send))
             {
-                transportMessage = MsmqUtilities.Convert(message);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                var errorQueue = context.Get<Address>("MsmqDequeueStrategy.ErrorQueue");
-
-                LogCorruptedMessage(message, ex, errorQueue);
-
-
-                using (var nativeErrorQueue = new MessageQueue(MsmqUtilities.GetFullPath(errorQueue), false, true, QueueAccessMode.Send))
-                {
-                    nativeErrorQueue.Send(message, MessageQueueTransactionType.Automatic);
-                }
-
-                transportMessage = null;
-
-                return false;
+                onError(nativeErrorQueue, message);
             }
         }
 
-      
 
         void LogCorruptedMessage(Message message, Exception ex, Address errorQueue)
         {

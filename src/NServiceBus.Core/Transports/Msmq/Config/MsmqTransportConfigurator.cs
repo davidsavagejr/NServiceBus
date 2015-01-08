@@ -31,12 +31,12 @@
 
             if (!receiveOptions.Transactions.IsTransactional)
             {
-                throw new NotImplementedException();
+                return b=> new MsmqReceiveWithNoTransactionBehavior();
             }
 
             if (receiveOptions.Transactions.SuppressDistributedTransactions)
             {
-                throw new NotImplementedException();
+                return b => new MsmqReceiveWithNativeTransactionBehavior();
             }
             else
             {

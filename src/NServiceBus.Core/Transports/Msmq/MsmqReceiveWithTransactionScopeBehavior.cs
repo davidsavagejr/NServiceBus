@@ -28,11 +28,20 @@ namespace NServiceBus
 
                 TransportMessage transportMessage;
 
-
-                if (TryConvertMessage(message, context, out transportMessage))
+                try
                 {
-                    onMessage(transportMessage);
+                    transportMessage = MsmqUtilities.Convert(message);
                 }
+                catch (Exception ex)
+                {
+                    HandleCorruptMessage(context,message,ex,(q,m)=> q.Send(m, MessageQueueTransactionType.Automatic));
+
+                    scope.Complete();
+                    return;
+                }
+
+
+                onMessage(transportMessage);
 
                 scope.Complete();
             }

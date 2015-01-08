@@ -129,6 +129,7 @@
     <Compile Include="Pipeline\Contexts\TransportReceiveContext.cs" />
     <Compile Include="Pipeline\StageConnector.cs" />
     <Compile Include="Transports\Msmq\MsmqReceiveBehavior.cs" />
+    <Compile Include="Transports\Msmq\MsmqReceiveWithNoTransactionBehavior.cs" />
     <Compile Include="Transports\ReceiveBehavior.cs" />
     <Compile Include="Unicast\Behaviors\TransportReceiveToPhysicalMessageProcessingConnector.cs" />
     <Compile Include="Pipeline\Contexts\LogicalMessageProcessingStageBehavior.cs" />
