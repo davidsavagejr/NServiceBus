@@ -1,5 +1,6 @@
 namespace NServiceBus.Unicast.Transport
 {
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Satellites;
@@ -10,7 +11,8 @@ namespace NServiceBus.Unicast.Transport
         ISatellite satellite;
 
 
-        public SatelliteTransportReceiver(string id, IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor, ISatellite satellite) : base(id, receiver, dequeueSettings, pipelineExecutor, executor)
+        public SatelliteTransportReceiver(string id, IBuilder builder, IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor, ISatellite satellite) 
+            : base(id, builder, receiver, dequeueSettings, pipelineExecutor, executor)
         {
             this.satellite = satellite;
         }

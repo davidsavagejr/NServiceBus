@@ -89,7 +89,7 @@
 
             //todo - add a way to set the context from out tests
 
-            bus.PropagateReturnAddressOnSend = true;
+            //bus.PropagateReturnAddressOnSend = true;
             RegisterMessageType<TestMessage>();
             bus.Send(new TestMessage());
 

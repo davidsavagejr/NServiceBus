@@ -14,6 +14,7 @@
 
             var pipeline = new TransportReceiver(
                 "Main",
+                builder,
                 builder.Build<IDequeueMessages>(),
                 dequeueSettings,
                 builder.Build<PipelineExecutor>(),

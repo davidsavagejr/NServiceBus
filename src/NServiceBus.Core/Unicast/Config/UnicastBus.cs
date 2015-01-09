@@ -8,6 +8,7 @@ namespace NServiceBus.Features
     using Config;
     using Logging;
     using NServiceBus.Hosting;
+    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Settings.Concurrency;
     using NServiceBus.Settings.Throttling;
     using NServiceBus.Support;
@@ -76,8 +77,22 @@ namespace NServiceBus.Features
             context.Container.ConfigureComponent<MainPipelineFactory>(DependencyLifecycle.SingleInstance);
             context.Container.ConfigureComponent<SatellitePipelineFactory>(DependencyLifecycle.SingleInstance);
 
+            context.Container.ConfigureComponent<BehaviorContextStacker>(DependencyLifecycle.SingleInstance);
+
+            context.Container.ConfigureComponent(b => b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
+
+            context.Container.ConfigureComponent(b => (PhysicalMessageProcessingStageBehavior.Context)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => (LogicalMessageProcessingStageBehavior.Context)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => (HandlingContext)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => (OutgoingContext)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
+
+            context.Container.ConfigureComponent<CallbackMessageLookup>(DependencyLifecycle.SingleInstance);
+            context.Container.ConfigureComponent<StaticOutgoingMessageHeaders>(DependencyLifecycle.SingleInstance);
+
             context.Container.ConfigureComponent<Unicast.UnicastBus>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(u => u.HostInformation, hostInfo);
+
+            context.Container.ConfigureComponent<ContextBus>(DependencyLifecycle.InstancePerCall);
 
             ConfigureSubscriptionAuthorization(context);
 

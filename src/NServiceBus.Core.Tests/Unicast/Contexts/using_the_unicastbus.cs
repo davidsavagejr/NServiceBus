@@ -66,7 +66,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
         public void SetUp()
         {
             LicenseManager.InitializeLicense();
-            transportDefinition = new MsmqTransport();
+            transportDefinition = CreateTransportDefinition();
             
             settings = new SettingsHolder();
 
@@ -74,6 +74,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
             settings.SetDefault("Endpoint.SendOnly", false);
             settings.SetDefault("MasterNode.Address", MasterNodeAddress);
             settings.SetDefault("NServiceBus.LocalAddress", "TestEndpoint");
+            OverrideSettings(settings);
 
             pipelineModifications = new PipelineModifications();
             settings.Set<PipelineModifications>(pipelineModifications);
@@ -105,6 +106,17 @@ namespace NServiceBus.Unicast.Tests.Contexts
                     Configure = configure
                 };
 
+            var behaviorContextStacker = new BehaviorContextStacker(Builder);
+            Builder.Register<BehaviorContextStacker>(() => behaviorContextStacker);
+
+            var outgoingMessageHeaders = new StaticOutgoingMessageHeaders();
+            Builder.Register<StaticOutgoingMessageHeaders>(() => outgoingMessageHeaders);
+
+            var callbackMessageLookup = new CallbackMessageLookup();
+            Builder.Register<CallbackMessageLookup>(() => callbackMessageLookup);
+
+            Builder.Register<CallbackInvocationBehavior>(() => new CallbackInvocationBehavior(callbackMessageLookup));
+
             var pipelineSettings = new PipelineSettings(pipelineModifications);
             HardcodedPipelineSteps.Register(pipelineSettings, false);
 
@@ -117,7 +129,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
             Builder.Register<IMessageSerializer>(() => MessageSerializer);
             Builder.Register<ISendMessages>(() => messageSender);
 
-            Builder.Register<LogicalMessageFactory>(() => new LogicalMessageFactory(MessageMetadataRegistry, MessageMapper, pipelineFactory));
+            Builder.Register<LogicalMessageFactory>(() => new LogicalMessageFactory(MessageMetadataRegistry, MessageMapper, behaviorContextStacker.GetCurrentContext()));
 
             Builder.Register<IManageSubscriptions>(() => subscriptionManager);
             Builder.Register<EstimatedTimeToSLABreachCalculator>(() => SLABreachCalculator);
@@ -139,12 +151,6 @@ namespace NServiceBus.Unicast.Tests.Contexts
             MessagePump = new FakeMessagePump();
             Builder.Register<IDequeueMessages>(() => MessagePump);
 
-            var messagePublisher = new StorageDrivenPublisher
-            {
-                MessageSender = messageSender,
-                SubscriptionStorage = subscriptionStorage
-            };
-
             var deferrer = new TimeoutManagerDeferrer
             {
                 MessageSender = messageSender,
@@ -153,19 +159,26 @@ namespace NServiceBus.Unicast.Tests.Contexts
             };
 
             Builder.Register<IDeferMessages>(() => deferrer);
-            Builder.Register<IPublishMessages>(() => messagePublisher);
+            Builder.Register<IPublishMessages>(() => new StorageDrivenPublisher(subscriptionStorage, messageSender, null, behaviorContextStacker.GetCurrentContext()));
 
-            bus = new UnicastBus
+            bus = new UnicastBus(
+                new FakeExecutor(), 
+                null,
+                 new PipelineFactory[] {new MainPipelineFactory(), new SatellitePipelineFactory()},
+                 new MessageMapper(), 
+                 Builder,
+                 configure,
+                 subscriptionManager,
+                 MessageMetadataRegistry,
+                 settings,
+                 transportDefinition,
+                 messageSender,
+                 router, 
+                 outgoingMessageHeaders,
+                 callbackMessageLookup,
+                 pipelineFactory
+                )
             {
-                Builder = Builder,
-                MessageSender = messageSender,
-                PipelineFactories = new PipelineFactory[] {new MainPipelineFactory(), new SatellitePipelineFactory()},
-                Executor = new FakeExecutor(),
-                MessageMapper = MessageMapper,
-                SubscriptionManager = subscriptionManager,
-                MessageRouter = router,
-                Settings = settings,
-                Configure = configure,
                 HostInformation = new HostInformation(Guid.NewGuid(), "HelloWorld")
             };
 
@@ -174,6 +187,15 @@ namespace NServiceBus.Unicast.Tests.Contexts
             Builder.Register<UnicastBus>(() => bus);
             Builder.Register<Conventions>(() => conventions);
             Builder.Register<Configure>(() => configure);
+        }
+
+        protected virtual TransportDefinition CreateTransportDefinition()
+        {
+            return new MsmqTransport();
+        }
+
+        protected virtual void OverrideSettings(SettingsHolder settings)
+        {
         }
 
         protected virtual void ApplyPipelineModifications()
@@ -291,14 +313,14 @@ namespace NServiceBus.Unicast.Tests.Contexts
         {
             try
             {
-                bus.GetHeaderAction = (o, s) =>
-                {
-                    string v;
-                    transportMessage.Headers.TryGetValue(s, out v);
-                    return v;
-                };
+                //bus.GetHeaderAction = (o, s) =>
+                //{
+                //    string v;
+                //    transportMessage.Headers.TryGetValue(s, out v);
+                //    return v;
+                //};
 
-                bus.SetHeaderAction = (o, s, v) => { transportMessage.Headers[s] = v; };
+                //bus.SetHeaderAction = (o, s, v) => { transportMessage.Headers[s] = v; };
                 MessagePump.SignalMessageAvailable(transportMessage);
             }
             catch (Exception ex)

@@ -3,6 +3,7 @@ namespace NServiceBus.Unicast.Tests
     using System;
     using Contexts;
     using Core.Tests.Fakes;
+    using NServiceBus.Transports;
     using NUnit.Framework;
     
     [TestFixture]
@@ -61,10 +62,9 @@ namespace NServiceBus.Unicast.Tests
     [TestFixture]
     class When_using_a_centralized_pub_sub_transport : using_the_unicastBus
     {
-        [SetUp]
-        public new void SetUp()
+        protected override TransportDefinition CreateTransportDefinition()
         {
-            transportDefinition = new FakeCentralizedPubSubTransportDefinition();
+            return new FakeCentralizedPubSubTransportDefinition();
         }
 
         [Test]

@@ -2,6 +2,7 @@ namespace NServiceBus.Unicast.Transport
 {
     using System;
     using NServiceBus.Logging;
+    using NServiceBus.ObjectBuilder;
     using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
@@ -17,9 +18,10 @@ namespace NServiceBus.Unicast.Transport
     /// </summary>
     public class TransportReceiver : IDisposable, IObserver<MessageAvailable>
     {
-        internal TransportReceiver(string id, IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor)
+        internal TransportReceiver(string id, IBuilder builder, IDequeueMessages receiver, DequeueSettings dequeueSettings, PipelineExecutor pipelineExecutor, IExecutor executor)
         {
             this.id = id;
+            this.builder = builder;
             this.pipelineExecutor = pipelineExecutor;
             this.executor = executor;
             this.dequeueSettings = dequeueSettings;
@@ -54,14 +56,14 @@ namespace NServiceBus.Unicast.Transport
 
         private void InvokePipeline(MessageAvailable messageAvailable)
         {
-            var context = new BootstrapContext(pipelineExecutor.CurrentContext);
+            var context = new BootstrapContext(new RootContext(builder));
 
             messageAvailable.InitializeContext(context);
             context.SetPublicReceiveAddress(messageAvailable.PublicReceiveAddress);
             context.Set(currentReceivePerformanceDiagnostics);
             SetContext(context);
 
-            executor.Execute(Id, () => pipelineExecutor.InvokeReceivePhysicalMessagePipeline(context));
+            executor.Execute(Id, () => pipelineExecutor.InvokeReceivePipeline(context));
         }
 
         /// <summary>
@@ -156,6 +158,7 @@ namespace NServiceBus.Unicast.Transport
 
 
         readonly string id;
+        readonly IBuilder builder;
         readonly PipelineExecutor pipelineExecutor;
         readonly IExecutor executor;
         readonly IDequeueMessages receiver;

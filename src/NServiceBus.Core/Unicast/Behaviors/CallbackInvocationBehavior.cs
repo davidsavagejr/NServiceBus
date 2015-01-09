@@ -10,7 +10,13 @@
     {
         public const string CallbackInvokedKey = "NServiceBus.CallbackInvocationBehavior.CallbackWasInvoked";
 
-        public UnicastBus UnicastBus { get; set; }
+        readonly CallbackMessageLookup callbackMessageLookup;
+
+        public CallbackInvocationBehavior(CallbackMessageLookup callbackMessageLookup)
+        {
+            this.callbackMessageLookup = callbackMessageLookup;
+        }
+
 
         public override void Invoke(Context context, Action next)
         {
@@ -47,7 +53,7 @@
 
             BusAsyncResult busAsyncResult;
 
-            if (!UnicastBus.messageIdToAsyncResultLookup.TryRemove(transportMessage.CorrelationId, out busAsyncResult))
+            if (!callbackMessageLookup.TryGet(transportMessage.CorrelationId, out busAsyncResult))
             {
                 return false;
             }

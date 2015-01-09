@@ -290,6 +290,7 @@
     <Compile Include="Pipeline\Contexts\HandlingContext.cs" />
     <Compile Include="Unicast\Behaviors\MessageProcessingAbortedException.cs" />
     <Compile Include="Unicast\BusAsyncResultEventArgs.cs" />
+    <Compile Include="Unicast\CallbackMessageLookup.cs" />
     <Compile Include="Unicast\Config\LoadMessageHandlersExtentions_Obsolete.cs" />
     <Compile Include="Unicast\Config\RegisterHandlersInOrder.cs" />
     <Compile Include="Monitoring\SLA\SLABehavior.cs" />
@@ -297,9 +298,11 @@
     <Compile Include="Monitoring\MonitoringConfig_Obsolete.cs" />
     <Compile Include="Monitoring\SLA\SLAMonitoring.cs" />
     <Compile Include="Monitoring\ProcessingStatisticsBehavior.cs" />
+    <Compile Include="Unicast\ContextBus.cs" />
     <Compile Include="Unicast\DefaultHostIdGenerator.cs" />
     <Compile Include="Unicast\IMessageDispatcherFactory_Obsolete.cs" />
     <Compile Include="MessageDeserializationException.cs" />
+    <Compile Include="Unicast\StaticOutgoingMessageHeaders.cs" />
     <Compile Include="Unicast\Transport\Config\TransportConfiguration.cs" />
     <Compile Include="Unicast\Transport\Config\TransportExtensions.cs" />
     <Compile Include="Unicast\Transport\Config\UseTransportExtensions_Obsolete.cs" />
@@ -310,6 +313,7 @@
     <Compile Include="Unicast\Transport\ReceivePerformanceDiagnosticsBehavior.cs" />
     <Compile Include="Unicast\Transport\HandlerTransactionScopeWrapperBehavior.cs" />
     <Compile Include="Unicast\Transport\SatelliteTransportReceiver.cs" />
+    <Compile Include="Unicast\UnicastBus_IBusImpl.cs" />
     <Compile Include="Utils\Guard.cs" />
     <Compile Include="Utils\ExceptionHeaderHelper.cs" />
     <Compile Include="Utils\ElevateChecker.cs" />
@@ -430,7 +434,6 @@
     <Compile Include="Unicast\Subscriptions\MessageDrivenSubscriptions\SubscriptionManager.cs" />
     <Compile Include="Unicast\Subscriptions\MessageDrivenSubscriptions\StorageInitializer.cs" />
     <Compile Include="Unicast\Transport\TransportMessageExtensions.cs" />
-    <Compile Include="Unicast\UnicastBus_Obsolete.cs" />
     <Compile Include="UnitOfWork\UnitOfWorkBehavior.cs" />
     <Compile Include="Pipeline\Behavior.cs" />
     <Compile Include="Pipeline\BehaviorChain.cs" />

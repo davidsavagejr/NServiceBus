@@ -34,6 +34,7 @@
 
                     var pipeline = new SatelliteTransportReceiver(
                         satellite.GetType().AssemblyQualifiedName,
+                        builder,
                         builder.Build<IDequeueMessages>(),
                         dequeueSettings,
                         pipelineExecutor,
@@ -67,7 +68,7 @@
             pipelineSettings.Register<FirstLevelRetriesBehavior.Registration>();
             pipelineSettings.Register<ExecuteSatelliteHandlerBehavior.Registration>();
 
-            var pipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(), pipelineModifications);
+            var pipelineExecutor = new PipelineExecutor(builder, builder.Build<BusNotifications>(), pipelineModifications, builder.Build<BehaviorContextStacker>());
             return pipelineExecutor;
         }
 

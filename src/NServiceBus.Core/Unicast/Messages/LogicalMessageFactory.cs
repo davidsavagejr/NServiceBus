@@ -13,19 +13,19 @@ namespace NServiceBus.Unicast.Messages
     {
         readonly MessageMetadataRegistry messageMetadataRegistry;
         readonly IMessageMapper messageMapper;
-        readonly PipelineExecutor pipelineExecutor;
+        readonly BehaviorContext behaviorContext;
 
         /// <summary>
         /// Ctor
         /// </summary>
         /// <param name="messageMetadataRegistry"></param>
         /// <param name="messageMapper"></param>
-        /// <param name="pipelineExecutor"></param>
-        public LogicalMessageFactory(MessageMetadataRegistry messageMetadataRegistry, IMessageMapper messageMapper, PipelineExecutor pipelineExecutor)
+        /// <param name="behaviorContext"></param>
+        public LogicalMessageFactory(MessageMetadataRegistry messageMetadataRegistry, IMessageMapper messageMapper, BehaviorContext behaviorContext)
         {
             this.messageMetadataRegistry = messageMetadataRegistry;
             this.messageMapper = messageMapper;
-            this.pipelineExecutor = pipelineExecutor;
+            this.behaviorContext = behaviorContext;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace NServiceBus.Unicast.Messages
         {
             Dictionary<object, Dictionary<string, string>> outgoingHeaders;
 
-            if (!pipelineExecutor.CurrentContext.TryGet("NServiceBus.OutgoingHeaders", out outgoingHeaders))
+            if (!behaviorContext.TryGet("NServiceBus.OutgoingHeaders", out outgoingHeaders))
             {
                 return new Dictionary<string, string>();
             }
