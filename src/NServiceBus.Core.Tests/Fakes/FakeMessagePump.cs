@@ -1,7 +1,6 @@
 namespace NServiceBus.Core.Tests.Fakes
 {
     using System;
-    using NServiceBus.Pipeline;
     using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Transports;
 

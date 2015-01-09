@@ -4,7 +4,6 @@
     using System.Linq;
     using NServiceBus.AcceptanceTesting;
     using Pipeline;
-    using Pipeline.Contexts;
 
     static class SubscriptionBehaviorExtensions
     {

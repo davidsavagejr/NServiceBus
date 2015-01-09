@@ -6,7 +6,6 @@
     using NServiceBus.Config;
     using NServiceBus.MessageMutator;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NServiceBus.Unicast;
     using NServiceBus.Unicast.Messages;
     using NUnit.Framework;

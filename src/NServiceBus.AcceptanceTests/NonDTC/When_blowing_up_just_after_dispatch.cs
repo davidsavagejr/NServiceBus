@@ -6,7 +6,6 @@
     using NServiceBus.AcceptanceTests.ScenarioDescriptors;
     using NServiceBus.Configuration.AdvanceExtensibility;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NUnit.Framework;
 
     public class When_blowing_up_just_after_dispatch : NServiceBusAcceptanceTest

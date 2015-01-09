@@ -4,7 +4,6 @@
     using NServiceBus.AcceptanceTesting;
     using NServiceBus.AcceptanceTests.EndpointTemplates;
     using NServiceBus.Pipeline;
-    using NServiceBus.Pipeline.Contexts;
     using NUnit.Framework;
 
     //This is a demo on how the pipeline overrides can be used to create endpoints that doesn't deserialize incoming messages and there by
