@@ -50,7 +50,7 @@
             InvokePipeline(outgoingBehaviors, context);
         }
         
-        internal void InvokeReceivePipeline(BootstrapContext context)
+        internal void InvokeReceivePipeline(IncomingContext context)
         {
             InvokePipeline(incomingBehaviors, context);
         }

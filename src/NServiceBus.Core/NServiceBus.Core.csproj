@@ -125,7 +125,7 @@
     <Compile Include="Faults\StoreFaultsInErrorQueue.cs" />
     <Compile Include="Pipeline\Contexts\PhysicalMessageProcessingStageBehavior.cs" />
     <Compile Include="Pipeline\BehaviorInvoker.cs" />
-    <Compile Include="Pipeline\Contexts\BootstrapContext.cs" />
+    <Compile Include="Pipeline\Contexts\IncomingContext.cs" />
     <Compile Include="Pipeline\Contexts\TransportReceiveContext.cs" />
     <Compile Include="Pipeline\StageConnector.cs" />
     <Compile Include="Transports\Msmq\MsmqReceiveBehavior.cs" />
@@ -298,10 +298,11 @@
     <Compile Include="Monitoring\MonitoringConfig_Obsolete.cs" />
     <Compile Include="Monitoring\SLA\SLAMonitoring.cs" />
     <Compile Include="Monitoring\ProcessingStatisticsBehavior.cs" />
-    <Compile Include="Unicast\ContextBus.cs" />
+    <Compile Include="Unicast\ContextualBus.cs" />
     <Compile Include="Unicast\DefaultHostIdGenerator.cs" />
     <Compile Include="Unicast\IMessageDispatcherFactory_Obsolete.cs" />
     <Compile Include="MessageDeserializationException.cs" />
+    <Compile Include="Unicast\Publishing\StorageDrivenPublisherNonFunctionalPublisher.cs" />
     <Compile Include="Unicast\StaticOutgoingMessageHeaders.cs" />
     <Compile Include="Unicast\Transport\Config\TransportConfiguration.cs" />
     <Compile Include="Unicast\Transport\Config\TransportExtensions.cs" />

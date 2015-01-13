@@ -6,7 +6,7 @@ namespace NServiceBus
 
     class MsmqReceiveWithNoTransactionBehavior : MsmqReceiveBehavior
     {
-        protected override void Invoke(BootstrapContext context, Action<TransportMessage> onMessage)
+        protected override void Invoke(IncomingContext context, Action<TransportMessage> onMessage)
         {
             var queue = context.Get<MessageQueue>();
 
@@ -37,7 +37,7 @@ namespace NServiceBus
 
     class MsmqReceiveWithNativeTransactionBehavior : MsmqReceiveBehavior
     {
-        protected override void Invoke(BootstrapContext context, Action<TransportMessage> onMessage)
+        protected override void Invoke(IncomingContext context, Action<TransportMessage> onMessage)
         {
             var queue = context.Get<MessageQueue>();
 

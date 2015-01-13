@@ -12,7 +12,7 @@ namespace NServiceBus
     {
        
         [DebuggerNonUserCode]
-        protected bool TryReceiveMessage(Func<Message> receive, BootstrapContext context, out Message message)
+        protected bool TryReceiveMessage(Func<Message> receive, IncomingContext context, out Message message)
         {
             message = null;
             
@@ -40,7 +40,7 @@ namespace NServiceBus
         }
 
 
-        protected void HandleCorruptMessage( BootstrapContext context,Message message,Exception ex, Action<MessageQueue,Message> onError)
+        protected void HandleCorruptMessage( IncomingContext context,Message message,Exception ex, Action<MessageQueue,Message> onError)
         {
             var errorQueue = context.Get<Address>("MsmqDequeueStrategy.ErrorQueue");
 

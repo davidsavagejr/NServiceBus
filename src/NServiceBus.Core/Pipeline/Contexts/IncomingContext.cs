@@ -3,13 +3,13 @@
     /// <summary>
     /// The first context in the incoming behavior chain
     /// </summary>
-    public class BootstrapContext : BehaviorContext
+    public class IncomingContext : BehaviorContext
     {
         /// <summary>
         /// The first context in the incoming behavior chain
         /// </summary>
         /// <param name="parentContext"></param>
-        public BootstrapContext(BehaviorContext parentContext) 
+        public IncomingContext(BehaviorContext parentContext) 
             : base(parentContext)
         {
         }

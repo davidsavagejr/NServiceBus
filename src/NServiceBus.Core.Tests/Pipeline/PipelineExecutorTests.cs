@@ -18,11 +18,11 @@ namespace NServiceBus.Core.Tests.Pipeline
             settings.Register("Static", typeof(SumBehavior), "A static behavior", true);
             var executor = new PipelineExecutor(builder, new BusNotifications(), modifications, new BehaviorContextStacker(builder));
 
-            var ctx1 = new BootstrapContext(new RootContext(builder));
+            var ctx1 = new IncomingContext(new RootContext(builder));
             ctx1.Set("Value",2);
             executor.InvokeReceivePipeline(ctx1);
 
-            var ctx2 = new BootstrapContext(new RootContext(builder));
+            var ctx2 = new IncomingContext(new RootContext(builder));
             ctx2.Set("Value", 3);
             executor.InvokeReceivePipeline(ctx2);
 
@@ -40,11 +40,11 @@ namespace NServiceBus.Core.Tests.Pipeline
             settings.Register("NonStatic", typeof(SumBehavior), "A non-static behavior", false);
             var executor = new PipelineExecutor(builder, new BusNotifications(), modifications, new BehaviorContextStacker(builder));
 
-            var ctx1 = new BootstrapContext(new RootContext(builder));
+            var ctx1 = new IncomingContext(new RootContext(builder));
             ctx1.Set("Value",2);
             executor.InvokeReceivePipeline(ctx1);
 
-            var ctx2 = new BootstrapContext(new RootContext(builder));
+            var ctx2 = new IncomingContext(new RootContext(builder));
             ctx2.Set("Value", 3);
             executor.InvokeReceivePipeline(ctx2);
 
@@ -53,11 +53,11 @@ namespace NServiceBus.Core.Tests.Pipeline
             Assert.AreEqual(3, sum);
         }
 
-        class SumBehavior : Behavior<BootstrapContext>
+        class SumBehavior : Behavior<IncomingContext>
         {
             int sum;
 
-            public override void Invoke(BootstrapContext context, Action next)
+            public override void Invoke(IncomingContext context, Action next)
             {
                 var value = context.Get<int>("Value");
                 sum += value;

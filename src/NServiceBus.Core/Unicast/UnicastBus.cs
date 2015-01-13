@@ -54,20 +54,18 @@ namespace NServiceBus.Unicast
             this.pipelineExecutor = pipelineExecutor;
 
             var rootContext = new RootContext(builder);
-            busImpl = new ContextBus(
+            busImpl = new ContextualBus(rootContext, 
                 messageMapper, 
-                rootContext, 
                 builder, 
-                configure, 
-                subscriptionManager,
-                new LogicalMessageFactory(messageMetadataRegistry, messageMapper, rootContext), 
+                configure,
+                subscriptionManager, 
+                new LogicalMessageFactory(messageMetadataRegistry, messageMapper, rootContext),
                 settings,
                 transportDefinition,
                 messageSender,
                 messageRouter,
                 outgoingMessageHeaders,
-                callbackMessageLookup,
-                pipelineExecutor);
+                callbackMessageLookup, pipelineExecutor);
         }
 
         /// <summary>
@@ -202,7 +200,7 @@ namespace NServiceBus.Unicast
         ManualResetEvent stopCompletedEvent = new ManualResetEvent(true);
 
         PipelineCollection pipelineCollection;
-        ContextBus busImpl;
+        ContextualBus busImpl;
         ReadOnlySettings settings;
         IEnumerable<PipelineFactory> pipelineFactories;
         IExecutor executor;

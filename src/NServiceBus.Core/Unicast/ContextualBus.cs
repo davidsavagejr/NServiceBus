@@ -12,10 +12,7 @@ namespace NServiceBus.Unicast
     using NServiceBus.Unicast.Messages;
     using NServiceBus.Unicast.Routing;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public class ContextBus : IBus, IManageMessageHeaders
+    class ContextualBus : IBus, IManageMessageHeaders
     {
         readonly IMessageMapper messageMapper;
         readonly BehaviorContext context;
@@ -32,22 +29,9 @@ namespace NServiceBus.Unicast
         readonly Address sendLocalAddress;
         readonly StaticOutgoingMessageHeaders staticOutgoingMessageHeaders;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public ContextBus(
-            IMessageMapper messageMapper,
-            BehaviorContext context,
-            IBuilder builder,
-            Configure configure,
-            IManageSubscriptions subscriptionManager,
-            LogicalMessageFactory messageFactory,
-            ReadOnlySettings settings,
-            TransportDefinition transportDefinition, 
-            ISendMessages messageSender, StaticMessageRouter messageRouter, 
-            StaticOutgoingMessageHeaders staticOutgoingMessageHeaders, 
-            CallbackMessageLookup callbackMessageLookup, 
-            PipelineExecutor pipelineExecutor)
+        public ContextualBus(BehaviorContext context, IMessageMapper messageMapper, IBuilder builder, Configure configure, IManageSubscriptions subscriptionManager, 
+            LogicalMessageFactory messageFactory, ReadOnlySettings settings, TransportDefinition transportDefinition, ISendMessages messageSender, StaticMessageRouter messageRouter, 
+            StaticOutgoingMessageHeaders staticOutgoingMessageHeaders, CallbackMessageLookup callbackMessageLookup, PipelineExecutor pipelineExecutor)
         {
             this.messageMapper = messageMapper;
             this.context = context;

@@ -17,7 +17,7 @@ namespace NServiceBus.Unicast.Transport
             this.satellite = satellite;
         }
 
-        protected override void SetContext(BootstrapContext context)
+        protected override void SetContext(IncomingContext context)
         {
             base.SetContext(context);
             context.Set(satellite);

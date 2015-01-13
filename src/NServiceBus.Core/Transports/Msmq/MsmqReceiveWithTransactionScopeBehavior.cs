@@ -12,7 +12,7 @@ namespace NServiceBus
             this.transactionOptions = transactionOptions;
         }
 
-        protected override void Invoke(BootstrapContext context, Action<TransportMessage> onMessage)
+        protected override void Invoke(IncomingContext context, Action<TransportMessage> onMessage)
         {
             var queue = context.Get<MessageQueue>();
 

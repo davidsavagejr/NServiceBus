@@ -47,7 +47,7 @@
         {
             var runner = new UnitOfWorkBehavior();
 
-            var context = new PhysicalMessageProcessingStageBehavior.Context(new TransportReceiveContext(null, new BootstrapContext(new RootContext(builder))));
+            var context = new PhysicalMessageProcessingStageBehavior.Context(new TransportReceiveContext(null, new IncomingContext(new RootContext(builder))));
 
             runner.Invoke(context, () => { });
 

@@ -33,7 +33,7 @@ namespace NServiceBus.Core.Tests.Fakes
 
     class FakeReceiveBehavior : ReceiveBehavior
     {
-        protected override void Invoke(BootstrapContext context, Action<TransportMessage> onMessage)
+        protected override void Invoke(IncomingContext context, Action<TransportMessage> onMessage)
         {
             var msg = context.Get<TransportMessage>("FakeMessage");
             onMessage(msg);

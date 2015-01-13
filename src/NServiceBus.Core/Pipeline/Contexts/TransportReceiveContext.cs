@@ -3,7 +3,7 @@
     /// <summary>
     /// Context containing a physical message
     /// </summary>
-    public class TransportReceiveContext : BootstrapContext
+    public class TransportReceiveContext : IncomingContext
     {
         internal const string IncomingPhysicalMessageKey = "NServiceBus.IncomingPhysicalMessage";
 

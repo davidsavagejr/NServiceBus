@@ -4,6 +4,7 @@ namespace NServiceBus.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using Logging;
+    using NServiceBus.Pipeline.Contexts;
 
     class StepRegistrationsCoordinator
     {
@@ -101,26 +102,43 @@ namespace NServiceBus.Pipeline
 
         static IEnumerable<RegisterStep> Sort(IEnumerable<RegisterStep> registrations)
         {
+            // Step 0: Add dependencies on pipeline begin
+            var receiveSteps = new List<Dependency>();
+            var sendPipelineNode = new Node("SendPipelineBegin", receiveSteps);
+
+            foreach (var registration in registrations)
+            {
+                var inputType = GetInputType(registration.BehaviorType);
+                if (typeof(IncomingContext).IsAssignableFrom(inputType))
+                {
+                    receiveSteps.Add(new Dependency(registration.StepId, true));
+                }
+                else if (typeof(OutgoingContext).IsAssignableFrom(inputType))
+                {
+                    registration.InsertAfter("SendPipelineBegin");
+                }
+            }
+
             // Step 1: create nodes for graph
             var nameToNodeDict = new Dictionary<string, Node>();
             var allNodes = new List<Node>();
             foreach (var rego in registrations)
             {
                 // create entries to preserve order within
-                var node = new Node
-                {
-                    Rego = rego
-                };
+                var node = new Node(rego);
                 nameToNodeDict[rego.StepId] = node;
                 allNodes.Add(node);
             }
 
+            allNodes.Add(sendPipelineNode);
+            nameToNodeDict[sendPipelineNode.StepId] = sendPipelineNode;
+
             // Step 2: create edges from InsertBefore/InsertAfter values
             foreach (var node in allNodes)
             {
-                if (node.Rego.Befores != null)
+                if (node.Befores != null)
                 {
-                    foreach (var beforeReference in node.Rego.Befores)
+                    foreach (var beforeReference in node.Befores)
                     {
                         Node referencedNode;
                         if (nameToNodeDict.TryGetValue(beforeReference.Id, out referencedNode))
@@ -129,7 +147,7 @@ namespace NServiceBus.Pipeline
                         }
                         else
                         {
-                            var message = string.Format("Registration '{0}' specified in the insertbefore of the '{1}' step does not exist!", beforeReference.Id, node.Rego.StepId);
+                            var message = string.Format("Registration '{0}' specified in the insertbefore of the '{1}' step does not exist!", beforeReference.Id, node.StepId);
 
                             if (!beforeReference.Enforce)
                             {
@@ -143,9 +161,9 @@ namespace NServiceBus.Pipeline
                     }
                 }
 
-                if (node.Rego.Afters != null)
+                if (node.Afters != null)
                 {
-                    foreach (var afterReference in node.Rego.Afters)
+                    foreach (var afterReference in node.Afters)
                     {
                         Node referencedNode;
                         if (nameToNodeDict.TryGetValue(afterReference.Id, out referencedNode))
@@ -154,7 +172,7 @@ namespace NServiceBus.Pipeline
                         }
                         else
                         {
-                            var message = string.Format("Registration '{0}' specified in the insertafter of the '{1}' step does not exist!", afterReference.Id, node.Rego.StepId);
+                            var message = string.Format("Registration '{0}' specified in the insertafter of the '{1}' step does not exist!", afterReference.Id, node.StepId);
 
                             if (!afterReference.Enforce)
                             {
@@ -182,14 +200,15 @@ namespace NServiceBus.Pipeline
                 var previousBehavior = output[i - 1].BehaviorType;
                 var thisBehavior = output[i].BehaviorType;
 
-                //TODO: hack to split send and receive pipeliens
-                if (thisBehavior == typeof(SendValidatorBehavior))
+                var incomingType = GetOutputType(previousBehavior);
+                var inputType = GetInputType(thisBehavior);
+
+                //There is no connection between the incoming and outgoing pipes.
+                if (incomingType != typeof(OutgoingContext) && inputType == typeof(OutgoingContext))
                 {
                     continue;
                 }
 
-                var incomingType = GetOutputType(previousBehavior);
-                var inputType = GetInputType(thisBehavior);
                 if (!inputType.IsAssignableFrom(incomingType))
                 {
                     throw new Exception(string.Format("Cannot chain behavior {0} and {1} together because output type of behvaior {0} ({2}) cannot be passed as input for behavior {1} ({3})",
@@ -252,10 +271,31 @@ namespace NServiceBus.Pipeline
                 {
                     n.Visit(output);
                 }
-                output.Add(Rego);
+                if (rego != null)
+                {
+                    output.Add(rego);
+                }
             }
 
-            internal RegisterStep Rego;
+            public Node(string id, IList<Dependency> befores)
+            {
+                StepId = id;
+                Befores = befores;
+                Afters = new Dependency[]{};
+            }
+
+            public Node(RegisterStep registerStep)
+            {
+                rego = registerStep;
+                Befores = registerStep.Befores;
+                Afters = registerStep.Afters;
+                StepId = registerStep.StepId;
+            }
+
+            public readonly string StepId;
+            private readonly RegisterStep rego;
+            public readonly IList<Dependency> Befores;
+            public readonly IList<Dependency> Afters; 
             internal List<Node> previous = new List<Node>();
             bool visited;
         }

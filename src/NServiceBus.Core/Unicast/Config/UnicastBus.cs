@@ -92,7 +92,7 @@ namespace NServiceBus.Features
             context.Container.ConfigureComponent<Unicast.UnicastBus>(DependencyLifecycle.SingleInstance)
                 .ConfigureProperty(u => u.HostInformation, hostInfo);
 
-            context.Container.ConfigureComponent<ContextBus>(DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent<ContextualBus>(DependencyLifecycle.InstancePerCall);
 
             ConfigureSubscriptionAuthorization(context);
 
