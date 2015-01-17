@@ -117,6 +117,7 @@
     <Compile Include="Sagas\SagaModelTests.cs" />
     <Compile Include="Sagas\TypeBasedSagaMetaModelTests.cs" />
     <Compile Include="SecondLevelRetries\DefaultRetryPolicyTests.cs" />
+    <Compile Include="Serializers\SerializeMessagesBehaviorTests.cs" />
     <Compile Include="StandardsTests.cs" />
     <Compile Include="Encryption\ConfigureRijndaelEncryptionServiceTests.cs" />
     <Compile Include="Encryption\RijndaelEncryptionServiceTest.cs" />
