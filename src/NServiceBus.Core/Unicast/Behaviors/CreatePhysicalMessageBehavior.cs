@@ -8,11 +8,14 @@
 
     class CreatePhysicalMessageBehavior : StageConnector<OutgoingContext, PhysicalOutgoingContextStageBehavior.Context>
     {
-        public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
+        readonly MessageMetadataRegistry messageMetadataRegistry;
+        readonly UnicastBus unicastBus;
 
-        public UnicastBus UnicastBus { get; set; }
-
-        public PipelineExecutor PipelineExecutor { get; set; }
+        public CreatePhysicalMessageBehavior(MessageMetadataRegistry messageMetadataRegistry,UnicastBus unicastBus)
+        {
+            this.messageMetadataRegistry = messageMetadataRegistry;
+            this.unicastBus = unicastBus;
+        }
 
         public override void Invoke(OutgoingContext context, Action<PhysicalOutgoingContextStageBehavior.Context> next)
         {
@@ -34,7 +37,7 @@
             }
 
             //apply static headers
-            foreach (var kvp in UnicastBus.OutgoingHeaders)
+            foreach (var kvp in unicastBus.OutgoingHeaders)
             {
                 toSend.Headers[kvp.Key] = kvp.Value;
             }
@@ -47,7 +50,7 @@
 
             if (context.OutgoingLogicalMessage.MessageType != null)
             {
-                var messageDefinitions = MessageMetadataRegistry.GetMessageMetadata(context.OutgoingLogicalMessage.MessageType);
+                var messageDefinitions = messageMetadataRegistry.GetMessageMetadata(context.OutgoingLogicalMessage.MessageType);
 
                 toSend.TimeToBeReceived = messageDefinitions.TimeToBeReceived;
                 toSend.Recoverable = messageDefinitions.Recoverable;

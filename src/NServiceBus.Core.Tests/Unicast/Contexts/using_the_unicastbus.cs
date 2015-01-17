@@ -145,7 +145,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
                                                                  MessageMetadataRegistry = MessageMetadataRegistry,
                                                              });
 
-            Builder.Register<CreatePhysicalMessageBehavior>(() => new CreatePhysicalMessageBehavior());
+            Builder.Register<CreatePhysicalMessageBehavior>(() => new CreatePhysicalMessageBehavior(MessageMetadataRegistry,bus));
             Builder.Register<PipelineExecutor>(() => pipelineFactory);
             Builder.Register<TransportDefinition>(() => transportDefinition);
             MessagePump = new FakeMessagePump();

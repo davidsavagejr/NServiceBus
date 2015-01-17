@@ -2,7 +2,6 @@ namespace NServiceBus
 {
     using System;
     using NServiceBus.Outbox;
-    using Pipeline;
     using Pipeline.Contexts;
 
     class OutboxSendBehavior : PhysicalOutgoingContextStageBehavior

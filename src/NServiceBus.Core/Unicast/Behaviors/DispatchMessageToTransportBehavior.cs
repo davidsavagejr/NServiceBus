@@ -4,7 +4,6 @@
     using NServiceBus.Unicast;
     using NServiceBus.Unicast.Queuing;
     using Settings;
-    using Pipeline;
     using Pipeline.Contexts;
     using Support;
     using Transports;
