@@ -109,6 +109,7 @@
     <Compile Include="ScenarioDescriptors\AllTransactionSettings.cs" />
     <Compile Include="ScenarioDescriptors\TransactionSettings.cs" />
     <Compile Include="Tx\Issue_2481.cs" />
+    <Compile Include="UnitOfWork\When_a_subscription_message_arrives.cs" />
     <Compile Include="Volatile\When_sending_to_non_durable_endpoint.cs" />
     <Compile Include="Encryption\When_using_Rijndael_with_multikey.cs" />
     <Compile Include="Encryption\When_using_Rijndael_with_custom.cs" />
