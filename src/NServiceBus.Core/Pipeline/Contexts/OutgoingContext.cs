@@ -21,6 +21,16 @@
             Set(OutgoingLogicalMessageKey, message);
         }
 
+        
+           /// <summary>
+        /// Allows context inheritence
+        /// </summary>
+        /// <param name="parentContext"></param>
+        protected OutgoingContext(BehaviorContext parentContext)
+            : base(parentContext)
+        {
+        }
+
         /// <summary>
         /// Sending options.
         /// </summary>
@@ -37,13 +47,7 @@
             get { return Get<LogicalMessage>(OutgoingLogicalMessageKey); }
         }
 
-        /// <summary>
-        /// The message about to be sent out.
-        /// </summary>
-        public TransportMessage OutgoingMessage
-        {
-            get { return Get<TransportMessage>(); }
-        }
+
 
         const string OutgoingLogicalMessageKey = "NServiceBus.OutgoingLogicalMessage";
     }

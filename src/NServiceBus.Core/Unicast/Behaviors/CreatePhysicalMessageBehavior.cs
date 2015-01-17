@@ -6,7 +6,7 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class CreatePhysicalMessageBehavior : Behavior<OutgoingContext>
+    class CreatePhysicalMessageBehavior : StageConnector<OutgoingContext, PhysicalOutgoingContextStageBehavior.Context>
     {
         public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
 
@@ -14,7 +14,7 @@
 
         public PipelineExecutor PipelineExecutor { get; set; }
 
-        public override void Invoke(OutgoingContext context, Action next)
+        public override void Invoke(OutgoingContext context, Action<PhysicalOutgoingContextStageBehavior.Context> next)
         {
             var deliveryOptions = context.DeliveryOptions;
 
@@ -53,9 +53,8 @@
                 toSend.Recoverable = messageDefinitions.Recoverable;
             }
 
-            context.Set(toSend);
-
-            next();
+            next(new PhysicalOutgoingContextStageBehavior.Context(toSend,context));
         }
+
     }
 }

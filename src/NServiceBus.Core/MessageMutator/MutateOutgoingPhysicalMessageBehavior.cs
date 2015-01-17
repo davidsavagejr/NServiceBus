@@ -2,12 +2,11 @@
 {
     using System;
     using NServiceBus.MessageMutator;
-    using Pipeline;
     using Pipeline.Contexts;
 
-    class MutateOutgoingPhysicalMessageBehavior : Behavior<OutgoingContext>
+    class MutateOutgoingPhysicalMessageBehavior : PhysicalOutgoingContextStageBehavior
     {
-        public override void Invoke(OutgoingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             foreach (var mutator in context.Builder.BuildAll<IMutateOutgoingTransportMessages>())
             {

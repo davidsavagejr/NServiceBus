@@ -14,15 +14,12 @@
         [Test]
         public void Should_set_content_type_header()
         {
-            var behavior = new SerializeMessagesBehavior
-            {
-                MessageSerializer = new FakeSerializer("myContentType")
-            };
+            var behavior = new SerializeMessagesBehavior(new FakeSerializer("myContentType"));
             var transportMessage = new TransportMessage("xyz", new Dictionary<string, string>());
-            var context = new RootContext(null);
 
-            context.Set(transportMessage);
-            behavior.Invoke(new OutgoingContext(context, new SendOptions("test"), new LogicalMessage(new Dictionary<string, string>(), null)), () => { });
+            var context = new OutgoingContext(null, new SendOptions("test"), new LogicalMessage(new Dictionary<string, string>(), null));
+
+            behavior.Invoke(new PhysicalOutgoingContextStageBehavior.Context(transportMessage, context), () => { });
 
             Assert.AreEqual("myContentType", transportMessage.Headers[Headers.ContentType]);
         }
