@@ -41,7 +41,6 @@
             public Registration()
                 : base(WellKnownStep.AuditProcessedMessage, typeof(AuditBehavior), "Send a copy of the successfully processed message to the configured audit queue")
             {
-                InsertBefore(WellKnownStep.ProcessingStatistics);
             }
         }
     }

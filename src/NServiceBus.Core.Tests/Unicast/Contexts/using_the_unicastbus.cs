@@ -10,8 +10,6 @@ namespace NServiceBus.Unicast.Tests.Contexts
     using Licensing;
     using MessageInterfaces;
     using MessageInterfaces.MessageMapper.Reflection;
-    using MessageMutator;
-    using Monitoring;
     using NServiceBus.Core.Tests.Fakes;
     using NServiceBus.Hosting;
     using NServiceBus.ObjectBuilder;
@@ -179,7 +177,6 @@ namespace NServiceBus.Unicast.Tests.Contexts
                 HostInformation = hostInformation
             };
 
-            Builder.Register<IMutateOutgoingTransportMessages>(() => new CausationMutator { Bus = bus });
             Builder.Register<IBus>(() => bus);
             Builder.Register<UnicastBus>(() => bus);
             Builder.Register<Conventions>(() => conventions);

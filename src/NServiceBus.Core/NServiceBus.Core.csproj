@@ -620,7 +620,7 @@
     <Compile Include="Unicast\MessagingBestPractices.cs" />
     <Compile Include="Monitoring\CriticalTime\CriticalTimeCalculator.cs" />
     <Compile Include="Monitoring\SLA\EstimatedTimeToSLABreachCalculator.cs" />
-    <Compile Include="Audit\CausationMutator.cs" />
+    <Compile Include="Audit\AttachCausationHeadersBehavior.cs" />
     <Compile Include="Unicast\Publishing\StorageDrivenPublisher.cs" />
     <Compile Include="Unicast\Queuing\Installers\EndpointInputQueueCreator.cs" />
     <Compile Include="Unicast\Queuing\Installers\AuditQueueCreator.cs" />
