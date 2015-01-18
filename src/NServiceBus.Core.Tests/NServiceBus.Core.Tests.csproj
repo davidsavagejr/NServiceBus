@@ -235,6 +235,7 @@
     <Compile Include="Unicast\Contexts\InterfaceMessage.cs" />
     <Compile Include="Unicast\Contexts\using_the_unicastbus.cs" />
     <Compile Include="Unicast\ReplyOptionsTests.cs" />
+    <Compile Include="Unicast\SubscriptionManagerTests.cs" />
     <Compile Include="Unicast\TransportMessageTests.cs" />
     <Compile Include="Unicast\MessageTypeTests.cs" />
     <Compile Include="UnitOfWork\UnitOfWorkBehaviorTests.cs" />

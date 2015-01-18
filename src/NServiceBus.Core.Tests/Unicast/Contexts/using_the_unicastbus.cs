@@ -99,11 +99,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
                 localAddress = localAddress
             };
 
-            subscriptionManager = new SubscriptionManager
-                {
-                    MessageSender = messageSender,
-                    Configure = configure
-                };
+            subscriptionManager = new SubscriptionManager(configure.PublicReturnAddress.ToString(),messageSender);
 
             var behaviorContextStacker = new BehaviorContextStacker(Builder);
             Builder.Register<BehaviorContextStacker>(() => behaviorContextStacker);

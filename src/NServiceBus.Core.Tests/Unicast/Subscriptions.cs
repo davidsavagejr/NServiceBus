@@ -7,43 +7,6 @@ namespace NServiceBus.Unicast.Tests
     using NUnit.Framework;
     
     [TestFixture]
-    class When_subscribing_to_messages : using_the_unicastBus
-    {
-        readonly Address addressToOwnerOfTestMessage = new Address("TestMessageOwner", "localhost");
-        /// <summary>
-        /// Set Up
-        /// </summary>
-        [SetUp]
-        public new void SetUp()
-        {
-            router.RegisterMessageRoute(typeof(TestMessage), addressToOwnerOfTestMessage);
-        }
-
-        [Test]
-        public void Should_send_the_assemblyQualified_name_as_subscription_type()
-        {
-            bus.Subscribe<TestMessage>();
-
-            AssertSubscription(m => m.Headers.ContainsKey(Headers.SubscriptionMessageType) &&
-                                    m.Headers[Headers.SubscriptionMessageType] == typeof(TestMessage).AssemblyQualifiedName,
-                                addressToOwnerOfTestMessage);
-
-        }
-
-        [Test]
-        public void Should_set_the_message_intent_to_subscribe()
-        {
-            bus.Subscribe<TestMessage>();
-
-
-            AssertSubscription(m => m.MessageIntent == MessageIntentEnum.Subscribe &&  
-                                    m.Headers.ContainsKey(Headers.NServiceBusVersion) &&
-                                    m.Headers.ContainsKey(Headers.TimeSent)
-                                    ,addressToOwnerOfTestMessage);
-        }
-    }
-    
-    [TestFixture]
     class When_using_a_non_centralized_pub_sub_transport : using_the_unicastBus
     {
         [Test]
