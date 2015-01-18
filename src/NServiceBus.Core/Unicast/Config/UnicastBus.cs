@@ -83,7 +83,7 @@ namespace NServiceBus.Features
 
             context.Container.ConfigureComponent(b => (PhysicalMessageProcessingStageBehavior.Context)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
             context.Container.ConfigureComponent(b => (LogicalMessageProcessingStageBehavior.Context)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
-            context.Container.ConfigureComponent(b => (HandlingContext)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
+            context.Container.ConfigureComponent(b => (HandlingStageBehavior.Context)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
             context.Container.ConfigureComponent(b => (OutgoingContext)b.Build<BehaviorContextStacker>().GetCurrentContext(), DependencyLifecycle.InstancePerCall);
 
             context.Container.ConfigureComponent<CallbackMessageLookup>(DependencyLifecycle.SingleInstance);

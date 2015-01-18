@@ -1,13 +1,12 @@
 ﻿namespace NServiceBus
 {
     using System;
-    using Pipeline;
     using Pipeline.Contexts;
     using Sagas;
 
-    class InvokeHandlersBehavior : Behavior<HandlingContext>
+    class InvokeHandlersBehavior : HandlingStageBehavior
     {
-        public override void Invoke(HandlingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             ActiveSagaInstance saga;
 

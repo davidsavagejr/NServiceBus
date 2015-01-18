@@ -2,11 +2,10 @@
 {
     using System;
     using NServiceBus.Pipeline.Contexts;
-    using Pipeline;
 
-    class SetCurrentMessageBeingHandledBehavior : Behavior<HandlingContext>
+    class SetCurrentMessageBeingHandledBehavior : HandlingStageBehavior
     {
-        public override void Invoke(HandlingContext context, Action next)
+        public override void Invoke(Context context, Action next)
         {
             var logicalMessage = context.IncomingLogicalMessage;
 

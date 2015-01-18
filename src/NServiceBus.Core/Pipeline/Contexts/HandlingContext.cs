@@ -3,59 +3,65 @@
     using NServiceBus.Unicast.Behaviors;
 
     /// <summary>
-    /// A context of handling a logical message by a handler
+    /// A behavior that belongs to the handling stage
     /// </summary>
-    public class HandlingContext : LogicalMessageProcessingStageBehavior.Context
+    public abstract class HandlingStageBehavior : Behavior<HandlingStageBehavior.Context>
     {
-        const string HandlerInvocationAbortedKey = "NServiceBus.HandlerInvocationAborted";
-
-        internal HandlingContext(MessageHandler handler, LogicalMessageProcessingStageBehavior.Context parentContext)
-            : base(parentContext)
-        {
-            Set(handler);
-        }
-
         /// <summary>
-        /// Allows context inheritence
+        /// A context of handling a logical message by a handler
         /// </summary>
-        /// <param name="context"></param>
-        protected HandlingContext(BehaviorContext context)
-            : base(context)
+        public class Context : LogicalMessageProcessingStageBehavior.Context
         {
-        }
+            const string HandlerInvocationAbortedKey = "NServiceBus.HandlerInvocationAborted";
 
-        /// <summary>
-        /// The current <see cref="IHandleMessages{T}"/> being executed.
-        /// </summary>
-        public MessageHandler MessageHandler
-        {
-            get { return Get<MessageHandler>(); }
-        }
-
-        /// <summary>
-        /// Call this to stop the invocation of handlers.
-        /// </summary>
-        public void DoNotInvokeAnyMoreHandlers()
-        {
-            HandlerInvocationAborted = true;
-        }
-
-        /// <summary>
-        /// <code>true</code> if DoNotInvokeAnyMoreHandlers has been called.
-        /// </summary>
-        public bool HandlerInvocationAborted
-        {
-            get
+            internal Context(MessageHandler handler, LogicalMessageProcessingStageBehavior.Context parentContext)
+                : base(parentContext)
             {
-                bool handlerInvocationAborted;
-
-                if (TryGet(HandlerInvocationAbortedKey, out handlerInvocationAborted))
-                {
-                    return handlerInvocationAborted;
-                }
-                return false;
+                Set(handler);
             }
-            private set { Set(HandlerInvocationAbortedKey,value); }
+
+            /// <summary>
+            /// Allows context inheritence
+            /// </summary>
+            /// <param name="context"></param>
+            protected Context(BehaviorContext context)
+                : base(context)
+            {
+            }
+
+            /// <summary>
+            /// The current <see cref="IHandleMessages{T}"/> being executed.
+            /// </summary>
+            public MessageHandler MessageHandler
+            {
+                get { return Get<MessageHandler>(); }
+            }
+
+            /// <summary>
+            /// Call this to stop the invocation of handlers.
+            /// </summary>
+            public void DoNotInvokeAnyMoreHandlers()
+            {
+                HandlerInvocationAborted = true;
+            }
+
+            /// <summary>
+            /// <code>true</code> if DoNotInvokeAnyMoreHandlers has been called.
+            /// </summary>
+            public bool HandlerInvocationAborted
+            {
+                get
+                {
+                    bool handlerInvocationAborted;
+
+                    if (TryGet(HandlerInvocationAbortedKey, out handlerInvocationAborted))
+                    {
+                        return handlerInvocationAborted;
+                    }
+                    return false;
+                }
+                private set { Set(HandlerInvocationAbortedKey, value); }
+            }
         }
     }
 }

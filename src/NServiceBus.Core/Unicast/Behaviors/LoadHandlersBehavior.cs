@@ -8,7 +8,7 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class LoadHandlersBehavior : StageConnector<LogicalMessageProcessingStageBehavior.Context, HandlingContext>
+    class LoadHandlersBehavior : StageConnector<LogicalMessageProcessingStageBehavior.Context, HandlingStageBehavior.Context>
     {
         public IMessageHandlerRegistry HandlerRegistry { get; set; }
 
@@ -16,7 +16,7 @@
 
         public PipelineExecutor PipelineFactory { get; set; }
 
-        public override void Invoke(LogicalMessageProcessingStageBehavior.Context context, Action<HandlingContext> next)
+        public override void Invoke(LogicalMessageProcessingStageBehavior.Context context, Action<HandlingStageBehavior.Context> next)
         {
             var messageToHandle = context.IncomingLogicalMessage;
 
@@ -39,7 +39,7 @@
                     Invocation = (handlerInstance, message) => HandlerRegistry.InvokeHandle(handlerInstance, message)
                 };
 
-                var handlingContext = new HandlingContext(loadedHandler, context);
+                var handlingContext = new HandlingStageBehavior.Context(loadedHandler, context);
                 next(handlingContext);
 
                 if (handlingContext.HandlerInvocationAborted)
