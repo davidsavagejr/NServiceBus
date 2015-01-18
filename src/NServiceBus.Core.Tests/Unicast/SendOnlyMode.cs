@@ -2,56 +2,10 @@
 {
     using System;
     using Contexts;
-    using NServiceBus.Settings;
     using NUnit.Framework;
 
-    [TestFixture]
-    class When_sending_a_message_in_send_only_mode : using_a_configured_unicastBus
-    {
-        protected override void OverrideSettings(SettingsHolder settings)
-        {
-            settings.Set("Endpoint.SendOnly", true);
-        }
-
-        [Test]
-        public void Should_be_allowed()
-        {
-            RegisterMessageType<TestMessage>();
-            bus.Send(configure.LocalAddress, new TestMessage());
-        }
-    }
-    [TestFixture]
-    class When_subscribing_to_a_message_in_send_only_mode : using_a_configured_unicastBus
-    {
-        protected override void OverrideSettings(SettingsHolder settings)
-        {
-            settings.Set("Endpoint.SendOnly", true);
-        }
-
-        [Test]
-        public void Should_not_be_allowed()
-        {
-            RegisterMessageType<TestMessage>();
-            Assert.Throws<InvalidOperationException>(() => bus.Subscribe<TestMessage>());
-        }
-    }
-
-    [TestFixture]
-    class When_unsubscribing_to_a_message_in_send_only_mode : using_a_configured_unicastBus
-    {
-        protected override void OverrideSettings(SettingsHolder settings)
-        {
-            settings.Set("Endpoint.SendOnly", true);
-        }
-
-        [Test]
-        public void Should_not_be_allowed()
-        {
-            RegisterMessageType<TestMessage>();
-            Assert.Throws<InvalidOperationException>(() => bus.Unsubscribe<TestMessage>());
-        }
-    }
-
+   
+   
     [TestFixture]
     class When_replying_to_a_message_that_was_sent_with_null_reply_to_address : using_the_unicastBus
     {
