@@ -216,6 +216,7 @@
     <Compile Include="Serializers\XML\Using_Infer_Type_With_Non_Nested_Class.cs" />
     <Compile Include="Timeout\FakeMessageSender.cs" />
     <Compile Include="Timeout\InMemoryTimeoutPersisterTests.cs" />
+    <Compile Include="Timeout\When_deferring_a_message.cs" />
     <Compile Include="Timeout\When_fetching_timeouts_from_storage.cs" />
     <Compile Include="Timeout\InMemoryTimeoutPersisterThreadTests.cs" />
     <Compile Include="Timeout\When_pooling_timeouts.cs" />
@@ -240,7 +241,6 @@
     <Compile Include="Unicast\ThroughputLimiterTests.cs" />
     <Compile Include="Unicast\MessagingBestPracticesTests.cs" />
     <Compile Include="Unicast\HandlerInvocationCache.cs" />
-    <Compile Include="Unicast\DeferedMessages.cs" />
     <Compile Include="Unicast\Helpers\FakeSubscriptionStorage.cs" />
     <Compile Include="Unicast\Helpers\Helpers.cs" />
     <Compile Include="Unicast\Messages\ANamespace\ASubNamespace\MessageD.cs" />

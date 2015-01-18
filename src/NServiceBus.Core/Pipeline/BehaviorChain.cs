@@ -17,8 +17,8 @@
 
             lookupSteps = pipelineExecutor.Incoming.Concat(pipelineExecutor.Outgoing).ToDictionary(rs => rs.BehaviorType);
         }
-        
-        public void Invoke(BehaviorContextStacker contextStacker)
+
+        public BehaviorContext Invoke(BehaviorContextStacker contextStacker)
         {
             var outerPipe = false;
 
@@ -32,12 +32,14 @@
                     notifications.Pipeline.InvokeReceiveStarted(steps);
                 }
 
-                InvokeNext(context, contextStacker, 0);
+                var result = InvokeNext(context, contextStacker, 0);
 
                 if (outerPipe)
                 {
                     steps.OnCompleted();
                 }
+
+                return result;
             }
             catch (Exception ex)
             {
@@ -57,11 +59,11 @@
             }
         }
 
-        void InvokeNext(BehaviorContext context, BehaviorContextStacker contextStacker, int currentIndex)
+        BehaviorContext InvokeNext(BehaviorContext context, BehaviorContextStacker contextStacker, int currentIndex)
         {
             if (currentIndex == itemDescriptors.Length)
             {
-                return;
+                return context;
             }
 
             var behavior = itemDescriptors[currentIndex];
@@ -75,10 +77,11 @@
 
                 var duration = Stopwatch.StartNew();
 
+                BehaviorContext innermostContext = null;
                 behavior.Invoke(instance, context, newContext =>
                 {
                     duration.Stop();
-                    InvokeNext(newContext, contextStacker, currentIndex + 1);
+                    innermostContext = InvokeNext(newContext, contextStacker, currentIndex + 1);
                     duration.Start();
                 });
 
@@ -86,6 +89,7 @@
 
                 stepEnded.OnNext(new StepEnded(duration.Elapsed));
                 stepEnded.OnCompleted();
+                return innermostContext;
             }
             catch (Exception ex)
             {

@@ -1,5 +1,6 @@
 ﻿namespace NServiceBus.Pipeline
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Contexts;
@@ -50,9 +51,9 @@
         /// </summary>
         public IList<RegisterStep> Outgoing { get; private set; }
 
-        internal void InvokeSendPipeline(OutgoingContext context)
+        internal BehaviorContext InvokeSendPipeline(OutgoingContext context)
         {            
-            InvokePipeline(outgoingBehaviors, context);
+            return InvokePipeline(outgoingBehaviors, context);
         }
         
         internal void InvokeReceivePipeline(IncomingContext context)
@@ -60,10 +61,10 @@
             InvokePipeline(incomingBehaviors, context);
         }
 
-        void InvokePipeline<TContext>(IEnumerable<BehaviorInstance> behaviors, TContext context) where TContext : BehaviorContext
+        BehaviorContext InvokePipeline<TContext>(IEnumerable<BehaviorInstance> behaviors, TContext context) where TContext : BehaviorContext
         {
             var pipeline = new BehaviorChain(behaviors, context, this, busNotifications);
-            pipeline.Invoke(contextStacker);
+            return pipeline.Invoke(contextStacker);
         }
 
 

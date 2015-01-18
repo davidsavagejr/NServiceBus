@@ -552,7 +552,7 @@ namespace NServiceBus.Unicast
             return SetupCallback(physicalMessage.Id);
         }
 
-        OutgoingContext InvokeSendPipeline(DeliveryOptions sendOptions, LogicalMessage message)
+        BehaviorContext InvokeSendPipeline(DeliveryOptions sendOptions, LogicalMessage message)
         {
             if (sendOptions.ReplyToAddress == null && !SendOnlyMode)
             {
@@ -565,8 +565,7 @@ namespace NServiceBus.Unicast
             }
 
             var outgoingContext = new OutgoingContext(context, sendOptions, message);
-            pipelineExecutor.InvokeSendPipeline(outgoingContext);
-            return outgoingContext;
+            return pipelineExecutor.InvokeSendPipeline(outgoingContext);
         }
 
 

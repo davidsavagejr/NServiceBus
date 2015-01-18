@@ -102,7 +102,6 @@ namespace NServiceBus.Unicast.Tests.Contexts
             subscriptionManager = new SubscriptionManager
                 {
                     MessageSender = messageSender,
-                    SubscriptionStorage = subscriptionStorage,
                     Configure = configure
                 };
 
@@ -144,12 +143,14 @@ namespace NServiceBus.Unicast.Tests.Contexts
                                                                  MessageSerializer = MessageSerializer,
                                                                  MessageMetadataRegistry = MessageMetadataRegistry,
                                                              });
-
+            Builder.Register<SerializeMessagesBehavior>(() => new SerializeMessagesBehavior(MessageSerializer));
             Builder.Register<CreatePhysicalMessageBehavior>(() => new CreatePhysicalMessageBehavior(MessageMetadataRegistry,bus));
             Builder.Register<PipelineExecutor>(() => pipelineFactory);
             Builder.Register<TransportDefinition>(() => transportDefinition);
             MessagePump = new FakeMessagePump();
             Builder.Register<IDequeueMessages>(() => MessagePump);
+            var hostInformation = new HostInformation(Guid.NewGuid(), "HelloWorld");
+            Builder.Register<HostInformation>(() => hostInformation);
 
             var deferrer = new TimeoutManagerDeferrer
             {
@@ -179,7 +180,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
                  pipelineFactory
                 )
             {
-                HostInformation = new HostInformation(Guid.NewGuid(), "HelloWorld")
+                HostInformation = hostInformation
             };
 
             Builder.Register<IMutateOutgoingTransportMessages>(() => new CausationMutator { Bus = bus });
