@@ -7,14 +7,14 @@ namespace NServiceBus.Transports
     /// <summary>
     /// 
     /// </summary>
-    public abstract class ReceiveBehavior : IBehavior<IncomingContext, TransportReceiveContext>
+    public abstract class ReceiveBehavior : StageConnector<IncomingContext, TransportReceiveContext>
     {
         /// <summary>
-        /// Called when the behavior is executed.
+        /// 
         /// </summary>
-        /// <param name="context">The current context.</param>
-        /// <param name="next">The next <see cref="IBehavior{TIn,TOut}"/> in the chain to execute.</param>
-        public void Invoke(IncomingContext context, Action<TransportReceiveContext> next)
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        public override void Invoke(IncomingContext context, Action<TransportReceiveContext> next)
         {
             Invoke(context, x => next(new TransportReceiveContext(x, context)));
         }

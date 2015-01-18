@@ -3,6 +3,7 @@ namespace NServiceBus.Pipeline
     using System;
 
     /// <summary>
+    /// Allows steps to be registered in order.
     /// </summary>
     public class StepRegistrationSequence
     {

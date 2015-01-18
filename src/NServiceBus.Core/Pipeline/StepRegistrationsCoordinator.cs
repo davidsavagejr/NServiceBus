@@ -24,11 +24,16 @@ namespace NServiceBus.Pipeline
             additions.Add(rego);
         }
 
-        public IEnumerable<RegisterStep> BuildRuntimeModel()
+        public PipelineRuntimeModel BuildRuntimeModel()
         {
-            var registrations = CreateRegistrationsList();
+            var registrations = CreateRegistrationsList().ToList();
 
-            return Sort(registrations);
+            var incomingPipelineSteps = registrations.Where(x => typeof(IncomingContext).IsAssignableFrom(GetInputType(x.BehaviorType))).ToList();
+            var outgoingPipelineSteps = registrations.Where(x => typeof(OutgoingContext).IsAssignableFrom(GetInputType(x.BehaviorType))).ToList();
+
+            return new PipelineRuntimeModel(
+                Sort(typeof(IncomingContext), incomingPipelineSteps), 
+                Sort(typeof(OutgoingContext), outgoingPipelineSteps));
         }
 
         IEnumerable<RegisterStep> CreateRegistrationsList()
@@ -46,11 +51,11 @@ namespace NServiceBus.Pipeline
                     registrations.Add(metadata.StepId, metadata);
                     if (metadata.Afters != null)
                     {
-                        listOfBeforeAndAfterIds.AddRange(metadata.Afters.Select(a=>a.Id));
+                        listOfBeforeAndAfterIds.AddRange(metadata.Afters.Select(a => a.Id));
                     }
                     if (metadata.Befores != null)
                     {
-                        listOfBeforeAndAfterIds.AddRange(metadata.Befores.Select(b=>b.Id));
+                        listOfBeforeAndAfterIds.AddRange(metadata.Befores.Select(b => b.Id));
                     }
 
                     continue;
@@ -87,8 +92,8 @@ namespace NServiceBus.Pipeline
 
                 if (listOfBeforeAndAfterIds.Contains(metadata.RemoveId, StringComparer.CurrentCultureIgnoreCase))
                 {
-                    var add = additions.First(mr => (mr.Befores != null && mr.Befores.Select(b=>b.Id).Contains(metadata.RemoveId, StringComparer.CurrentCultureIgnoreCase)) ||
-                                                    (mr.Afters != null && mr.Afters.Select(b=>b.Id).Contains(metadata.RemoveId, StringComparer.CurrentCultureIgnoreCase)));
+                    var add = additions.First(mr => (mr.Befores != null && mr.Befores.Select(b => b.Id).Contains(metadata.RemoveId, StringComparer.CurrentCultureIgnoreCase)) ||
+                                                    (mr.Afters != null && mr.Afters.Select(b => b.Id).Contains(metadata.RemoveId, StringComparer.CurrentCultureIgnoreCase)));
 
                     var message = string.Format("You cannot remove step registration with id '{0}', registration with id {1} depends on it!", metadata.RemoveId, add.StepId);
                     throw new Exception(message);
@@ -97,26 +102,31 @@ namespace NServiceBus.Pipeline
                 registrations.Remove(metadata.RemoveId);
             }
 
+            
+
             return registrations.Values;
         }
 
-        static IEnumerable<RegisterStep> Sort(IEnumerable<RegisterStep> registrations)
+        static IEnumerable<RegisterStep> Sort(Type beginContext, IList<RegisterStep> registrations)
         {
-            // Step 0: Add dependencies on pipeline begin
-            var receiveSteps = new List<Dependency>();
-            var sendPipelineNode = new Node("SendPipelineBegin", receiveSteps);
+            // Step 0: Add dependencies on pipeline and stage begins
+            var pipelineBeginNode = new Node("PipelineBegin", new Dependency[0]);
+            var stageBeginMap = registrations
+               .Select(x => new
+               {
+                   r = x,
+                   t = x.BehaviorType.GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IStartStage<>))
+               })
+               .Where(x => x.t != null)
+               .ToDictionary(x => x.t.GetGenericArguments()[0], x => x.r.StepId);
+
+            stageBeginMap[beginContext] = pipelineBeginNode.StepId;
 
             foreach (var registration in registrations)
             {
                 var inputType = GetInputType(registration.BehaviorType);
-                if (typeof(IncomingContext).IsAssignableFrom(inputType))
-                {
-                    receiveSteps.Add(new Dependency(registration.StepId, true));
-                }
-                else if (typeof(OutgoingContext).IsAssignableFrom(inputType))
-                {
-                    registration.InsertAfter("SendPipelineBegin");
-                }
+                var stageBegin = stageBeginMap[inputType];
+                registration.InsertAfter(stageBegin);
             }
 
             // Step 1: create nodes for graph
@@ -130,8 +140,8 @@ namespace NServiceBus.Pipeline
                 allNodes.Add(node);
             }
 
-            allNodes.Add(sendPipelineNode);
-            nameToNodeDict[sendPipelineNode.StepId] = sendPipelineNode;
+            allNodes.Add(pipelineBeginNode);
+            nameToNodeDict[pipelineBeginNode.StepId] = pipelineBeginNode;
 
             // Step 2: create edges from InsertBefore/InsertAfter values
             foreach (var node in allNodes)
@@ -196,7 +206,7 @@ namespace NServiceBus.Pipeline
 
             // Step 4: Validate intput and output types
             for (var i = 1; i < output.Count; i++)
-            {                
+            {
                 var previousBehavior = output[i - 1].BehaviorType;
                 var thisBehavior = output[i].BehaviorType;
 
@@ -231,6 +241,17 @@ namespace NServiceBus.Pipeline
         {
             var behaviorInterface = behaviorType.GetInterfaces().First(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IBehavior<,>));
             return behaviorInterface;
+        }
+
+        static bool IsConnectorTo(Type candidateBehavior, Type inputType)
+        {
+            var output = GetOutputType(candidateBehavior);
+            if (output != inputType)
+            {
+                return false;
+            }
+            var input = GetInputType(candidateBehavior);
+            return typeof(StageConnector<,>).MakeGenericType(input, output).IsAssignableFrom(candidateBehavior);
         }
 
         static Type GetInputType(Type behaviorType)
@@ -281,7 +302,7 @@ namespace NServiceBus.Pipeline
             {
                 StepId = id;
                 Befores = befores;
-                Afters = new Dependency[]{};
+                Afters = new Dependency[] { };
             }
 
             public Node(RegisterStep registerStep)
@@ -295,7 +316,7 @@ namespace NServiceBus.Pipeline
             public readonly string StepId;
             private readonly RegisterStep rego;
             public readonly IList<Dependency> Befores;
-            public readonly IList<Dependency> Afters; 
+            public readonly IList<Dependency> Afters;
             internal List<Node> previous = new List<Node>();
             bool visited;
         }

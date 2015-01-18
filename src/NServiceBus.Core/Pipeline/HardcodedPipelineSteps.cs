@@ -6,15 +6,16 @@ namespace NServiceBus.Pipeline
     {
         public static void Register(PipelineSettings pipeline, bool isSendOnly)
         {
-            if (!isSendOnly)
-            {
-                RegisterIncomingCoreBehaviors(pipeline);
-            }
+            RegisterIncomingCoreBehaviors(pipeline, isSendOnly);
             RegisterOutgoingCoreBehaviors(pipeline);
         }
 
-        static void RegisterIncomingCoreBehaviors(PipelineSettings pipeline)
+        static void RegisterIncomingCoreBehaviors(PipelineSettings pipeline, bool isSendOnly)
         {
+            if (isSendOnly)
+            {
+                return;
+            }
             pipeline
                 .After(WellKnownStep.Receive)
                 .Register("AbortableBehavior", typeof(TransportReceiveToPhysicalMessageProcessingConnector), "Allows to abort processing the message")

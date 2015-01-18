@@ -19,6 +19,13 @@
         void Invoke(TIn context, Action<TOut> next);
     }
 
+    /// <summary>
+    /// A marker interface marking the behavior that starts the given stage.
+    /// </summary>
+    /// <typeparam name="TOut"></typeparam>
+    public interface IStartStage<out TOut>
+    {
+    }
 
     /// <summary>
     /// This is the base interface to implement to create a behavior that can be registered in a pipeline.

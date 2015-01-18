@@ -5,6 +5,7 @@ namespace NServiceBus.Core.Tests.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using NServiceBus.Pipeline;
+    using NServiceBus.Pipeline.Contexts;
     using NUnit.Framework;
 
     [TestFixture]
@@ -34,7 +35,7 @@ namespace NServiceBus.Core.Tests.Pipeline
 
             var model = coordinator.BuildRuntimeModel();
 
-            Assert.AreEqual(2, model.Count());
+            Assert.AreEqual(2, model.IncomingSteps.Count());
         }
 
         [Test]
@@ -44,7 +45,7 @@ namespace NServiceBus.Core.Tests.Pipeline
             coordinator.Register("2", typeof(FakeBehavior), "2");
             coordinator.Register("3", typeof(FakeBehavior), "3");
 
-            var model = coordinator.BuildRuntimeModel().ToList();
+            var model = coordinator.BuildRuntimeModel().IncomingSteps.ToList();
 
             Assert.AreEqual("1", model[0].StepId);
             Assert.AreEqual("2", model[1].StepId);
@@ -61,7 +62,7 @@ namespace NServiceBus.Core.Tests.Pipeline
             replacements.Add(new ReplaceBehavior("1", typeof(ReplacedBehavior), "new"));
             replacements.Add(new ReplaceBehavior("2", typeof(ReplacedBehavior)));
 
-            var model = coordinator.BuildRuntimeModel().ToList();
+            var model = coordinator.BuildRuntimeModel().IncomingSteps.ToList();
 
             Assert.AreEqual(typeof(ReplacedBehavior).FullName, model[0].BehaviorType.FullName);
             Assert.AreEqual("new", model[0].Description);
@@ -79,7 +80,7 @@ namespace NServiceBus.Core.Tests.Pipeline
             coordinator.Register(new MyCustomRegistration("2.5", "3", "2"));
             coordinator.Register(new MyCustomRegistration("3.5", null, "3"));
             
-            var model = coordinator.BuildRuntimeModel().ToList();
+            var model = coordinator.BuildRuntimeModel().IncomingSteps.ToList();
 
             Assert.AreEqual("1", model[0].StepId);
             Assert.AreEqual("1.5", model[1].StepId);
@@ -99,7 +100,7 @@ namespace NServiceBus.Core.Tests.Pipeline
             coordinator.Register(new MyCustomRegistration("1.5", "2,3", null));
             coordinator.Register(new MyCustomRegistration("2.5", "3", null));
 
-            var model = coordinator.BuildRuntimeModel().ToList();
+            var model = coordinator.BuildRuntimeModel().IncomingSteps.ToList();
 
             Assert.AreEqual("1", model[0].StepId);
             Assert.AreEqual("1.5", model[1].StepId);
@@ -119,7 +120,7 @@ namespace NServiceBus.Core.Tests.Pipeline
             coordinator.Register(new MyCustomRegistration("2.5", "3", "2,1"));
             coordinator.Register(new MyCustomRegistration("3.5", null, "1,2,3"));
 
-            var model = coordinator.BuildRuntimeModel().ToList();
+            var model = coordinator.BuildRuntimeModel().IncomingSteps.ToList();
 
             Assert.AreEqual("1", model[0].StepId);
             Assert.AreEqual("1.5", model[1].StepId);
@@ -140,7 +141,7 @@ namespace NServiceBus.Core.Tests.Pipeline
             coordinator.Register(new MyCustomRegistration("1.6", "2", "1.5"));
             coordinator.Register(new MyCustomRegistration("1.1", "1.5", "1"));
 
-            var model = coordinator.BuildRuntimeModel().ToList();
+            var model = coordinator.BuildRuntimeModel().IncomingSteps.ToList();
 
             Assert.AreEqual("1", model[0].StepId);
             Assert.AreEqual("1.1", model[1].StepId);
@@ -174,17 +175,17 @@ namespace NServiceBus.Core.Tests.Pipeline
                 }
             }
         }
-        class FakeBehavior: PhysicalMessageProcessingStageBehavior
+        class FakeBehavior: IBehavior<IncomingContext, IncomingContext>
         {
-            public override void Invoke(Context context, Action next)
+            public void Invoke(IncomingContext context, Action<IncomingContext> next)
             {
                 throw new NotImplementedException();
             }
         }
 
-        class ReplacedBehavior : PhysicalMessageProcessingStageBehavior
+        class ReplacedBehavior : IBehavior<IncomingContext, IncomingContext>
         {
-            public override void Invoke(Context context, Action next)
+            public void Invoke(IncomingContext context, Action<IncomingContext> next)
             {
                 throw new NotImplementedException();
             }

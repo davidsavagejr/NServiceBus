@@ -6,7 +6,7 @@
     using Pipeline.Contexts;
     using Unicast;
 
-    class SendValidatorBehavior : Behavior<OutgoingContext>
+    class SendValidatorBehavior : Behavior<OutgoingContext>, IStartStage<OutgoingContext>
     {
         public Conventions Conventions { get; set; }
 

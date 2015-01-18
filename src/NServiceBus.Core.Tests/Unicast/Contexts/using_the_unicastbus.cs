@@ -118,7 +118,7 @@ namespace NServiceBus.Unicast.Tests.Contexts
             Builder.Register<CallbackInvocationBehavior>(() => new CallbackInvocationBehavior(callbackMessageLookup));
 
             var pipelineSettings = new PipelineSettings(pipelineModifications);
-            HardcodedPipelineSteps.Register(pipelineSettings, false);
+            HardcodedPipelineSteps.Register(pipelineSettings, settings.Get<bool>("Endpoint.SendOnly"));
 
             var receiveBehaviorRegistration = new ReceiveBehaviorRegistration();
             receiveBehaviorRegistration.ContainerRegistration((b, s) => new FakeReceiveBehavior());

@@ -27,9 +27,14 @@
             this.busNotifications = busNotifications;
             this.contextStacker = contextStacker;
 
-            var pipelineBuilder = new PipelineBuilder(pipelineModifications);
-            Incoming = pipelineBuilder.Incoming.AsReadOnly();
-            Outgoing = pipelineBuilder.Outgoing.AsReadOnly();
+            var coordinator = new StepRegistrationsCoordinator(pipelineModifications.Removals, pipelineModifications.Replacements);
+            foreach (var rego in pipelineModifications.Additions)
+            {
+                coordinator.Register(rego);
+            }
+            var model = coordinator.BuildRuntimeModel();
+            Incoming = model.IncomingSteps;
+            Outgoing = model.OutgoingSteps;
 
             incomingBehaviors = Incoming.Select(r => r.CreateBehavior(builder)).ToArray();
             outgoingBehaviors = Outgoing.Select(r => r.CreateBehavior(builder)).ToArray();

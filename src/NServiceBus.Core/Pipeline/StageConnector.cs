@@ -7,9 +7,16 @@
     /// </summary>
     /// <typeparam name="TFrom"></typeparam>
     /// <typeparam name="TTo"></typeparam>
-    abstract class StageConnector<TFrom, TTo> : IBehavior<TFrom, TTo> where TFrom : BehaviorContext
+    public abstract class StageConnector<TFrom, TTo> : IStartStage<TTo>, IBehavior<TFrom, TTo> 
+        where TFrom : BehaviorContext
         where TTo : BehaviorContext
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
         public abstract void Invoke(TFrom context, Action<TTo> next);
+
     }
 }
