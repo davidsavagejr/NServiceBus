@@ -2,7 +2,6 @@
 {
     using System;
     using System.Linq;
-    using MessageInterfaces;
     using NServiceBus.Unicast.Behaviors;
     using Pipeline;
     using Pipeline.Contexts;
@@ -10,20 +9,27 @@
 
     class LoadHandlersBehavior : StageConnector<LogicalMessageProcessingStageBehavior.Context, HandlingStageBehavior.Context>
     {
-        public IMessageHandlerRegistry HandlerRegistry { get; set; }
+        readonly IMessageHandlerRegistry messageHandlerRegistry;
 
-        public IMessageMapper MessageMapper { get; set; }
-
-        public PipelineExecutor PipelineFactory { get; set; }
+        public LoadHandlersBehavior(IMessageHandlerRegistry messageHandlerRegistry)
+        {
+            this.messageHandlerRegistry = messageHandlerRegistry;
+        }
 
         public override void Invoke(LogicalMessageProcessingStageBehavior.Context context, Action<HandlingStageBehavior.Context> next)
         {
             var messageToHandle = context.IncomingLogicalMessage;
 
-            // for now we cheat and pull it from the behavior context:
-            var callbackInvoked = context.Get<bool>(CallbackInvocationBehavior.CallbackInvokedKey);
+            bool callbackInvoked;
 
-            var handlerTypedToInvoke = HandlerRegistry.GetHandlerTypes(messageToHandle.MessageType).ToList();
+
+            // for now we cheat and pull it from the behavior context:
+            if (!context.TryGet(CallbackInvocationBehavior.CallbackInvokedKey, out callbackInvoked))
+            {
+                callbackInvoked = false;
+            }
+
+            var handlerTypedToInvoke = messageHandlerRegistry.GetHandlerTypes(messageToHandle.MessageType).ToList();
 
             if (!callbackInvoked && !handlerTypedToInvoke.Any())
             {
@@ -36,7 +42,7 @@
                 var loadedHandler = new MessageHandler
                 {
                     Instance = context.Builder.Build(handlerType),
-                    Invocation = (handlerInstance, message) => HandlerRegistry.InvokeHandle(handlerInstance, message)
+                    Invocation = (handlerInstance, message) => messageHandlerRegistry.InvokeHandle(handlerInstance, message)
                 };
 
                 var handlingContext = new HandlingStageBehavior.Context(loadedHandler, context);
