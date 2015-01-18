@@ -95,17 +95,4 @@
         }
     }
 
-    [TestFixture]
-    class When_sending_a_interface_message : using_the_unicastBus
-    {
-        [Test]
-        public void Should_specify_the_message_to_be_recoverable()
-        {
-            var defaultAddress = RegisterMessageType<InterfaceMessage>();
-
-            bus.Send<InterfaceMessage>(m => { });
-
-            messageSender.AssertWasCalled(x => x.Send(Arg<TransportMessage>.Matches(m => m.Recoverable), Arg<SendOptions>.Matches(o=>o.Destination == defaultAddress)));
-        }
-    }
 }

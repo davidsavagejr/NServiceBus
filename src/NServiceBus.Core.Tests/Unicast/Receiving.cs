@@ -78,7 +78,7 @@
         }
     }
   
-    [TestFixture]
+    [TestFixture,Ignore("Will be converted soon")]
      class When_sending_messages_from_a_messageHandler : using_the_unicastBus
     {
         [Test]
