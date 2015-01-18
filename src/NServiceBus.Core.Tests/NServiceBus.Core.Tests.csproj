@@ -233,6 +233,7 @@
     <Compile Include="Fakes\FakeMessagePump.cs" />
     <Compile Include="Unicast\Contexts\InterfaceMessage.cs" />
     <Compile Include="Unicast\Contexts\using_the_unicastbus.cs" />
+    <Compile Include="Unicast\TransportMessageTests.cs" />
     <Compile Include="UnitOfWork\UnitOfWorkBehaviorTests.cs" />
     <Compile Include="Unicast\ThroughputLimiterTests.cs" />
     <Compile Include="Unicast\MessagingBestPracticesTests.cs" />
