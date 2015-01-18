@@ -252,7 +252,6 @@
     <Compile Include="Unicast\Receiving.cs" />
     <Compile Include="Unicast\Sending.cs" />
     <Compile Include="Unicast\TestMessage.cs" />
-    <Compile Include="Unicast\Subscriptions.cs" />
     <Compile Include="Utils\ExceptionHeaderHelperTests.cs" />
     <Compile Include="Utils\Reflection\ExtensionMethodsTests.cs" />
     <Compile Include="Utils\Reflection\ReflectTests.cs" />
