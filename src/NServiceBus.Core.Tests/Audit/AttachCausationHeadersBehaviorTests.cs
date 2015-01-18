@@ -49,5 +49,20 @@
             Assert.AreEqual(userConvId, context.OutgoingMessage.Headers[Headers.ConversationId]);
             
         }
+
+        [Test]
+        public void Should_set_the_related_to_header_with_the_id_of_the_current_message()
+        {
+            
+            var behavior = new AttachCausationHeadersBehavior();
+            var context = new PhysicalOutgoingContextStageBehavior.Context(new TransportMessage(), null);
+
+            context.Set(TransportReceiveContext.IncomingPhysicalMessageKey, new TransportMessage("the message id", new Dictionary<string, string>()));
+
+            behavior.Invoke(context, () => { });
+
+            Assert.AreEqual("the message id", context.OutgoingMessage.Headers[Headers.RelatedTo]);
+        
+        }
     }
 }
