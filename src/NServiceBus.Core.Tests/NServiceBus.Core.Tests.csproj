@@ -233,6 +233,7 @@
     <Compile Include="Fakes\FakeMessagePump.cs" />
     <Compile Include="Unicast\Contexts\InterfaceMessage.cs" />
     <Compile Include="Unicast\Contexts\using_the_unicastbus.cs" />
+    <Compile Include="Unicast\ReplyOptionsTests.cs" />
     <Compile Include="Unicast\TransportMessageTests.cs" />
     <Compile Include="UnitOfWork\UnitOfWorkBehaviorTests.cs" />
     <Compile Include="Unicast\ThroughputLimiterTests.cs" />
@@ -248,7 +249,7 @@
     <Compile Include="Unicast\Messages\MessageB.cs" />
     <Compile Include="Unicast\Receiving.cs" />
     <Compile Include="Unicast\Sending.cs" />
-    <Compile Include="Unicast\SendOnlyMode.cs" />
+    <Compile Include="Unicast\TestMessage.cs" />
     <Compile Include="Unicast\Subscriptions.cs" />
     <Compile Include="Utils\ExceptionHeaderHelperTests.cs" />
     <Compile Include="Utils\Reflection\ExtensionMethodsTests.cs" />
