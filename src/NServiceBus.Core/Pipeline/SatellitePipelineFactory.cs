@@ -63,7 +63,9 @@
             var pipelineSettings = new PipelineSettings(pipelineModifications);
 
             pipelineSettings.Register(builder.Build<TransportReceiveBehaviorDefinition>().Registration);
-            pipelineSettings.After(WellKnownStep.Receive).Register("AbortableBehavior", typeof(TransportReceiveToPhysicalMessageProcessingConnector), "Allows to abort processing the message");
+            pipelineSettings.After(WellKnownStep.Receive)
+                .Register("TransportReceiveToPhysicalMessageProcessingConnector", typeof(TransportReceiveToPhysicalMessageProcessingConnector), "Allows to abort processing the message");
+            
             pipelineSettings.Register<MoveFaultsToErrorQueueBehavior.Registration>();
             pipelineSettings.Register<FirstLevelRetriesBehavior.Registration>();
             pipelineSettings.Register<ExecuteSatelliteHandlerBehavior.Registration>();

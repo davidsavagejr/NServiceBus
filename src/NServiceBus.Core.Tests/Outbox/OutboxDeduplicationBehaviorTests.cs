@@ -44,12 +44,9 @@
         public void SetUp()
         {
             fakeOutbox = new FakeOutboxStorage();
-
-            behavior = new OutboxDeduplicationBehavior
-            {
-                OutboxStorage = fakeOutbox,
-                TransactionSettings = new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, false,false)
-            };
+            var transactionSettings = new TransactionSettings(true, TimeSpan.FromSeconds(30), IsolationLevel.ReadCommitted, false, false);
+            
+            behavior = new OutboxDeduplicationBehavior(fakeOutbox, null, null,transactionSettings);
         }
 
         void Invoke(PhysicalMessageProcessingStageBehavior.Context context, bool shouldAbort = false)

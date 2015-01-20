@@ -7,33 +7,37 @@
     using Pipeline;
     using Transports;
     using Unicast;
-    using Unicast.Messages;
     using Unicast.Transport;
 
     class OutboxDeduplicationBehavior : PhysicalMessageProcessingStageBehavior
     {
-        public IOutboxStorage OutboxStorage { get; set; }
-        public DispatchMessageToTransportBehavior DispatchMessageToTransportBehavior { get; set; }
+        readonly IOutboxStorage outboxStorage;
+        readonly DispatchMessageToTransportBehavior defaultDispatcher;
+        readonly DefaultMessageAuditer defaultAuditer;
+        readonly TransactionSettings transactionSettings;
 
-        public MessageMetadataRegistry MessageMetadataRegistry { get; set; }
+        public OutboxDeduplicationBehavior(IOutboxStorage outboxStorage, DispatchMessageToTransportBehavior defaultDispatcher, DefaultMessageAuditer defaultAuditer, TransactionSettings transactionSettings)
+        {
+            this.outboxStorage = outboxStorage;
+            this.defaultDispatcher = defaultDispatcher;
+            this.defaultAuditer = defaultAuditer;
+            this.transactionSettings = transactionSettings;
+        }
 
-        public DefaultMessageAuditer DefaultMessageAuditer { get; set; }
-
-        public TransactionSettings TransactionSettings { get; set; }
 
         public override void Invoke(Context context, Action next)
         {
             var messageId = context.PhysicalMessage.Id;
             OutboxMessage outboxMessage;
 
-            if (!OutboxStorage.TryGet(messageId, out outboxMessage))
+            if (!outboxStorage.TryGet(messageId, out outboxMessage))
             {
                 outboxMessage = new OutboxMessage(messageId);
 
                 context.Set(outboxMessage);
 
                 //we use this scope to make sure that we escalate to DTC if the user is talking to another resource by misstake
-                using (var checkForEscalationScope = new TransactionScope(TransactionScopeOption.RequiresNew,new TransactionOptions{IsolationLevel = TransactionSettings.IsolationLevel,Timeout = TransactionSettings.TransactionTimeout}))
+                using (var checkForEscalationScope = new TransactionScope(TransactionScopeOption.RequiresNew,new TransactionOptions{IsolationLevel = transactionSettings.IsolationLevel,Timeout = transactionSettings.TransactionTimeout}))
                 {
                     next();
                     checkForEscalationScope.Complete();
@@ -48,7 +52,7 @@
 
             DispatchOperationToTransport(outboxMessage.TransportOperations);
 
-            OutboxStorage.SetAsDispatched(messageId);
+            outboxStorage.SetAsDispatched(messageId);
         }
 
         void DispatchOperationToTransport(IEnumerable<TransportOperation> operations)
@@ -68,11 +72,11 @@
 
                 if (transportOperation.Options["Operation"] != "Audit")
                 {
-                    DispatchMessageToTransportBehavior.InvokeNative(deliveryOptions, message);    
+                    defaultDispatcher.InvokeNative(deliveryOptions, message);    
                 }
                 else
                 {
-                    DefaultMessageAuditer.Audit(deliveryOptions as SendOptions, message);
+                    defaultAuditer.Audit(deliveryOptions as SendOptions, message);
                 }
                 
             }
@@ -83,8 +87,7 @@
             public OutboxDeduplicationRegistration()
                 : base("OutboxDeduplication", typeof(OutboxDeduplicationBehavior), "Deduplication for the outbox feature")
             {
-                InsertAfter(WellKnownStep.CreateChildContainer);
-                InsertBefore(WellKnownStep.ExecuteUnitOfWork);
+                InsertBeforeIfExists(WellKnownStep.AuditProcessedMessage);
             }
         }
     }

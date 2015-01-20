@@ -61,6 +61,11 @@
 
         BehaviorContext InvokeNext(BehaviorContext context, BehaviorContextStacker contextStacker, int currentIndex)
         {
+            if (context == null)
+            {
+                throw new ArgumentNullException("context");
+            }
+
             if (currentIndex == itemDescriptors.Length)
             {
                 return context;
@@ -89,7 +94,8 @@
 
                 stepEnded.OnNext(new StepEnded(duration.Elapsed));
                 stepEnded.OnCompleted();
-                return innermostContext;
+
+                return innermostContext ?? context;
             }
             catch (Exception ex)
             {

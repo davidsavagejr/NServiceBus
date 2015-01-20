@@ -65,12 +65,8 @@ namespace NServiceBus
             public Registration()
                 : base("MoveFaultsToErrorQueue", typeof(MoveFaultsToErrorQueueBehavior), "Invokes the configured fault manager for messages that fails processing (and any retries)")
             {
-                InsertAfter("AbortableBehavior");
-
-                InsertBeforeIfExists("HandlerTransactionScopeWrapper");
                 InsertBeforeIfExists("FirstLevelRetries");
                 InsertBeforeIfExists("SecondLevelRetries");
-
             }
         }
     }

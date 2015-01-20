@@ -54,7 +54,7 @@ namespace NServiceBus.Unicast.Transport
             //todo: Szymon: removing the try as it impedes testing
         }
 
-        private void InvokePipeline(MessageAvailable messageAvailable)
+        void InvokePipeline(MessageAvailable messageAvailable)
         {
             var context = new IncomingContext(new RootContext(builder));
 

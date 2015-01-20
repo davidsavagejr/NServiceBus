@@ -20,7 +20,8 @@ namespace NServiceBus
             public Registration()
                 : base("EnforceMessageId", typeof(EnforceMessageIdBehavior), "Makes sure that the message pulled from the transport contains a message id")
             {
-                InsertAfter("AbortableBehavior");
+
+                InsertBeforeIfExists("SecondLevelRetries");
                 InsertBeforeIfExists("FirstLevelRetries");
             }
         }

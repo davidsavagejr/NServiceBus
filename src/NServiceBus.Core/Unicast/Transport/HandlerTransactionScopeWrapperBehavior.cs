@@ -3,8 +3,9 @@ namespace NServiceBus
     using System;
     using System.Transactions;
     using NServiceBus.Pipeline;
+    using NServiceBus.Pipeline.Contexts;
 
-    class HandlerTransactionScopeWrapperBehavior : PhysicalMessageProcessingStageBehavior
+    class HandlerTransactionScopeWrapperBehavior : HandlingStageBehavior
     {
         readonly TransactionOptions transactionOptions;
 
@@ -34,8 +35,7 @@ namespace NServiceBus
             public Registration()
                 : base("HandlerTransactionScopeWrapper", typeof(HandlerTransactionScopeWrapperBehavior), "Makes sure that the handlers gets wrapped in a transaction scope")
             {
-                InsertAfter("ReceiveMessage");
-                InsertBeforeIfExists("FirstLevelRetries");
+                InsertBeforeIfExists(WellKnownStep.InvokeHandlers);
 
                 ContainerRegistration((builder, settings) =>
                 {

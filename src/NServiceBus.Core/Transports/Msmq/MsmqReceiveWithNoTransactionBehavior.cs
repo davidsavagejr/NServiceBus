@@ -41,48 +41,47 @@ namespace NServiceBus
         {
             var queue = context.Get<MessageQueue>();
 
-
             using (var msmqTransaction = new MessageQueueTransaction())
             {
-                Message message;
-
-                if (!TryReceiveMessage(() => queue.Receive(TimeSpan.FromSeconds(1), msmqTransaction), context, out message))
-                {
-                    msmqTransaction.Commit();
-                    return;
-                }
-
-                TransportMessage transportMessage;
-
                 try
                 {
-                    transportMessage = MsmqUtilities.Convert(message);
-                }
-                catch (Exception ex)
-                {
-                    HandleCorruptMessage(context, message, ex, (q, m) => q.Send(m, msmqTransaction));
+                    msmqTransaction.Begin();
 
-                    msmqTransaction.Commit();
-                    return;
-                }
+                    Message message;
 
-                try
-                {
+                    if (!TryReceiveMessage(() => queue.Receive(TimeSpan.FromSeconds(1), msmqTransaction), context, out message))
+                    {
+                        msmqTransaction.Commit();
+                        return;
+                    }
+
+                    TransportMessage transportMessage;
+
+                    try
+                    {
+                        transportMessage = MsmqUtilities.Convert(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        HandleCorruptMessage(context, message, ex, (q, m) => q.Send(m, msmqTransaction));
+
+                        msmqTransaction.Commit();
+                        return;
+                    }
+
                     //todo: add tx to UoW
                     onMessage(transportMessage);
+                    //finally
+                    //{
+                    //    //todo: clear tx to UoW
+                    //}
+                    msmqTransaction.Commit();
                 }
                 catch (Exception)
                 {
                     msmqTransaction.Abort();
-                    throw;
                 }
-                //finally
-                //{
-                //    //todo: clear tx to UoW
-                //}
-
-                msmqTransaction.Commit();
-            }
+           }
 
 
 

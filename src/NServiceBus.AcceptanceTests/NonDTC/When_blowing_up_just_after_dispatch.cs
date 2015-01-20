@@ -66,10 +66,8 @@
         }
 
 
-        [Serializable]
         public class PlaceOrder : ICommand { }
 
-        [Serializable]
         class SendOrderAcknowledgement : IMessage { }
     }
 
@@ -79,6 +77,7 @@
         {
             public Registration() : base("BlowUpAfterDispatchBehavior", typeof(BlowUpAfterDispatchBehavior), "For testing")
             {
+                InsertAfter("FirstLevelRetries");
                 InsertBefore("OutboxDeduplication");
             }
         }
